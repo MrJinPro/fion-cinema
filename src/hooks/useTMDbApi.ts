@@ -54,6 +54,18 @@ export const usePopularTVShows = (page = 1) => {
   });
 };
 
+// Hook для фильмов в кинотеатрах
+export const useNowPlayingMovies = (page = 1) => {
+  return useQuery({
+    queryKey: ['movies', 'now_playing', page],
+    queryFn: async () => {
+      console.log('Fetching now playing movies, page:', page);
+      return tmdbClient.getNowPlayingMovies(page);
+    },
+    staleTime: 30 * 60 * 1000, // 30 минут
+  });
+};
+
 // Hook для жанров фильмов
 export const useMovieGenres = () => {
   return useQuery({

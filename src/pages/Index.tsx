@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
+import { HeroBanner } from '@/components/ui/hero-banner';
+import { FeaturedMovie } from '@/components/ui/featured-movie';
+import { AutoCarousel } from '@/components/ui/auto-carousel';
+import { PersonalizedSection } from '@/components/ui/personalized-section';
 import { MovieCard } from '@/components/ui/movie-card';
 import { MovieSkeleton } from '@/components/ui/movie-skeleton';
 import { Button } from '@/components/ui/button';
@@ -9,18 +13,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Play, TrendingUp, Star, Calendar } from 'lucide-react';
 import { TMDbMovie, TMDbTVShow } from '@/lib/tmdb';
-import { useTrending, usePopularMovies, usePopularTVShows } from '@/hooks/useTMDbApi';
+import { useTrending, usePopularMovies, usePopularTVShows, useNowPlayingMovies } from '@/hooks/useTMDbApi';
 
 const Index = () => {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState('');
 
-  // Получаем реальные данные из TMDb API
-  const { data: trendingData, isLoading: trendingLoading, error: trendingError } = useTrending('all', 'week');
-  const { data: popularMoviesData, isLoading: popularMoviesLoading } = usePopularMovies();
-  const { data: popularTVData, isLoading: popularTVLoading } = usePopularTVShows();
+  // Данные из API
+  const { data: trending, isLoading: trendingLoading } = useTrending('all', 'week');
+  const { data: popularMovies, isLoading: moviesLoading } = usePopularMovies();
+  const { data: popularTVShows, isLoading: tvLoading } = usePopularTVShows();
+  const { data: nowPlaying, isLoading: nowPlayingLoading } = useNowPlayingMovies();
 
-  const isLoading = trendingLoading || popularMoviesLoading || popularTVLoading;
+  const isLoading = trendingLoading || moviesLoading || tvLoading;
 
   const handleSearch = (query: string) => {
     if (query.trim()) {
@@ -34,165 +39,125 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header
+      <Header 
         searchValue={searchValue}
         onSearchChange={setSearchValue}
-        onSearch={handleSearch}
+        onSearch={handleSearch} 
       />
-
-      <main className="container px-4 py-8">
-        {/* Герой секция */}
-        <section className="relative mb-12 overflow-hidden rounded-2xl bg-gradient-primary p-8 text-center">
-          <div className="relative z-10">
-            <h1 className="mb-4 text-4xl font-bold md:text-6xl text-white">
-              Добро пожаловать в{' '}
-              <span className="text-gradient-orange">ViOn</span>
-            </h1>
-            <p className="mb-6 text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
-              Откройте мир кинематографа. Находите фильмы и сериалы, создавайте списки и 
-              делитесь впечатлениями с друзьями.
-            </p>
-            <Button
-              size="lg"
-              variant="secondary"
-              className="bg-white text-primary hover:bg-white/90 hover-neon-primary"
-              onClick={() => navigate('/search')}
-            >
-              <Play className="mr-2 h-5 w-5" />
-              Начать поиск
-            </Button>
+      
+      <main className="space-y-12">
+        {/* Hero Banner */}
+        {trending?.results && trending.results.length > 0 && (
+          <div className="container mx-auto px-4 pt-8">
+            <HeroBanner 
+              items={trending.results.slice(0, 5)} 
+              onItemClick={handleMovieClick}
+            />
           </div>
-          
-          {/* Неоновые эффекты */}
-          <div className="absolute top-1/4 left-1/4 h-32 w-32 bg-info/30 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 h-40 w-40 bg-accent/20 rounded-full blur-3xl" />
-        </section>
+        )}
 
-        {/* В тренде */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <TrendingUp className="h-6 w-6 text-primary" />
+        <div className="container mx-auto px-4 space-y-12">
+          {/* Featured Movie */}
+          {trending?.results && trending.results[0] && (
+            <FeaturedMovie 
+              item={trending.results[0]}
+              onItemClick={handleMovieClick}
+            />
+          )}
+
+          {/* Персонализированная секция */}
+          <PersonalizedSection 
+            onItemClick={handleMovieClick}
+            onNavigate={navigate}
+          />
+
+          {/* В кинотеатрах сейчас */}
+          {nowPlaying?.results && (
+            <AutoCarousel
+              title="В кинотеатрах сейчас"
+              items={nowPlaying.results}
+              type="movie"
+              isLoading={nowPlayingLoading}
+              onItemClick={handleMovieClick}
+              autoPlayInterval={4000}
+            />
+          )}
+
+          {/* В тренде сегодня */}
+          <section className="space-y-6 animate-stagger-1">
+            <h2 className="text-3xl font-bold text-gradient-primary neon-underline">
               В тренде сегодня
             </h2>
-            <Button variant="outline" onClick={() => navigate('/search')}>
-              Смотреть всё
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {isLoading ? (
-              Array.from({ length: 6 }).map((_, i) => (
-                <MovieSkeleton key={i} />
-              ))
-            ) : trendingError ? (
-              <div className="col-span-full text-center py-8">
-                <p className="text-muted-foreground">Ошибка загрузки трендовых фильмов</p>
+            {trendingLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <MovieSkeleton key={index} />
+                ))}
               </div>
             ) : (
-              trendingData?.results.slice(0, 6).map((item) => (
-                <MovieCard
-                  key={item.id}
-                  item={item}
-                  type={'title' in item ? 'movie' : 'tv'}
-                />
-              ))
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {trending?.results?.slice(0, 10).map((item, index) => (
+                  <MovieCard
+                    key={item.id}
+                    item={item}
+                    type={'title' in item ? 'movie' : 'tv'}
+                    className="animate-scale-in hover-neon-primary transition-neon"
+                  />
+                ))}
+              </div>
             )}
-          </div>
-        </section>
+          </section>
 
-        {/* Популярные фильмы */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Star className="h-6 w-6 text-orange" />
+          {/* Популярные фильмы */}
+          <section className="space-y-6 animate-stagger-2">
+            <h2 className="text-3xl font-bold text-gradient-primary neon-underline">
               Популярные фильмы
             </h2>
-            <Button variant="outline" onClick={() => navigate('/search?type=movie')}>
-              Все фильмы
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {popularMoviesLoading ? (
-              Array.from({ length: 6 }).map((_, i) => (
-                <MovieSkeleton key={i} />
-              ))
+            {moviesLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <MovieSkeleton key={index} />
+                ))}
+              </div>
             ) : (
-              popularMoviesData?.results.slice(0, 6).map((movie) => (
-                <MovieCard
-                  key={movie.id}
-                  item={movie}
-                  type="movie"
-                />
-              ))
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {popularMovies?.results?.slice(0, 10).map((movie, index) => (
+                  <MovieCard
+                    key={movie.id}
+                    item={movie}
+                    type="movie"
+                    className="animate-scale-in hover-neon-accent transition-neon"
+                  />
+                ))}
+              </div>
             )}
-          </div>
-        </section>
+          </section>
 
-        {/* Популярные сериалы */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Calendar className="h-6 w-6 text-accent" />
+          {/* Популярные сериалы */}
+          <section className="space-y-6 animate-stagger-3">
+            <h2 className="text-3xl font-bold text-gradient-primary neon-underline">
               Популярные сериалы
             </h2>
-            <Button variant="outline" onClick={() => navigate('/search?type=tv')}>
-              Все сериалы
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {popularTVLoading ? (
-              Array.from({ length: 6 }).map((_, i) => (
-                <MovieSkeleton key={i} />
-              ))
+            {tvLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <MovieSkeleton key={index} />
+                ))}
+              </div>
             ) : (
-              popularTVData?.results.slice(0, 6).map((show) => (
-                <MovieCard
-                  key={show.id}
-                  item={show}
-                  type="tv"
-                />
-              ))
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {popularTVShows?.results?.slice(0, 10).map((show, index) => (
+                  <MovieCard
+                    key={show.id}
+                    item={show}
+                    type="tv"
+                    className="animate-scale-in hover-neon-info transition-neon"
+                  />
+                ))}
+              </div>
             )}
-          </div>
-        </section>
-
-        {/* Статистика */}
-        <section className="mb-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="bg-card/50 border-border/50 hover-neon-primary transition-neon">
-              <CardHeader>
-                <CardTitle className="text-primary">Фильмы</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-foreground">500K+</div>
-                <p className="text-muted-foreground">Фильмов в базе</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-card/50 border-border/50 hover-neon-accent transition-neon">
-              <CardHeader>
-                <CardTitle className="text-accent">Сериалы</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-foreground">100K+</div>
-                <p className="text-muted-foreground">Сериалов в каталоге</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-card/50 border-border/50 hover-neon-info transition-neon">
-              <CardHeader>
-                <CardTitle className="text-info">Актёры</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-foreground">2M+</div>
-                <p className="text-muted-foreground">Актёров и режиссёров</p>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
+          </section>
+        </div>
       </main>
 
       <Footer />
