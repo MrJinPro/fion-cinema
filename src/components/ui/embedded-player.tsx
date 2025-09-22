@@ -28,7 +28,7 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
-  // Available video sources (VidSrc alternatives)
+  // Available video sources (multiple reliable options)
   const videoSources = [
     {
       name: 'VidSrc.to',
@@ -41,9 +41,19 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
       description: 'Альтернативный источник'
     },
     {
-      name: 'AutoEmbed',
+      name: 'Embed.su',
+      url: `https://embed.su/embed/movie/${movieId}`,
+      description: 'Быстрый источник'
+    },
+    {
+      name: '2Embed',
       url: `https://www.2embed.to/embed/tmdb/movie?id=${movieId}`,
       description: 'Резервный источник'
+    },
+    {
+      name: 'MoviesJoy',
+      url: `https://embed.smashystream.com/playere.php?tmdb=${movieId}`,
+      description: 'Дополнительный источник'
     }
   ];
 
@@ -54,7 +64,7 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
 
   const handleError = () => {
     setIsLoading(false);
-    setError('Не удалось загрузить видео. Попробуйте другой источник.');
+    setError('Источник недоступен или заблокирован. Попробуйте другой источник или отключите блокировщик рекламы.');
   };
 
   const toggleFullscreen = () => {
@@ -146,7 +156,7 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
           <div className="absolute top-16 left-4 right-4 z-10">
             <Alert className="bg-yellow-600/90 border-yellow-500 text-white">
               <AlertDescription>
-                ⚠️ Видео предоставляется сторонними сервисами. Качество и доступность могут варьироваться.
+                ⚠️ Видео предоставляется сторонними сервисами. Если видео не загружается, попробуйте другой источник или отключите блокировщик рекламы.
               </AlertDescription>
             </Alert>
           </div>

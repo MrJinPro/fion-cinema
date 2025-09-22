@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from './card';
 import { Button } from './button';
 import { Badge } from './badge';
-import { ExternalLink, Play, Download, Tv, Eye, Loader2, AlertTriangle } from 'lucide-react';
+import { ExternalLink, Play, Download, Tv, Eye, Loader2, AlertTriangle, Monitor, Film } from 'lucide-react';
 import { ExternalLinkModal } from './external-link-modal';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -73,7 +73,6 @@ export function StreamingAvailability({ movieId, title, imdbId }: StreamingAvail
       {
         id: 'ivi',
         name: 'IVI',
-        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/IVI_logo.svg/240px-IVI_logo.svg.png',
         type: 'subscription',
         price: 'От 299 ₽/мес',
         url: `https://www.ivi.ru/search/?q=${encodeURIComponent(title)}`,
@@ -82,7 +81,6 @@ export function StreamingAvailability({ movieId, title, imdbId }: StreamingAvail
       {
         id: 'okko',
         name: 'OKKO',
-        logo: 'https://upload.wikimedia.org/wikipedia/ru/thumb/2/29/Okko_logo.svg/240px-Okko_logo.svg.png',
         type: 'subscription',
         price: 'От 199 ₽/мес',
         url: `https://okko.tv/search?query=${encodeURIComponent(title)}`,
@@ -91,7 +89,6 @@ export function StreamingAvailability({ movieId, title, imdbId }: StreamingAvail
       {
         id: 'kinopoisk',
         name: 'Кинопоиск HD',
-        logo: 'https://avatars.mds.yandex.net/get-bunker/128809/7c05615678c8420ce4cd51e61ea6b789e7b8ba1e/orig',
         type: 'subscription',
         price: 'От 299 ₽/мес',
         url: `https://hd.kinopoisk.ru/search?query=${encodeURIComponent(title)}`,
@@ -113,16 +110,30 @@ export function StreamingAvailability({ movieId, title, imdbId }: StreamingAvail
     setSelectedProvider(null);
   };
 
-  const getProviderIcon = (type: string) => {
+  const getProviderIcon = (type: string, name?: string) => {
+    // Use specific icons for known services
+    if (name?.toLowerCase().includes('ivi')) {
+      return <Monitor className="h-4 w-4 text-purple-600" />;
+    }
+    if (name?.toLowerCase().includes('okko')) {
+      return <Film className="h-4 w-4 text-orange-600" />;
+    }
+    if (name?.toLowerCase().includes('кинопоиск')) {
+      return <Eye className="h-4 w-4 text-yellow-600" />;
+    }
+    
+    // Fallback based on type
     switch (type) {
       case 'subscription':
-        return <Tv className="h-4 w-4" />;
+        return <Tv className="h-4 w-4 text-blue-600" />;
       case 'rent':
-        return <Play className="h-4 w-4" />;
+        return <Play className="h-4 w-4 text-green-600" />;
       case 'buy':
-        return <Download className="h-4 w-4" />;
+        return <Download className="h-4 w-4 text-red-600" />;
+      case 'free':
+        return <Play className="h-4 w-4 text-purple-600" />;
       default:
-        return <Play className="h-4 w-4" />;
+        return <Play className="h-4 w-4 text-gray-600" />;
     }
   };
 
@@ -223,25 +234,8 @@ export function StreamingAvailability({ movieId, title, imdbId }: StreamingAvail
                 className="flex items-center justify-between p-4 border-2 border-green-200 dark:border-green-800 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200 hover:scale-105"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-12 h-12 bg-white rounded-lg border shadow-sm">
-                    {provider.logo ? (
-                      <img 
-                        src={provider.logo} 
-                        alt={provider.name}
-                        className="w-8 h-8 object-contain"
-                        onError={(e) => {
-                          const target = e.currentTarget;
-                          target.style.display = 'none';
-                          const iconContainer = target.parentElement?.querySelector('.fallback-icon');
-                          if (iconContainer) {
-                            iconContainer.classList.remove('hidden');
-                          }
-                        }}
-                      />
-                    ) : null}
-                    <div className={`fallback-icon ${provider.logo ? 'hidden' : ''}`}>
-                      {getProviderIcon(provider.type)}
-                    </div>
+                  <div className="flex items-center justify-center w-12 h-12 bg-white dark:bg-gray-800 rounded-lg border shadow-sm">
+                    {getProviderIcon(provider.type, provider.name)}
                   </div>
                   <div>
                     <h4 className="font-bold text-lg text-foreground">{provider.name}</h4>

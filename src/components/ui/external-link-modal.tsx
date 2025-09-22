@@ -20,13 +20,13 @@ interface ExternalLinkModalProps {
 export function ExternalLinkModal({ isOpen, onClose, onConfirm, serviceName }: ExternalLinkModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" aria-describedby="external-link-description">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-amber-500" />
             Переход на внешний сайт
           </DialogTitle>
-          <DialogDescription className="text-left">
+          <DialogDescription id="external-link-description" className="text-left">
             Вы переходите на сайт <strong>{serviceName}</strong>. 
             Этот ресурс не контролируется нашим сервисом.
           </DialogDescription>
