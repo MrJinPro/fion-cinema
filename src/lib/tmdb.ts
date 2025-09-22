@@ -201,8 +201,11 @@ export class TMDbClient {
 
   private async makeRequest<T>(endpoint: string, params: Record<string, any> = {}): Promise<T> {
     if (!this.apiKey) {
+      console.error('TMDb API key is not configured. Please set VITE_TMDB_API_KEY environment variable.');
       throw new Error('TMDb API key is required');
     }
+
+    console.log('Making TMDb request to:', endpoint, 'with params:', params);
 
     await this.rateLimiter.wait();
 
@@ -225,17 +228,23 @@ export class TMDbClient {
     const cacheKey = url.toString();
     const cached = this.cache.get(cacheKey);
     if (cached) {
+      console.log('Returning cached result for:', endpoint);
       return cached;
     }
 
     try {
+      console.log('Fetching from TMDb:', url.toString());
       const response = await fetch(url.toString());
       
       if (!response.ok) {
+        console.error('TMDb API error:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('TMDb API error body:', errorText);
         throw new Error(`TMDb API error: ${response.status} ${response.statusText}`);
       }
 
       const data: T = await response.json();
+      console.log('TMDb API response:', data);
       this.cache.set(cacheKey, data);
       return data;
     } catch (error) {
@@ -347,7 +356,9 @@ let tmdbClient: TMDbClient | null = null;
 
 export function getTMDbClient(): TMDbClient {
   if (!tmdbClient) {
-    tmdbClient = new TMDbClient(import.meta.env.VITE_TMDB_API_KEY);
+    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+    console.log('Initializing TMDb client with API key:', apiKey ? 'API key present' : 'API key missing');
+    tmdbClient = new TMDbClient(apiKey);
   }
   return tmdbClient;
 }

@@ -2,13 +2,17 @@ import { useQuery } from '@tanstack/react-query';
 import { getTMDbClient } from '@/lib/tmdb';
 import type { TMDbMovie, TMDbTVShow, TMDbPerson, TMDbSearchResponse, TMDbGenre } from '@/lib/tmdb';
 
+console.log('Loading TMDb API hooks...');
 const tmdbClient = getTMDbClient();
 
 // Hook для поиска
 export const useSearchMulti = (query: string, page = 1) => {
   return useQuery({
     queryKey: ['search', 'multi', query, page],
-    queryFn: () => tmdbClient.searchMulti(query, page),
+    queryFn: async () => {
+      console.log('Searching for:', query, 'page:', page);
+      return tmdbClient.searchMulti(query, page);
+    },
     enabled: !!query.trim(),
     staleTime: 5 * 60 * 1000, // 5 минут
   });
@@ -18,7 +22,10 @@ export const useSearchMulti = (query: string, page = 1) => {
 export const useTrending = (mediaType: 'all' | 'movie' | 'tv' = 'all', timeWindow: 'day' | 'week' = 'week') => {
   return useQuery({
     queryKey: ['trending', mediaType, timeWindow],
-    queryFn: () => tmdbClient.getTrending(mediaType, timeWindow),
+    queryFn: async () => {
+      console.log('Fetching trending:', mediaType, timeWindow);
+      return tmdbClient.getTrending(mediaType, timeWindow);
+    },
     staleTime: 30 * 60 * 1000, // 30 минут
   });
 };
@@ -27,7 +34,10 @@ export const useTrending = (mediaType: 'all' | 'movie' | 'tv' = 'all', timeWindo
 export const usePopularMovies = (page = 1) => {
   return useQuery({
     queryKey: ['movies', 'popular', page],
-    queryFn: () => tmdbClient.getPopularMovies(page),
+    queryFn: async () => {
+      console.log('Fetching popular movies, page:', page);
+      return tmdbClient.getPopularMovies(page);
+    },
     staleTime: 30 * 60 * 1000, // 30 минут
   });
 };
@@ -36,7 +46,10 @@ export const usePopularMovies = (page = 1) => {
 export const usePopularTVShows = (page = 1) => {
   return useQuery({
     queryKey: ['tv', 'popular', page],
-    queryFn: () => tmdbClient.getPopularTVShows(page),
+    queryFn: async () => {
+      console.log('Fetching popular TV shows, page:', page);
+      return tmdbClient.getPopularTVShows(page);
+    },
     staleTime: 30 * 60 * 1000, // 30 минут
   });
 };
