@@ -1,73 +1,249 @@
-# Welcome to your Lovable project
+# ViOn Cinema - Онлайн каталог фильмов и сериалов
 
-## Project info
+![ViOn Cinema](public/vion-logo.svg)
 
-**URL**: https://lovable.dev/projects/bf3f92ce-4b3d-4b23-9cd2-9d5b27e011c6
+ViOn Cinema - это современное веб-приложение для поиска и организации информации о фильмах и сериалах. Проект использует TMDb API для получения актуальных данных о кинематографическом контенте.
 
-## How can I edit this code?
+## 🎬 Особенности
 
-There are several ways of editing your application.
+- **Поиск и фильтрация**: Мощная система поиска с фильтрами по жанрам, годам, рейтингу
+- **Детальная информация**: Подробные страницы фильмов, сериалов и актёров
+- **Избранное**: Персональный список любимых фильмов и сериалов
+- **Пользовательские списки**: Создание тематических коллекций
+- **Адаптивный дизайн**: Оптимизирован для всех устройств
+- **Неоновая тема**: Современный тёмный дизайн с неоновыми акцентами
+- **PWA поддержка**: Возможность установки как приложение
 
-**Use Lovable**
+## 🚀 Быстрый старт
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/bf3f92ce-4b3d-4b23-9cd2-9d5b27e011c6) and start prompting.
+### Предварительные требования
 
-Changes made via Lovable will be committed automatically to this repo.
+- Node.js 18+ и npm
+- TMDb API ключ (получить на [themoviedb.org](https://www.themoviedb.org/settings/api))
 
-**Use your preferred IDE**
+### Установка
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. **Клонируйте репозиторий**
+   ```bash
+   git clone <YOUR_GIT_URL>
+   cd vion-cinema
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+2. **Установите зависимости**
+   ```bash
+   npm install
+   ```
 
-Follow these steps:
+3. **Настройте переменные окружения**
+   ```bash
+   cp .env.local.example .env.local
+   ```
+   
+   Отредактируйте `.env.local` и добавьте ваш TMDb API ключ:
+   ```env
+   TMDB_API_KEY=ваш_tmdb_api_ключ
+   REDIS_URL=redis://localhost:6379  # опционально
+   NEXT_PUBLIC_APP_NAME=ViOn
+   NEXT_PUBLIC_DEFAULT_LOCALE=ru
+   NEXT_PUBLIC_ANALYTICS=off
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+4. **Запустите приложение**
+   ```bash
+   npm run dev
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+   Приложение будет доступно по адресу [http://localhost:8080](http://localhost:8080)
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 📝 Скрипты
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+- `npm run dev` - Запуск в режиме разработки
+- `npm run build` - Сборка для production
+- `npm run start` - Запуск production сборки
+- `npm run preview` - Предварительный просмотр production сборки
+- `npm run lint` - Проверка кода линтером
+- `npm run typecheck` - Проверка типов TypeScript
+
+## 🛠 Технологический стек
+
+- **Frontend**: React 18, TypeScript, Vite
+- **Стилизация**: Tailwind CSS, shadcn/ui
+- **Роутинг**: React Router
+- **State Management**: TanStack Query
+- **Формы**: React Hook Form + Zod
+- **Иконки**: Lucide React
+- **API**: TMDb (The Movie Database)
+- **Хранилище**: IndexedDB (с fallback на LocalStorage)
+
+## 🐳 Docker
+
+### Сборка образа
+
+```bash
+docker build -t vion-cinema .
 ```
 
-**Edit a file directly in GitHub**
+### Запуск с Docker Compose
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+docker-compose up -d
+```
 
-**Use GitHub Codespaces**
+Это запустит приложение с Redis для кэширования.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🔧 Конфигурация
 
-## What technologies are used for this project?
+### TMDb API
 
-This project is built with:
+Приложение использует TMDb API для получения данных о фильмах и сериалах. Для работы требуется бесплатный API ключ:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Зарегистрируйтесь на [themoviedb.org](https://www.themoviedb.org)
+2. Перейдите в [настройки API](https://www.themoviedb.org/settings/api)
+3. Создайте новый API ключ
+4. Добавьте ключ в `.env.local`
 
-## How can I deploy this project?
+### Кэширование
 
-Simply open [Lovable](https://lovable.dev/projects/bf3f92ce-4b3d-4b23-9cd2-9d5b27e011c6) and click on Share -> Publish.
+Приложение поддерживает несколько уровней кэширования:
 
-## Can I connect a custom domain to my Lovable project?
+- **Клиентский LRU кэш**: В памяти браузера (TTL: 24 часа)
+- **Redis** (опционально): Серверное кэширование при наличии `REDIS_URL`
 
-Yes, you can!
+### Аналитика
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Добавлена заглушка для аналитики. Для подключения реального провайдера:
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+1. Установите `NEXT_PUBLIC_ANALYTICS=on`
+2. Реализуйте интеграцию в `lib/analytics.ts`
+
+## 📱 PWA
+
+Приложение поддерживает Progressive Web App функциональность:
+
+- Manifest для установки
+- Service Worker для офлайн кэширования
+- Кэширование критических ресурсов
+
+## 📋 Структура проекта
+
+```
+src/
+├── components/           # React компоненты
+│   ├── ui/              # UI компоненты (shadcn/ui)
+│   └── layout/          # Компоненты лэйаута
+├── pages/               # Страницы приложения
+├── lib/                 # Утилиты и библиотеки
+│   ├── tmdb.ts         # TMDb API SDK
+│   ├── storage.ts      # Локальное хранилище
+│   └── utils.ts        # Общие утилиты
+├── hooks/              # React хуки
+└── styles/             # Стили (Tailwind)
+```
+
+## 🎨 Дизайн система
+
+Приложение использует неоновую тёмную тему с акцентами:
+
+- **Primary**: Фиолетовый (#7C3AED)
+- **Accent**: Бирюза (#06B6D4) 
+- **Info**: Синий (#3B82F6)
+- **Orange**: Оранжевый (#FF8500)
+
+Все цвета определены в `src/index.css` и настроены через CSS переменные.
+
+## 📖 API Reference
+
+### TMDb SDK
+
+```typescript
+import { getTMDbClient } from '@/lib/tmdb';
+
+const tmdb = getTMDbClient();
+
+// Поиск фильмов
+const movies = await tmdb.searchMovies('Дюна');
+
+// Детали фильма
+const movie = await tmdb.getMovieDetails(123);
+
+// Трендовое
+const trending = await tmdb.getTrending('movie', 'week');
+```
+
+### Локальное хранилище
+
+```typescript
+import { getStorageRepository } from '@/lib/storage';
+
+const storage = getStorageRepository();
+
+// Избранное
+await storage.addToFavorites(favoriteItem);
+const favorites = await storage.getFavorites();
+
+// Списки
+const list = await storage.createList('Мои комедии');
+await storage.addToList(list.id, item);
+```
+
+## 🔒 Безопасность
+
+- TMDb API ключ хранится только на сервере
+- Клиент обращается к TMDb через наши API роуты
+- Rate limiting: 30 запросов в минуту на IP
+- Безопасные заголовки (CSP, Referrer-Policy)
+
+## 📊 Performance
+
+Целевые показатели Lighthouse:
+
+- **Performance**: ≥90
+- **SEO**: ≥90  
+- **Accessibility**: ≥90
+- **Best Practices**: ≥90
+
+## 📄 Лицензия и атрибуция
+
+### TMDb
+
+Все данные о фильмах предоставлены [The Movie Database (TMDb)](https://www.themoviedb.org/).
+
+**Важно**: 
+- Данный продукт использует TMDb API, но не поддерживается и не сертифицирован TMDb
+- При коммерческом использовании требуется получение коммерческой лицензии TMDb
+- Текущая версия предназначена только для некоммерческого использования
+
+### Использование
+
+Этот проект создан в образовательных целях и как демонстрация технических возможностей. 
+
+**Ограничения**:
+- Некоммерческое использование
+- Не предназначен для распространения защищённого контента
+- Только информационные цели
+
+## 🤝 Вклад в развитие
+
+1. Форкните репозиторий
+2. Создайте ветку для новой функции (`git checkout -b feature/amazing-feature`)
+3. Закоммитьте изменения (`git commit -m 'Add amazing feature'`)
+4. Отправьте в ветку (`git push origin feature/amazing-feature`)
+5. Откройте Pull Request
+
+## 📞 Поддержка
+
+- **Разработчик**: MrJinPro
+- **Email**: contact@mrjinpro.dev
+- **GitHub**: [@MrJinPro](https://github.com/MrJinPro)
+
+## 🔗 Полезные ссылки
+
+- [TMDb API Documentation](https://developers.themoviedb.org/)
+- [TMDb Terms of Use](https://www.themoviedb.org/terms-of-use)
+- [React Documentation](https://react.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [shadcn/ui](https://ui.shadcn.com/)
+
+---
+
+© 2024 ViOn Cinema. Разработано MrJinPro. Некоммерческое использование.

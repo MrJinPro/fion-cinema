@@ -1,0 +1,455 @@
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Header } from '@/components/layout/header';
+import { Footer } from '@/components/layout/footer';
+import { MovieCard } from '@/components/ui/movie-card';
+import { MovieSkeleton } from '@/components/ui/movie-skeleton';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Filter, Search as SearchIcon, X } from 'lucide-react';
+import { TMDbMovie, TMDbTVShow, TMDbGenre } from '@/lib/tmdb';
+
+const Search = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  
+  const [searchValue, setSearchValue] = useState(searchParams.get('q') || '');
+  const [isLoading, setIsLoading] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Фильтры
+  const [mediaType, setMediaType] = useState(searchParams.get('type') || 'all');
+  const [sortBy, setSortBy] = useState('popularity.desc');
+  const [minRating, setMinRating] = useState('');
+  const [year, setYear] = useState('');
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  
+  // Результаты поиска (демо данные)
+  const [results, setResults] = useState<(TMDbMovie | TMDbTVShow)[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Демо жанры
+  const demoGenres: TMDbGenre[] = [
+    { id: 28, name: 'Боевик' },
+    { id: 12, name: 'Приключения' },
+    { id: 16, name: 'Мультфильм' },
+    { id: 35, name: 'Комедия' },
+    { id: 80, name: 'Криминал' },
+    { id: 99, name: 'Документальный' },
+    { id: 18, name: 'Драма' },
+    { id: 10751, name: 'Семейный' },
+    { id: 14, name: 'Фэнтези' },
+    { id: 36, name: 'История' },
+    { id: 27, name: 'Ужасы' },
+    { id: 10402, name: 'Музыка' },
+    { id: 9648, name: 'Детектив' },
+    { id: 10749, name: 'Мелодрама' },
+    { id: 878, name: 'Фантастика' },
+    { id: 10770, name: 'Телефильм' },
+    { id: 53, name: 'Триллер' },
+    { id: 10752, name: 'Военный' },
+    { id: 37, name: 'Вестерн' },
+  ];
+
+  // Демо результаты
+  const demoResults: (TMDbMovie | TMDbTVShow)[] = [
+    {
+      id: 1,
+      title: "Дюна: Часть вторая",
+      original_title: "Dune: Part Two",
+      overview: "Пол Атрейдес объединяется с Чани и фрименами, чтобы отомстить заговорщикам, уничтожившим его семью.",
+      poster_path: "/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
+      backdrop_path: "/xvzjJYYRAbt6pjJgHAZLpcE2z9B.jpg",
+      release_date: "2024-02-28",
+      genre_ids: [878, 12, 28],
+      vote_average: 8.2,
+      vote_count: 2847,
+      popularity: 2841.677,
+      adult: false,
+      video: false,
+      original_language: "en"
+    } as TMDbMovie,
+    {
+      id: 5,
+      name: "Последние из нас",
+      original_name: "The Last of Us",
+      overview: "Спустя 20 лет после разрушения современной цивилизации Джоэл должен провести 14-летнюю Элли из карантинной зоны.",
+      poster_path: "/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg",
+      backdrop_path: "/56v2KjBlU4XaOv9rVYEQypROD7P.jpg",
+      first_air_date: "2023-01-15",
+      genre_ids: [18, 878, 10765],
+      vote_average: 8.7,
+      vote_count: 6543,
+      popularity: 2456.789,
+      origin_country: ["US"],
+      original_language: "en"
+    } as TMDbTVShow,
+  ];
+
+  useEffect(() => {
+    const query = searchParams.get('q');
+    const type = searchParams.get('type');
+    
+    if (query) {
+      setSearchValue(query);
+      performSearch(query);
+    }
+    
+    if (type) {
+      setMediaType(type);
+    }
+  }, [searchParams]);
+
+  const performSearch = async (query: string) => {
+    setIsLoading(true);
+    
+    // Имитируем API запрос
+    setTimeout(() => {
+      if (query.trim()) {
+        setResults(demoResults);
+        setTotalPages(5);
+      } else {
+        setResults([]);
+        setTotalPages(1);
+      }
+      setIsLoading(false);
+    }, 800);
+  };
+
+  const handleSearch = (query: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (query.trim()) {
+      params.set('q', query.trim());
+    } else {
+      params.delete('q');
+    }
+    setSearchParams(params);
+  };
+
+  const handleFilterChange = () => {
+    const params = new URLSearchParams(searchParams);
+    
+    if (mediaType !== 'all') {
+      params.set('type', mediaType);
+    } else {
+      params.delete('type');
+    }
+    
+    if (selectedGenres.length > 0) {
+      params.set('genres', selectedGenres.join(','));
+    } else {
+      params.delete('genres');
+    }
+    
+    if (year) {
+      params.set('year', year);
+    } else {
+      params.delete('year');
+    }
+    
+    if (minRating) {
+      params.set('rating', minRating);
+    } else {
+      params.delete('rating');
+    }
+    
+    params.set('sort', sortBy);
+    
+    setSearchParams(params);
+    
+    // Выполняем поиск с новыми фильтрами
+    if (searchValue) {
+      performSearch(searchValue);
+    }
+  };
+
+  const toggleGenre = (genreId: string) => {
+    setSelectedGenres(prev => 
+      prev.includes(genreId)
+        ? prev.filter(id => id !== genreId)
+        : [...prev, genreId]
+    );
+  };
+
+  const clearFilters = () => {
+    setMediaType('all');
+    setSortBy('popularity.desc');
+    setMinRating('');
+    setYear('');
+    setSelectedGenres([]);
+    
+    const params = new URLSearchParams();
+    if (searchValue) {
+      params.set('q', searchValue);
+    }
+    setSearchParams(params);
+  };
+
+  const getItemType = (item: TMDbMovie | TMDbTVShow): 'movie' | 'tv' => {
+    return 'title' in item ? 'movie' : 'tv';
+  };
+
+  const handleItemClick = (item: TMDbMovie | TMDbTVShow) => {
+    const type = getItemType(item);
+    navigate(`/${type}/${item.id}`);
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        onSearch={handleSearch}
+      />
+
+      <main className="container px-4 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Фильтры */}
+          <aside className="lg:w-80">
+            <Card className="sticky top-24 bg-card/50 border-border/50">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between text-foreground">
+                  <span className="flex items-center gap-2">
+                    <Filter className="h-5 w-5 text-primary" />
+                    Фильтры
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="lg:hidden"
+                  >
+                    {showFilters ? 'Скрыть' : 'Показать'}
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              
+              <CardContent className={`space-y-6 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+                {/* Тип контента */}
+                <div>
+                  <Label className="text-sm font-medium text-foreground">Тип контента</Label>
+                  <Select value={mediaType} onValueChange={setMediaType}>
+                    <SelectTrigger className="mt-2 bg-background border-border/50">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Всё</SelectItem>
+                      <SelectItem value="movie">Фильмы</SelectItem>
+                      <SelectItem value="tv">Сериалы</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Сортировка */}
+                <div>
+                  <Label className="text-sm font-medium text-foreground">Сортировка</Label>
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="mt-2 bg-background border-border/50">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="popularity.desc">По популярности (убыв.)</SelectItem>
+                      <SelectItem value="popularity.asc">По популярности (возр.)</SelectItem>
+                      <SelectItem value="vote_average.desc">По рейтингу (убыв.)</SelectItem>
+                      <SelectItem value="vote_average.asc">По рейтингу (возр.)</SelectItem>
+                      <SelectItem value="release_date.desc">По дате (новые)</SelectItem>
+                      <SelectItem value="release_date.asc">По дате (старые)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Минимальный рейтинг */}
+                <div>
+                  <Label className="text-sm font-medium text-foreground">Минимальный рейтинг</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="10"
+                    step="0.1"
+                    value={minRating}
+                    onChange={(e) => setMinRating(e.target.value)}
+                    placeholder="Например: 7.0"
+                    className="mt-2 bg-background border-border/50"
+                  />
+                </div>
+
+                {/* Год */}
+                <div>
+                  <Label className="text-sm font-medium text-foreground">Год</Label>
+                  <Input
+                    type="number"
+                    min="1900"
+                    max={new Date().getFullYear() + 5}
+                    value={year}
+                    onChange={(e) => setYear(e.target.value)}
+                    placeholder="Например: 2024"
+                    className="mt-2 bg-background border-border/50"
+                  />
+                </div>
+
+                {/* Жанры */}
+                <div>
+                  <Label className="text-sm font-medium text-foreground">Жанры</Label>
+                  <div className="mt-2 flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+                    {demoGenres.map((genre) => (
+                      <Badge
+                        key={genre.id}
+                        variant={selectedGenres.includes(String(genre.id)) ? "default" : "outline"}
+                        className={`cursor-pointer transition-colors text-xs ${
+                          selectedGenres.includes(String(genre.id))
+                            ? "bg-primary text-primary-foreground hover:bg-primary/80"
+                            : "border-border/50 hover:border-primary hover:text-primary"
+                        }`}
+                        onClick={() => toggleGenre(String(genre.id))}
+                      >
+                        {genre.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Кнопки действий */}
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleFilterChange}
+                    className="flex-1 hover-neon-primary"
+                  >
+                    <SearchIcon className="mr-2 h-4 w-4" />
+                    Применить
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={clearFilters}
+                    className="px-3"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </aside>
+
+          {/* Результаты поиска */}
+          <div className="flex-1">
+            {/* Заголовок результатов */}
+            <div className="mb-6">
+              {searchValue ? (
+                <h1 className="text-2xl font-bold text-foreground">
+                  Результаты поиска: "{searchValue}"
+                </h1>
+              ) : (
+                <h1 className="text-2xl font-bold text-foreground">
+                  Поиск фильмов и сериалов
+                </h1>
+              )}
+              
+              {!isLoading && results.length > 0 && (
+                <p className="text-muted-foreground mt-2">
+                  Найдено {results.length} результатов
+                </p>
+              )}
+            </div>
+
+            {/* Загрузка */}
+            {isLoading && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <MovieSkeleton key={i} />
+                ))}
+              </div>
+            )}
+
+            {/* Результаты */}
+            {!isLoading && results.length > 0 && (
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+                  {results.map((item) => (
+                    <MovieCard
+                      key={item.id}
+                      item={item}
+                      type={getItemType(item)}
+                      onPlay={() => handleItemClick(item)}
+                    />
+                  ))}
+                </div>
+
+                {/* Пагинация */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center gap-2">
+                    <Button
+                      variant="outline"
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                    >
+                      Назад
+                    </Button>
+                    
+                    <div className="flex items-center gap-2">
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        const page = i + 1;
+                        return (
+                          <Button
+                            key={page}
+                            variant={page === currentPage ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setCurrentPage(page)}
+                            className={page === currentPage ? "hover-neon-primary" : ""}
+                          >
+                            {page}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                    >
+                      Далее
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Пустые результаты */}
+            {!isLoading && searchValue && results.length === 0 && (
+              <div className="text-center py-12">
+                <SearchIcon className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  Ничего не найдено
+                </h3>
+                <p className="text-muted-foreground">
+                  Попробуйте изменить запрос или настройки фильтров
+                </p>
+              </div>
+            )}
+
+            {/* Приглашение к поиску */}
+            {!isLoading && !searchValue && (
+              <div className="text-center py-12">
+                <SearchIcon className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  Начните поиск
+                </h3>
+                <p className="text-muted-foreground">
+                  Введите название фильма или сериала в поисковую строку
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default Search;
