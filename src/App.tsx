@@ -16,7 +16,7 @@ const App = () => {
   console.log("ViOn App загружается...");
   
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground" style={{ backgroundColor: '#0B0F17', color: '#F8FAFC' }}>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
