@@ -98,11 +98,22 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    /* Принудительно тёмная тема */
+    /* Принудительно тёмная тема с fallback */
+    background-color: #0B0F17 !important;
+    color: #F8FAFC !important;
+    min-height: 100vh;
   }
   
   html {
     @apply dark;
+    /* Принудительно тёмная тема */
+    background-color: #0B0F17 !important;
+  }
+  
+  #root {
+    min-height: 100vh;
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
   }
 }
 
