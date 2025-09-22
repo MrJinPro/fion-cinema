@@ -48,6 +48,43 @@ export interface TMDbPerson {
   known_for: (TMDbMovie | TMDbTVShow)[];
 }
 
+export interface TMDbPersonDetails extends TMDbPerson {
+  also_known_as: string[];
+  biography: string;
+  birthday: string | null;
+  deathday: string | null;
+  place_of_birth: string | null;
+  homepage: string | null;
+  imdb_id: string | null;
+}
+
+export interface TMDbPersonMovieCredits {
+  cast: Array<TMDbMovie & { character: string; order: number }>;
+  crew: Array<TMDbMovie & { job: string; department: string }>;
+}
+
+export interface TMDbPersonTVCredits {
+  cast: Array<TMDbTVShow & { character: string; episode_count: number }>;
+  crew: Array<TMDbTVShow & { job: string; department: string; episode_count: number }>;
+}
+
+export interface TMDbPersonImages {
+  profiles: TMDbImage[];
+}
+
+export interface TMDbPersonExternalIds {
+  imdb_id: string | null;
+  facebook_id: string | null;
+  freebase_mid: string | null;
+  freebase_id: string | null;
+  tvrage_id: number | null;
+  twitter_id: string | null;
+  instagram_id: string | null;
+  tiktok_id: string | null;
+  youtube_id: string | null;
+  wikidata_id: string | null;
+}
+
 export interface TMDbGenre {
   id: number;
   name: string;
@@ -352,8 +389,24 @@ export class TMDbClient {
     return this.makeRequest(`/tv/${id}`);
   }
 
-  async getPersonDetails(id: number): Promise<TMDbPerson> {
+  async getPersonDetails(id: number): Promise<TMDbPersonDetails> {
     return this.makeRequest(`/person/${id}`);
+  }
+
+  async getPersonMovieCredits(id: number): Promise<TMDbPersonMovieCredits> {
+    return this.makeRequest(`/person/${id}/movie_credits`);
+  }
+
+  async getPersonTVCredits(id: number): Promise<TMDbPersonTVCredits> {
+    return this.makeRequest(`/person/${id}/tv_credits`);
+  }
+
+  async getPersonImages(id: number): Promise<TMDbPersonImages> {
+    return this.makeRequest(`/person/${id}/images`);
+  }
+
+  async getPersonExternalIds(id: number): Promise<TMDbPersonExternalIds> {
+    return this.makeRequest(`/person/${id}/external_ids`);
   }
 
   // Популярное и трендовое

@@ -1,6 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
 import { getTMDbClient } from '@/lib/tmdb';
-import type { TMDbMovie, TMDbTVShow, TMDbPerson, TMDbSearchResponse, TMDbGenre } from '@/lib/tmdb';
+import type { 
+  TMDbMovie, 
+  TMDbTVShow, 
+  TMDbPerson, 
+  TMDbSearchResponse, 
+  TMDbGenre,
+  TMDbPersonDetails,
+  TMDbPersonMovieCredits,
+  TMDbPersonTVCredits,
+  TMDbPersonImages,
+  TMDbPersonExternalIds
+} from '@/lib/tmdb';
 
 console.log('Loading TMDb API hooks...');
 const tmdbClient = getTMDbClient();
@@ -245,5 +256,51 @@ export const useTVReviews = (id: number, page = 1) => {
     queryFn: () => tmdbClient.getTVReviews(id, page),
     enabled: !!id,
     staleTime: 30 * 60 * 1000, // 30 минут
+  });
+};
+
+// Person hooks
+export const usePersonDetails = (id: number) => {
+  return useQuery({
+    queryKey: ['person', id],
+    queryFn: () => tmdbClient.getPersonDetails(id),
+    enabled: !!id,
+    staleTime: 120 * 60 * 1000, // 2 часа - персональная информация меняется редко
+  });
+};
+
+export const usePersonMovieCredits = (id: number) => {
+  return useQuery({
+    queryKey: ['person', id, 'movie-credits'],
+    queryFn: () => tmdbClient.getPersonMovieCredits(id),
+    enabled: !!id,
+    staleTime: 120 * 60 * 1000, // 2 часа
+  });
+};
+
+export const usePersonTVCredits = (id: number) => {
+  return useQuery({
+    queryKey: ['person', id, 'tv-credits'],
+    queryFn: () => tmdbClient.getPersonTVCredits(id),
+    enabled: !!id,
+    staleTime: 120 * 60 * 1000, // 2 часа
+  });
+};
+
+export const usePersonImages = (id: number) => {
+  return useQuery({
+    queryKey: ['person', id, 'images'],
+    queryFn: () => tmdbClient.getPersonImages(id),
+    enabled: !!id,
+    staleTime: 120 * 60 * 1000, // 2 часа
+  });
+};
+
+export const usePersonExternalIds = (id: number) => {
+  return useQuery({
+    queryKey: ['person', id, 'external-ids'],
+    queryFn: () => tmdbClient.getPersonExternalIds(id),
+    enabled: !!id,
+    staleTime: 240 * 60 * 1000, // 4 часа - внешние ссылки меняются очень редко
   });
 };
