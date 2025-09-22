@@ -347,7 +347,7 @@ let tmdbClient: TMDbClient | null = null;
 
 export function getTMDbClient(): TMDbClient {
   if (!tmdbClient) {
-    tmdbClient = new TMDbClient(process.env.TMDB_API_KEY);
+    tmdbClient = new TMDbClient(import.meta.env.VITE_TMDB_API_KEY);
   }
   return tmdbClient;
 }

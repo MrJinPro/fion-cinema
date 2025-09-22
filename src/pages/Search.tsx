@@ -12,13 +12,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Filter, Search as SearchIcon, X } from 'lucide-react';
 import { TMDbMovie, TMDbTVShow, TMDbGenre } from '@/lib/tmdb';
+import { useSearchMulti, useMovieGenres, useTVGenres, useDiscoverMovies, useDiscoverTVShows } from '@/hooks/useTMDbApi';
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   
   const [searchValue, setSearchValue] = useState(searchParams.get('q') || '');
-  const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   
   // Фильтры
@@ -27,69 +27,70 @@ const Search = () => {
   const [minRating, setMinRating] = useState('');
   const [year, setYear] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  
-  // Результаты поиска (демо данные)
-  const [results, setResults] = useState<(TMDbMovie | TMDbTVShow)[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Демо жанры
-  const demoGenres: TMDbGenre[] = [
-    { id: 28, name: 'Боевик' },
-    { id: 12, name: 'Приключения' },
-    { id: 16, name: 'Мультфильм' },
-    { id: 35, name: 'Комедия' },
-    { id: 80, name: 'Криминал' },
-    { id: 99, name: 'Документальный' },
-    { id: 18, name: 'Драма' },
-    { id: 10751, name: 'Семейный' },
-    { id: 14, name: 'Фэнтези' },
-    { id: 36, name: 'История' },
-    { id: 27, name: 'Ужасы' },
-    { id: 10402, name: 'Музыка' },
-    { id: 9648, name: 'Детектив' },
-    { id: 10749, name: 'Мелодрама' },
-    { id: 878, name: 'Фантастика' },
-    { id: 10770, name: 'Телефильм' },
-    { id: 53, name: 'Триллер' },
-    { id: 10752, name: 'Военный' },
-    { id: 37, name: 'Вестерн' },
-  ];
+  // Получаем жанры из API
+  const { data: movieGenresData } = useMovieGenres();
+  const { data: tvGenresData } = useTVGenres();
+  
+  // Объединяем жанры фильмов и сериалов
+  const allGenres = [
+    ...(movieGenresData?.genres || []),
+    ...(tvGenresData?.genres || [])
+  ].filter((genre, index, array) => 
+    array.findIndex(g => g.id === genre.id) === index
+  );
 
-  // Демо результаты
-  const demoResults: (TMDbMovie | TMDbTVShow)[] = [
-    {
-      id: 1,
-      title: "Дюна: Часть вторая",
-      original_title: "Dune: Part Two",
-      overview: "Пол Атрейдес объединяется с Чани и фрименами, чтобы отомстить заговорщикам, уничтожившим его семью.",
-      poster_path: "/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
-      backdrop_path: "/xvzjJYYRAbt6pjJgHAZLpcE2z9B.jpg",
-      release_date: "2024-02-28",
-      genre_ids: [878, 12, 28],
-      vote_average: 8.2,
-      vote_count: 2847,
-      popularity: 2841.677,
-      adult: false,
-      video: false,
-      original_language: "en"
-    } as TMDbMovie,
-    {
-      id: 5,
-      name: "Последние из нас",
-      original_name: "The Last of Us",
-      overview: "Спустя 20 лет после разрушения современной цивилизации Джоэл должен провести 14-летнюю Элли из карантинной зоны.",
-      poster_path: "/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg",
-      backdrop_path: "/56v2KjBlU4XaOv9rVYEQypROD7P.jpg",
-      first_air_date: "2023-01-15",
-      genre_ids: [18, 878, 10765],
-      vote_average: 8.7,
-      vote_count: 6543,
-      popularity: 2456.789,
-      origin_country: ["US"],
-      original_language: "en"
-    } as TMDbTVShow,
-  ];
+  // API запросы для поиска
+  const searchQuery = searchValue.trim();
+  const { data: searchData, isLoading: searchLoading, error: searchError } = useSearchMulti(
+    searchQuery, 
+    currentPage
+  );
+
+  // Prepare filters for discover endpoints
+  const discoverFilters = {
+    page: currentPage,
+    with_genres: selectedGenres.length > 0 ? selectedGenres.join(',') : undefined,
+    vote_average_gte: minRating ? parseFloat(minRating) : undefined,
+    sort_by: sortBy,
+    ...(mediaType === 'movie' ? {
+      primary_release_year: year ? parseInt(year) : undefined
+    } : {
+      first_air_date_year: year ? parseInt(year) : undefined
+    })
+  };
+
+  const { data: discoverMoviesData, isLoading: discoverMoviesLoading } = useDiscoverMovies(
+    mediaType === 'movie' && !searchQuery ? discoverFilters : {}
+  );
+  
+  const { data: discoverTVData, isLoading: discoverTVLoading } = useDiscoverTVShows(
+    mediaType === 'tv' && !searchQuery ? discoverFilters : {}
+  );
+
+  const isLoading = searchLoading || discoverMoviesLoading || discoverTVLoading;
+  
+  // Определяем результаты для отображения
+  let results: (TMDbMovie | TMDbTVShow)[] = [];
+  let totalPages = 1;
+  
+  if (searchQuery) {
+    // Показываем результаты поиска, фильтруем только фильмы и сериалы
+    results = (searchData?.results || []).filter((item): item is TMDbMovie | TMDbTVShow => 
+      'title' in item || 'name' in item
+    );
+    totalPages = searchData?.total_pages || 1;
+  } else {
+    // Показываем результаты discovery
+    if (mediaType === 'movie' && discoverMoviesData) {
+      results = discoverMoviesData.results;
+      totalPages = discoverMoviesData.total_pages;
+    } else if (mediaType === 'tv' && discoverTVData) {
+      results = discoverTVData.results;
+      totalPages = discoverTVData.total_pages;
+    }
+  }
 
   useEffect(() => {
     const query = searchParams.get('q');
@@ -97,29 +98,12 @@ const Search = () => {
     
     if (query) {
       setSearchValue(query);
-      performSearch(query);
     }
     
     if (type) {
       setMediaType(type);
     }
   }, [searchParams]);
-
-  const performSearch = async (query: string) => {
-    setIsLoading(true);
-    
-    // Имитируем API запрос
-    setTimeout(() => {
-      if (query.trim()) {
-        setResults(demoResults);
-        setTotalPages(5);
-      } else {
-        setResults([]);
-        setTotalPages(1);
-      }
-      setIsLoading(false);
-    }, 800);
-  };
 
   const handleSearch = (query: string) => {
     const params = new URLSearchParams(searchParams);
@@ -162,10 +146,8 @@ const Search = () => {
     
     setSearchParams(params);
     
-    // Выполняем поиск с новыми фильтрами
-    if (searchValue) {
-      performSearch(searchValue);
-    }
+    // Сбрасываем страницу при изменении фильтров
+    setCurrentPage(1);
   };
 
   const toggleGenre = (genreId: string) => {
@@ -296,7 +278,7 @@ const Search = () => {
                 <div>
                   <Label className="text-sm font-medium text-foreground">Жанры</Label>
                   <div className="mt-2 flex flex-wrap gap-2 max-h-40 overflow-y-auto">
-                    {demoGenres.map((genre) => (
+                    {allGenres.map((genre) => (
                       <Badge
                         key={genre.id}
                         variant={selectedGenres.includes(String(genre.id)) ? "default" : "outline"}

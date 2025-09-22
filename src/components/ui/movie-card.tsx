@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Heart, Star, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { TMDbMovie, TMDbTVShow } from '@/lib/tmdb';
+import { TMDbMovie, TMDbTVShow, getTMDbClient } from '@/lib/tmdb';
 
 interface MovieCardProps {
   item: TMDbMovie | TMDbTVShow;
@@ -23,15 +23,15 @@ export const MovieCard: React.FC<MovieCardProps> = ({
   onPlay,
   className,
 }) => {
+  const tmdbClient = getTMDbClient();
+  
   const title = type === 'movie' ? (item as TMDbMovie).title : (item as TMDbTVShow).name;
   const releaseDate = type === 'movie' 
     ? (item as TMDbMovie).release_date 
     : (item as TMDbTVShow).first_air_date;
   
   const year = releaseDate ? new Date(releaseDate).getFullYear() : null;
-  const posterUrl = item.poster_path 
-    ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
-    : null;
+  const posterUrl = tmdbClient.getPosterURL(item.poster_path, 'w500');
 
   return (
     <Card className={cn(
