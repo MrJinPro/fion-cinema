@@ -22,6 +22,7 @@ import { ImagesSection } from '@/components/ui/images-section';
 import { ReviewsSection } from '@/components/ui/reviews-section';
 import { SimilarSection } from '@/components/ui/similar-section';
 import { StreamingAvailability } from '@/components/ui/streaming-availability';
+import EmbeddedPlayer from '@/components/ui/embedded-player';
 import { ArrowLeft, Star, Calendar, Clock, Play, DollarSign } from 'lucide-react';
 import { getTMDbClient } from '@/lib/tmdb';
 
@@ -198,8 +199,19 @@ const MovieDetails = () => {
               </div>
             )}
 
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-4 mb-6">
+              <EmbeddedPlayer
+                movieId={movie.id}
+                title={movie.title}
+                year={releaseYear || undefined}
+                imdbId={movie.imdb_id}
+                className="mr-4"
+              />
+            </div>
+
             {/* Streaming Availability - Prominent Position */}
-            <StreamingAvailability movieId={movie.id} title={movie.title} />
+            <StreamingAvailability movieId={movie.id} title={movie.title} imdbId={movie.imdb_id} />
 
             {/* Overview */}
             {movie.overview && (

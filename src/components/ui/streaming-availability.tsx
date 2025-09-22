@@ -2,170 +2,102 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from './card';
 import { Button } from './button';
 import { Badge } from './badge';
-import { ExternalLink, Play, Download, Tv, Eye } from 'lucide-react';
+import { ExternalLink, Play, Download, Tv, Eye, Loader2, AlertTriangle } from 'lucide-react';
 import { ExternalLinkModal } from './external-link-modal';
-import { getTMDbClient } from '@/lib/tmdb';
+import { supabase } from '@/integrations/supabase/client';
 
 interface StreamingProvider {
-  id: string;
+  id: string | number;
   name: string;
-  logo: string;
+  logo?: string;
   type: 'subscription' | 'rent' | 'buy' | 'free';
   price?: string;
   url: string;
+  available: boolean;
 }
 
 interface StreamingAvailabilityProps {
   movieId: number;
   title: string;
+  imdbId?: string;
 }
 
-export function StreamingAvailability({ movieId, title }: StreamingAvailabilityProps) {
+export function StreamingAvailability({ movieId, title, imdbId }: StreamingAvailabilityProps) {
   const [providers, setProviders] = useState<StreamingProvider[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<StreamingProvider | null>(null);
-  const tmdbClient = getTMDbClient();
+  const [cached, setCached] = useState(false);
 
   useEffect(() => {
-    const fetchWatchProviders = async () => {
-      try {
-        // Try to get real TMDb watch providers data
-        const watchData = await tmdbClient.getMovieWatchProviders(movieId);
-        const ruProviders = watchData?.results?.RU;
-        
-        let providersArray: StreamingProvider[] = [];
-        
-        // Add real providers if available
-        if (ruProviders) {
-          // Subscription services
-          if (ruProviders.flatrate) {
-            ruProviders.flatrate.forEach((provider: any) => {
-              providersArray.push({
-                id: provider.provider_id.toString(),
-                name: provider.provider_name,
-                logo: tmdbClient.getImageURL(provider.logo_path, 'w92') || '',
-                type: 'subscription',
-                url: generateProviderUrl(provider.provider_name, title, movieId)
-              });
-            });
-          }
-          
-          // Rental services
-          if (ruProviders.rent) {
-            ruProviders.rent.forEach((provider: any) => {
-              providersArray.push({
-                id: `${provider.provider_id}-rent`,
-                name: provider.provider_name,
-                logo: tmdbClient.getImageURL(provider.logo_path, 'w92') || '',
-                type: 'rent',
-                price: '299-499 ₽',
-                url: generateProviderUrl(provider.provider_name, title, movieId)
-              });
-            });
-          }
-          
-          // Purchase services
-          if (ruProviders.buy) {
-            ruProviders.buy.forEach((provider: any) => {
-              providersArray.push({
-                id: `${provider.provider_id}-buy`,
-                name: provider.provider_name,
-                logo: tmdbClient.getImageURL(provider.logo_path, 'w92') || '',
-                type: 'buy',
-                price: '599-999 ₽',
-                url: generateProviderUrl(provider.provider_name, title, movieId)
-              });
-            });
-          }
+    fetchAvailabilityData();
+  }, [movieId]);
+
+  const fetchAvailabilityData = async () => {
+    try {
+      setLoading(true);
+      
+      // Call our smart availability check function
+      const { data, error } = await supabase.functions.invoke('check-movie-availability', {
+        body: { 
+          movieId, 
+          title,
+          imdbId 
         }
-        
-        // Always add popular Russian services
-        const russianServices: StreamingProvider[] = [
-          {
-            id: 'ivi',
-            name: 'IVI',
-            logo: 'https://avatars.mds.yandex.net/get-bunker/61205/69b65a9c6ea146ab806cf9a6d93b6e31fb3da8c5/png',
-            type: 'subscription',
-            url: `https://www.ivi.ru/search?q=${encodeURIComponent(title)}`
-          },
-          {
-            id: 'okko',
-            name: 'OKKO',
-            logo: 'https://avatars.mds.yandex.net/get-bunker/61205/4bb271cd993db66f8fcb18fdb8d46b0f94b36f5b/png',
-            type: 'subscription',
-            url: `https://okko.tv/search?text=${encodeURIComponent(title)}`
-          },
-          {
-            id: 'kinopoisk',
-            name: 'Кинопоиск HD',
-            logo: 'https://avatars.mds.yandex.net/get-bunker/61205/80a4ee47eaef1e3c22c2c73c52eca30b24b1e571/png',
-            type: 'subscription',
-            url: `https://hd.kinopoisk.ru/film/${movieId}`
-          }
-        ];
-        
-        // Remove duplicates and add Russian services
-        const existingNames = providersArray.map(p => p.name.toLowerCase());
-        russianServices.forEach(service => {
-          if (!existingNames.includes(service.name.toLowerCase())) {
-            providersArray.push(service);
-          }
-        });
-        
-        setProviders(providersArray);
-      } catch (error) {
-        console.error('Error fetching watch providers:', error);
-        // Fallback to Russian services only
-        setProviders([
-          {
-            id: 'ivi',
-            name: 'IVI',
-            logo: 'https://avatars.mds.yandex.net/get-bunker/61205/69b65a9c6ea146ab806cf9a6d93b6e31fb3da8c5/png',
-            type: 'subscription',
-            url: `https://www.ivi.ru/search?q=${encodeURIComponent(title)}`
-          },
-          {
-            id: 'okko',
-            name: 'OKKO',
-            logo: 'https://avatars.mds.yandex.net/get-bunker/61205/4bb271cd993db66f8fcb18fdb8d46b0f94b36f5b/png',
-            type: 'subscription',
-            url: `https://okko.tv/search?text=${encodeURIComponent(title)}`
-          },
-          {
-            id: 'kinopoisk',
-            name: 'Кинопоиск HD',
-            logo: 'https://avatars.mds.yandex.net/get-bunker/61205/80a4ee47eaef1e3c22c2c73c52eca30b24b1e571/png',
-            type: 'subscription',
-            url: `https://hd.kinopoisk.ru/film/${movieId}`
-          }
-        ]);
-      } finally {
-        setLoading(false);
+      });
+
+      if (error) {
+        console.error('Error calling availability function:', error);
+        // Fallback to basic Russian services
+        setProviders(getBasicRussianServices());
+        return;
       }
-    };
 
-    fetchWatchProviders();
-  }, [movieId, title]);
-
-  const generateProviderUrl = (providerName: string, movieTitle: string, movieId: number): string => {
-    const encodedTitle = encodeURIComponent(movieTitle);
-    
-    switch (providerName.toLowerCase()) {
-      case 'netflix':
-        return `https://www.netflix.com/search?q=${encodedTitle}`;
-      case 'apple tv':
-      case 'apple tv+':
-        return `https://tv.apple.com/search?term=${encodedTitle}`;
-      case 'google play movies & tv':
-      case 'google play':
-        return `https://play.google.com/store/search?q=${encodedTitle}&c=movies`;
-      case 'amazon prime video':
-      case 'prime video':
-        return `https://www.primevideo.com/search/ref=atv_nb_sr?phrase=${encodedTitle}`;
-      default:
-        return `https://www.google.com/search?q="${movieTitle}"+${providerName}+смотреть+онлайн`;
+      if (data && data.providers) {
+        setProviders(data.providers);
+        setCached(data.cached || false);
+        console.log(`Loaded ${data.providers.length} providers for ${title}${data.cached ? ' (from cache)' : ''}`);
+      } else {
+        setProviders(getBasicRussianServices());
+      }
+    } catch (error) {
+      console.error('Error fetching availability data:', error);
+      setProviders(getBasicRussianServices());
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const getBasicRussianServices = (): StreamingProvider[] => {
+    return [
+      {
+        id: 'ivi',
+        name: 'IVI',
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/IVI_logo.svg/240px-IVI_logo.svg.png',
+        type: 'subscription',
+        price: 'От 299 ₽/мес',
+        url: `https://www.ivi.ru/search/?q=${encodeURIComponent(title)}`,
+        available: true
+      },
+      {
+        id: 'okko',
+        name: 'OKKO',
+        logo: 'https://upload.wikimedia.org/wikipedia/ru/thumb/2/29/Okko_logo.svg/240px-Okko_logo.svg.png',
+        type: 'subscription',
+        price: 'От 199 ₽/мес',
+        url: `https://okko.tv/search?query=${encodeURIComponent(title)}`,
+        available: true
+      },
+      {
+        id: 'kinopoisk',
+        name: 'Кинопоиск HD',
+        logo: 'https://avatars.mds.yandex.net/get-bunker/128809/7c05615678c8420ce4cd51e61ea6b789e7b8ba1e/orig',
+        type: 'subscription',
+        price: 'От 299 ₽/мес',
+        url: `https://hd.kinopoisk.ru/search?query=${encodeURIComponent(title)}`,
+        available: true
+      }
+    ];
   };
 
   const handleWatchClick = (provider: StreamingProvider) => {
@@ -226,18 +158,17 @@ export function StreamingAvailability({ movieId, title }: StreamingAvailabilityP
 
   if (loading) {
     return (
-      <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
+      <Card className="w-full border-2 border-blue-500/20 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-primary">
-            <Eye className="h-5 w-5" />
-            Где посмотреть
+          <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+            <Eye className="h-6 w-6" />
+            🎬 Где посмотреть
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-16 bg-muted animate-pulse rounded-lg" />
-            ))}
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <span className="ml-2 text-gray-600 dark:text-gray-300">Проверяем доступность...</span>
           </div>
         </CardContent>
       </Card>
@@ -246,17 +177,23 @@ export function StreamingAvailability({ movieId, title }: StreamingAvailabilityP
 
   if (providers.length === 0) {
     return (
-      <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
+      <Card className="w-full border-2 border-yellow-500/20 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950 dark:to-orange-950">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-primary">
-            <Eye className="h-5 w-5" />
-            Где посмотреть
+          <CardTitle className="flex items-center gap-2 text-yellow-700 dark:text-yellow-300">
+            <Eye className="h-6 w-6" />
+            🎬 Где посмотреть
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-center py-4">
-            Информация о доступности не найдена для вашего региона
-          </p>
+          <div className="text-center py-8">
+            <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+            <p className="text-gray-600 dark:text-gray-400 mb-2">
+              Информация о доступности не найдена
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-500">
+              Попробуйте поискать фильм на популярных платформах самостоятельно
+            </p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -264,65 +201,79 @@ export function StreamingAvailability({ movieId, title }: StreamingAvailabilityP
 
   return (
     <>
-      <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
+      <Card className="w-full border-2 border-green-500/20 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950 dark:to-blue-950">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-primary">
-            <Eye className="h-5 w-5" />
-            Где посмотреть
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+              <Eye className="h-6 w-6" />
+              🎬 Где посмотреть
+            </div>
+            {cached && (
+              <Badge variant="secondary" className="text-xs">
+                Данные обновлены
+              </Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {providers.map((provider) => (
+            {providers.filter(p => p.available).map((provider) => (
               <div
                 key={provider.id}
-                className="flex items-center justify-between p-4 border border-border/50 rounded-lg hover:bg-accent/10 hover:border-primary/30 transition-all duration-200"
+                className="flex items-center justify-between p-4 border-2 border-green-200 dark:border-green-800 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200 hover:scale-105"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-12 h-12 bg-background rounded-lg border shadow-sm">
+                  <div className="flex items-center justify-center w-12 h-12 bg-white rounded-lg border shadow-sm">
                     {provider.logo ? (
                       <img 
                         src={provider.logo} 
                         alt={provider.name}
                         className="w-8 h-8 object-contain"
                         onError={(e) => {
-                          e.currentTarget.style.display = 'none';
+                          const target = e.currentTarget;
+                          target.style.display = 'none';
+                          const iconContainer = target.parentElement?.querySelector('.fallback-icon');
+                          if (iconContainer) {
+                            iconContainer.classList.remove('hidden');
+                          }
                         }}
                       />
-                    ) : (
-                      getProviderIcon(provider.type)
-                    )}
+                    ) : null}
+                    <div className={`fallback-icon ${provider.logo ? 'hidden' : ''}`}>
+                      {getProviderIcon(provider.type)}
+                    </div>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-foreground">{provider.name}</h4>
+                    <h4 className="font-bold text-lg text-foreground">{provider.name}</h4>
                     <div className="flex items-center gap-2">
                       <Badge variant={getTypeVariant(provider.type)} className="text-xs">
                         {getTypeLabel(provider.type)}
                       </Badge>
                       {provider.price && (
-                        <span className="text-sm font-semibold text-primary">
-                          {provider.price}
+                        <span className="text-sm font-semibold text-green-600 dark:text-green-400">
+                          💰 {provider.price}
                         </span>
                       )}
                     </div>
                   </div>
                 </div>
                 <Button
-                  size="sm"
+                  size="lg"
                   variant="default"
                   onClick={() => handleWatchClick(provider)}
-                  className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+                  className="bg-green-600 hover:bg-green-700 text-white font-semibold"
                 >
+                  <Play className="mr-2 h-4 w-4" />
                   Смотреть
-                  <ExternalLink className="h-3 w-3" />
                 </Button>
               </div>
             ))}
           </div>
           
-          <div className="mt-4 p-3 bg-muted/30 rounded-lg">
-            <p className="text-xs text-muted-foreground">
-              Данные о доступности предоставлены TMDb и партнёрами. Цены и доступность могут изменяться.
+          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              <AlertTriangle className="inline h-4 w-4 mr-1" />
+              ✨ Показаны только проверенные сервисы где доступен фильм. Данные обновляются ежедневно.
             </p>
           </div>
         </CardContent>

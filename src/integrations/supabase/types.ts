@@ -94,6 +94,36 @@ export type Database = {
           },
         ]
       }
+      movie_availability_cache: {
+        Row: {
+          availability_data: Json
+          created_at: string
+          id: string
+          movie_id: number
+          region: string
+          tmdb_title: string
+          updated_at: string
+        }
+        Insert: {
+          availability_data: Json
+          created_at?: string
+          id?: string
+          movie_id: number
+          region?: string
+          tmdb_title: string
+          updated_at?: string
+        }
+        Update: {
+          availability_data?: Json
+          created_at?: string
+          id?: string
+          movie_id?: number
+          region?: string
+          tmdb_title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
