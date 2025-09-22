@@ -16,13 +16,13 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ items, onItemClick }) =>
   const tmdbClient = getTMDbClient();
   const currentItem = items[currentIndex];
   
-  // Автопрокрутка каждые 6 секунд
+  // Автопрокрутка каждые 8 секунд
   useEffect(() => {
     if (!isAutoPlay || items.length <= 1) return;
     
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % items.length);
-    }, 6000);
+    }, 8000);
     
     return () => clearInterval(interval);
   }, [items.length, isAutoPlay]);

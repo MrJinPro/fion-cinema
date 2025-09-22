@@ -38,7 +38,7 @@ export const usePopularMovies = (page = 1) => {
       console.log('Fetching popular movies, page:', page);
       return tmdbClient.getPopularMovies(page);
     },
-    staleTime: 30 * 60 * 1000, // 30 минут
+    staleTime: 60 * 60 * 1000, // 1 час
   });
 };
 
@@ -50,7 +50,7 @@ export const usePopularTVShows = (page = 1) => {
       console.log('Fetching popular TV shows, page:', page);
       return tmdbClient.getPopularTVShows(page);
     },
-    staleTime: 30 * 60 * 1000, // 30 минут
+    staleTime: 60 * 60 * 1000, // 1 час
   });
 };
 
@@ -62,7 +62,7 @@ export const useNowPlayingMovies = (page = 1) => {
       console.log('Fetching now playing movies, page:', page);
       return tmdbClient.getNowPlayingMovies(page);
     },
-    staleTime: 30 * 60 * 1000, // 30 минут
+    staleTime: 120 * 60 * 1000, // 2 часа
   });
 };
 

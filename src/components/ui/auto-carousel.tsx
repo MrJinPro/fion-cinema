@@ -19,7 +19,7 @@ export const AutoCarousel: React.FC<AutoCarouselProps> = ({
   type,
   isLoading = false,
   onItemClick,
-  autoPlayInterval = 3000
+  autoPlayInterval = 18000
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -151,6 +151,8 @@ export const AutoCarousel: React.FC<AutoCarouselProps> = ({
           style={{ 
             transform: `translateX(-${(currentIndex % itemsPerView) * (100 / itemsPerView)}%)`,
           }}
+          onMouseEnter={() => setIsPlaying(false)}
+          onMouseLeave={() => setIsPlaying(true)}
         >
           {items.map((item, index) => (
             <div
