@@ -189,31 +189,29 @@ class RateLimiter {
 
 // TMDb API Client
 export class TMDbClient {
-  private baseURL = 'https://api.themoviedb.org/3';
+  private baseURL: string;
   private imageBaseURL = 'https://image.tmdb.org/t/p';
   private cache = new LRUCache<any>();
   private rateLimiter = new RateLimiter();
-  private apiKey: string | null = null;
 
-  constructor(apiKey?: string) {
-    this.apiKey = apiKey || null;
+  constructor() {
+    // Use Edge Function for API requests instead of direct TMDb API calls
+    this.baseURL = `https://qvavaxqdsbwjcimsbqmx.supabase.co/functions/v1/tmdb-proxy`;
   }
 
   private async makeRequest<T>(endpoint: string, params: Record<string, any> = {}): Promise<T> {
-    if (!this.apiKey) {
-      console.error('TMDb API key is not configured. Please set VITE_TMDB_API_KEY environment variable.');
-      throw new Error('TMDb API key is required');
-    }
-
     console.log('Making TMDb request to:', endpoint, 'with params:', params);
 
     await this.rateLimiter.wait();
 
-    const url = new URL(`${this.baseURL}${endpoint}`);
+    // Construct URL for Edge Function
+    const url = new URL(this.baseURL);
     
-    // Добавляем базовые параметры
+    // Add endpoint as a parameter for the Edge Function
+    url.searchParams.set('endpoint', endpoint);
+    
+    // Add base parameters
     const searchParams = {
-      api_key: this.apiKey,
       language: 'ru-RU',
       region: 'RU',
       ...params,
@@ -221,7 +219,7 @@ export class TMDbClient {
 
     Object.entries(searchParams).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        url.searchParams.append(key, String(value));
+        url.searchParams.set(key, String(value));
       }
     });
 
@@ -356,9 +354,8 @@ let tmdbClient: TMDbClient | null = null;
 
 export function getTMDbClient(): TMDbClient {
   if (!tmdbClient) {
-    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
-    console.log('Initializing TMDb client with API key:', apiKey ? 'API key present' : 'API key missing');
-    tmdbClient = new TMDbClient(apiKey);
+    console.log('Initializing TMDb client with Edge Function proxy');
+    tmdbClient = new TMDbClient();
   }
   return tmdbClient;
 }
