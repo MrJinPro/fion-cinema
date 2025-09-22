@@ -64,7 +64,12 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
 
   const handleError = () => {
     setIsLoading(false);
-    setError('Источник недоступен или заблокирован. Попробуйте другой источник или отключите блокировщик рекламы.');
+    const errorMessages = [
+      'Источник недоступен или заблокирован блокировщиком рекламы.',
+      'Попробуйте другой источник или отключите AdBlock.',
+      'Некоторые провайдеры блокируют показ в iframe (Sandbox mode).'
+    ];
+    setError(errorMessages[Math.floor(Math.random() * errorMessages.length)]);
   };
 
   const toggleFullscreen = () => {
@@ -154,9 +159,9 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
 
           {/* Warning Alert */}
           <div className="absolute top-16 left-4 right-4 z-10">
-            <Alert className="bg-yellow-600/90 border-yellow-500 text-white">
+            <Alert className="bg-orange/90 border-orange text-white">
               <AlertDescription>
-                ⚠️ Видео предоставляется сторонними сервисами. Если видео не загружается, попробуйте другой источник или отключите блокировщик рекламы.
+                ⚠️ Видео предоставляется сторонними сервисами. При ошибке "Sandbox mode not allowed" попробуйте другой источник или отключите блокировщик рекламы.
               </AlertDescription>
             </Alert>
           </div>
@@ -199,8 +204,8 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
               src={currentSourceData.url}
               className="w-full h-full rounded-lg"
               allowFullScreen
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              sandbox="allow-scripts allow-same-origin allow-presentation"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+              sandbox="allow-scripts allow-same-origin allow-presentation allow-forms allow-pointer-lock allow-popups allow-popups-to-escape-sandbox"
               onLoad={handleLoad}
               onError={handleError}
               style={{ display: isLoading || error ? 'none' : 'block' }}

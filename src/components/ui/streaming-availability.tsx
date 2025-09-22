@@ -169,17 +169,17 @@ export function StreamingAvailability({ movieId, title, imdbId }: StreamingAvail
 
   if (loading) {
     return (
-      <Card className="w-full border-2 border-blue-500/20 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950">
+      <Card className="w-full border-2 border-info/20 bg-gradient-to-r from-card to-secondary hover-neon-info">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+          <CardTitle className="flex items-center gap-2 text-info">
             <Eye className="h-6 w-6" />
             🎬 Где посмотреть
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-            <span className="ml-2 text-gray-600 dark:text-gray-300">Проверяем доступность...</span>
+            <Loader2 className="h-8 w-8 animate-spin text-info" />
+            <span className="ml-2 text-muted-foreground">Проверяем доступность...</span>
           </div>
         </CardContent>
       </Card>
@@ -188,20 +188,20 @@ export function StreamingAvailability({ movieId, title, imdbId }: StreamingAvail
 
   if (providers.length === 0) {
     return (
-      <Card className="w-full border-2 border-yellow-500/20 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950 dark:to-orange-950">
+      <Card className="w-full border-2 border-orange/20 bg-gradient-to-r from-card to-secondary hover-neon-orange">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-yellow-700 dark:text-yellow-300">
+          <CardTitle className="flex items-center gap-2 text-orange">
             <Eye className="h-6 w-6" />
             🎬 Где посмотреть
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400 mb-2">
+            <AlertTriangle className="h-12 w-12 text-orange mx-auto mb-4" />
+            <p className="text-foreground mb-2">
               Информация о доступности не найдена
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-500">
+            <p className="text-sm text-muted-foreground">
               Попробуйте поискать фильм на популярных платформах самостоятельно
             </p>
           </div>
@@ -212,10 +212,10 @@ export function StreamingAvailability({ movieId, title, imdbId }: StreamingAvail
 
   return (
     <>
-      <Card className="w-full border-2 border-green-500/20 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950 dark:to-blue-950">
+      <Card className="w-full border-2 border-accent/20 bg-gradient-to-r from-card to-secondary hover-neon-accent">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+            <div className="flex items-center gap-2 text-accent text-gradient-primary">
               <Eye className="h-6 w-6" />
               🎬 Где посмотреть
             </div>
@@ -231,10 +231,10 @@ export function StreamingAvailability({ movieId, title, imdbId }: StreamingAvail
             {providers.filter(p => p.available).map((provider) => (
               <div
                 key={provider.id}
-                className="flex items-center justify-between p-4 border-2 border-green-200 dark:border-green-800 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200 hover:scale-105"
+                className="flex items-center justify-between p-4 border-2 border-accent/20 rounded-lg bg-card hover:bg-secondary transition-neon hover:neon-glow-accent hover:scale-105"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-12 h-12 bg-white dark:bg-gray-800 rounded-lg border shadow-sm">
+                  <div className="flex items-center justify-center w-12 h-12 bg-secondary rounded-lg border border-border shadow-sm">
                     {getProviderIcon(provider.type, provider.name)}
                   </div>
                   <div>
@@ -244,7 +244,7 @@ export function StreamingAvailability({ movieId, title, imdbId }: StreamingAvail
                         {getTypeLabel(provider.type)}
                       </Badge>
                       {provider.price && (
-                        <span className="text-sm font-semibold text-green-600 dark:text-green-400">
+                        <span className="text-sm font-semibold text-accent">
                           💰 {provider.price}
                         </span>
                       )}
@@ -255,7 +255,7 @@ export function StreamingAvailability({ movieId, title, imdbId }: StreamingAvail
                   size="lg"
                   variant="default"
                   onClick={() => handleWatchClick(provider)}
-                  className="bg-green-600 hover:bg-green-700 text-white font-semibold"
+                  className="bg-accent hover:bg-accent/80 text-white font-semibold hover-neon-accent"
                 >
                   <Play className="mr-2 h-4 w-4" />
                   Смотреть
@@ -264,8 +264,8 @@ export function StreamingAvailability({ movieId, title, imdbId }: StreamingAvail
             ))}
           </div>
           
-          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <p className="text-sm text-blue-800 dark:text-blue-200">
+          <div className="mt-6 p-4 bg-secondary rounded-lg border border-info/20">
+            <p className="text-sm text-info">
               <AlertTriangle className="inline h-4 w-4 mr-1" />
               ✨ Показаны только проверенные сервисы где доступен фильм. Данные обновляются ежедневно.
             </p>
