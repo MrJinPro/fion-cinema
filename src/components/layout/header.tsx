@@ -1,10 +1,19 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Logo } from '@/components/ui/logo';
 import { SearchInput } from '@/components/ui/search-input';
 import { Button } from '@/components/ui/button';
-import { Heart, List, Menu } from 'lucide-react';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Heart, List, Menu, User, LogOut, LogIn } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 interface HeaderProps {
   searchValue: string;
@@ -20,12 +29,26 @@ export const Header: React.FC<HeaderProps> = ({
   onMenuToggle,
 }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast.error('Ошибка при выходе');
+    } else {
+      toast.success('Вы вышли из аккаунта');
+      navigate('/');
+    }
+  };
 
   const navLinks = [
     { href: '/', label: 'Главная' },
     { href: '/search', label: 'Поиск' },
-    { href: '/favorites', label: 'Избранное', icon: Heart },
-    { href: '/lists', label: 'Списки', icon: List },
+    ...(user ? [
+      { href: '/favorites', label: 'Избранное', icon: Heart },
+      { href: '/lists', label: 'Списки', icon: List },
+    ] : [])
   ];
 
   return (
@@ -67,15 +90,55 @@ export const Header: React.FC<HeaderProps> = ({
           />
         </div>
 
-        {/* Мобильное меню */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="md:hidden"
-          onClick={onMenuToggle}
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
+        {/* Аутентификация */}
+        <div className="flex items-center gap-2">
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  <span className="hidden md:inline">Профиль</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/favorites" className="flex items-center gap-2">
+                    <Heart className="h-4 w-4" />
+                    Избранное
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/lists" className="flex items-center gap-2">
+                    <List className="h-4 w-4" />
+                    Мои списки
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2">
+                  <LogOut className="h-4 w-4" />
+                  Выйти
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button variant="default" size="sm" asChild>
+              <Link to="/auth" className="flex items-center gap-2">
+                <LogIn className="h-4 w-4" />
+                <span className="hidden md:inline">Войти</span>
+              </Link>
+            </Button>
+          )}
+
+          {/* Мобильное меню */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="md:hidden"
+            onClick={onMenuToggle}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
       {/* Мобильный поиск */}

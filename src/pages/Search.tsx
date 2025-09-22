@@ -355,7 +355,6 @@ const Search = () => {
                       key={item.id}
                       item={item}
                       type={getItemType(item)}
-                      onPlay={() => handleItemClick(item)}
                     />
                   ))}
                 </div>

@@ -14,7 +14,140 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      favorites: {
+        Row: {
+          added_at: string
+          id: string
+          media_type: string
+          poster_path: string | null
+          release_date: string | null
+          title: string
+          tmdb_id: number
+          user_id: string
+          vote_average: number | null
+        }
+        Insert: {
+          added_at?: string
+          id?: string
+          media_type: string
+          poster_path?: string | null
+          release_date?: string | null
+          title: string
+          tmdb_id: number
+          user_id: string
+          vote_average?: number | null
+        }
+        Update: {
+          added_at?: string
+          id?: string
+          media_type?: string
+          poster_path?: string | null
+          release_date?: string | null
+          title?: string
+          tmdb_id?: number
+          user_id?: string
+          vote_average?: number | null
+        }
+        Relationships: []
+      }
+      list_items: {
+        Row: {
+          added_at: string
+          id: string
+          list_id: string
+          media_type: string
+          poster_path: string | null
+          release_date: string | null
+          title: string
+          tmdb_id: number
+          vote_average: number | null
+        }
+        Insert: {
+          added_at?: string
+          id?: string
+          list_id: string
+          media_type: string
+          poster_path?: string | null
+          release_date?: string | null
+          title: string
+          tmdb_id: number
+          vote_average?: number | null
+        }
+        Update: {
+          added_at?: string
+          id?: string
+          list_id?: string
+          media_type?: string
+          poster_path?: string | null
+          release_date?: string | null
+          title?: string
+          tmdb_id?: number
+          vote_average?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "list_items_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "user_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_lists: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

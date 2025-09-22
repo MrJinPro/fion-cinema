@@ -95,7 +95,6 @@ const Index = () => {
                   key={item.id}
                   item={item}
                   type={'title' in item ? 'movie' : 'tv'}
-                  onPlay={() => handleMovieClick(item.id, 'title' in item ? 'movie' : 'tv')}
                 />
               ))
             )}
@@ -125,7 +124,6 @@ const Index = () => {
                   key={movie.id}
                   item={movie}
                   type="movie"
-                  onPlay={() => handleMovieClick(movie.id, 'movie')}
                 />
               ))
             )}
@@ -155,7 +153,6 @@ const Index = () => {
                   key={show.id}
                   item={show}
                   type="tv"
-                  onPlay={() => handleMovieClick(show.id, 'tv')}
                 />
               ))
             )}

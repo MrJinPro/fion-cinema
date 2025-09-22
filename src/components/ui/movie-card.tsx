@@ -1,28 +1,29 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Heart, Star, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TMDbMovie, TMDbTVShow, getTMDbClient } from '@/lib/tmdb';
+import { useFavorites } from '@/hooks/useFavorites';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 interface MovieCardProps {
   item: TMDbMovie | TMDbTVShow;
   type: 'movie' | 'tv';
-  isFavorite?: boolean;
-  onToggleFavorite?: () => void;
-  onPlay?: () => void;
   className?: string;
 }
 
 export const MovieCard: React.FC<MovieCardProps> = ({
   item,
   type,
-  isFavorite = false,
-  onToggleFavorite,
-  onPlay,
   className,
 }) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const tmdbClient = getTMDbClient();
   
   const title = type === 'movie' ? (item as TMDbMovie).title : (item as TMDbTVShow).name;
@@ -32,12 +33,37 @@ export const MovieCard: React.FC<MovieCardProps> = ({
   
   const year = releaseDate ? new Date(releaseDate).getFullYear() : null;
   const posterUrl = tmdbClient.getPosterURL(item.poster_path, 'w500');
+  const isItemFavorite = user ? isFavorite(item.id, type) : false;
+
+  const handleClick = () => {
+    navigate(`/${type}/${item.id}`);
+  };
+
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!user) {
+      navigate('/auth');
+      toast.info('Войдите, чтобы добавлять в избранное');
+      return;
+    }
+
+    try {
+      await toggleFavorite(item, type);
+      toast.success(isItemFavorite ? 'Удалено из избранного' : 'Добавлено в избранное');
+    } catch (error) {
+      toast.error('Произошла ошибка');
+    }
+  };
 
   return (
-    <Card className={cn(
-      "group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm transition-neon hover-neon-primary",
-      className
-    )}>
+    <Card 
+      className={cn(
+        "group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm transition-neon hover-neon-primary cursor-pointer",
+        className
+      )}
+      onClick={handleClick}
+    >
       <div className="relative aspect-[2/3] overflow-hidden">
         {posterUrl ? (
           <img
@@ -57,36 +83,28 @@ export const MovieCard: React.FC<MovieCardProps> = ({
         
         {/* Действия при наведении */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-          {onPlay && (
-            <Button
-              size="lg"
-              variant="secondary"
-              className="bg-primary/90 text-primary-foreground hover:bg-primary hover-neon-primary"
-              onClick={onPlay}
-            >
-              <Play className="mr-2 h-5 w-5" />
-              Смотреть
-            </Button>
-          )}
+          <Button
+            size="lg"
+            variant="secondary"
+            className="bg-primary/90 text-primary-foreground hover:bg-primary hover-neon-primary"
+          >
+            <Play className="mr-2 h-5 w-5" />
+            Подробнее
+          </Button>
         </div>
 
         {/* Кнопка избранного */}
-        {onToggleFavorite && (
-          <Button
-            size="sm"
-            variant="secondary"
-            className={cn(
-              "absolute top-2 right-2 h-8 w-8 p-0 opacity-0 transition-all duration-300 group-hover:opacity-100",
-              isFavorite && "opacity-100 bg-primary text-primary-foreground hover-neon-primary"
-            )}
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleFavorite();
-            }}
-          >
-            <Heart className={cn("h-4 w-4", isFavorite && "fill-current")} />
-          </Button>
-        )}
+        <Button
+          size="sm"
+          variant="secondary"
+          className={cn(
+            "absolute top-2 right-2 h-8 w-8 p-0 opacity-0 transition-all duration-300 group-hover:opacity-100",
+            isItemFavorite && "opacity-100 bg-primary text-primary-foreground hover-neon-primary"
+          )}
+          onClick={handleFavoriteClick}
+        >
+          <Heart className={cn("h-4 w-4", isItemFavorite && "fill-current")} />
+        </Button>
 
         {/* Рейтинг */}
         {item.vote_average > 0 && (
