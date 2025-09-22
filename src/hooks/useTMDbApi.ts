@@ -259,6 +259,25 @@ export const useTVReviews = (id: number, page = 1) => {
   });
 };
 
+// Watch Providers hooks
+export const useMovieWatchProviders = (id: number) => {
+  return useQuery({
+    queryKey: ['movie-watch-providers', id],
+    queryFn: () => tmdbClient.getMovieWatchProviders(id),
+    enabled: !!id,
+    staleTime: 30 * 60 * 1000, // 30 минут
+  });
+};
+
+export const useTVWatchProviders = (id: number) => {
+  return useQuery({
+    queryKey: ['tv-watch-providers', id],
+    queryFn: () => tmdbClient.getTVWatchProviders(id),
+    enabled: !!id,
+    staleTime: 30 * 60 * 1000, // 30 минут
+  });
+};
+
 // Person hooks
 export const usePersonDetails = (id: number) => {
   return useQuery({

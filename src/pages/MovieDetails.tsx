@@ -198,6 +198,9 @@ const MovieDetails = () => {
               </div>
             )}
 
+            {/* Streaming Availability - Prominent Position */}
+            <StreamingAvailability movieId={movie.id} title={movie.title} />
+
             {/* Overview */}
             {movie.overview && (
               <Card>
@@ -249,10 +252,9 @@ const MovieDetails = () => {
 
             {/* Additional Content Tabs */}
             <Tabs defaultValue="cast" className="w-full">
-              <TabsList className="grid w-full grid-cols-6">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="cast">Актёры</TabsTrigger>
                 <TabsTrigger value="videos">Видео</TabsTrigger>
-                <TabsTrigger value="streaming">Просмотр</TabsTrigger>
                 <TabsTrigger value="images">Фото</TabsTrigger>
                 <TabsTrigger value="reviews">Отзывы</TabsTrigger>
                 <TabsTrigger value="similar">Похожие</TabsTrigger>
@@ -264,10 +266,6 @@ const MovieDetails = () => {
               
               <TabsContent value="videos" className="mt-6">
                 {videos && <VideoSection videos={videos.results} />}
-              </TabsContent>
-              
-              <TabsContent value="streaming" className="mt-6">
-                <StreamingAvailability movieId={movie.id} title={movie.title} />
               </TabsContent>
               
               <TabsContent value="images" className="mt-6">

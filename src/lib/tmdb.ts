@@ -510,6 +510,15 @@ export class TMDbClient {
     return this.makeRequest(`/tv/${id}/reviews`, { page });
   }
 
+  // Watch Providers
+  async getMovieWatchProviders(id: number): Promise<any> {
+    return this.makeRequest(`/movie/${id}/watch/providers`);
+  }
+
+  async getTVWatchProviders(id: number): Promise<any> {
+    return this.makeRequest(`/tv/${id}/watch/providers`);
+  }
+
   // Утилиты для изображений
   getImageURL(path: string | null, size: 'w92' | 'w154' | 'w185' | 'w342' | 'w500' | 'w780' | 'original' = 'w500'): string | null {
     if (!path) return null;
