@@ -21,6 +21,7 @@ import { VideoSection } from '@/components/ui/video-section';
 import { ImagesSection } from '@/components/ui/images-section';
 import { ReviewsSection } from '@/components/ui/reviews-section';
 import { SimilarSection } from '@/components/ui/similar-section';
+import { StreamingAvailability } from '@/components/ui/streaming-availability';
 import { ArrowLeft, Star, Calendar, Clock, Play, DollarSign } from 'lucide-react';
 import { getTMDbClient } from '@/lib/tmdb';
 
@@ -248,9 +249,10 @@ const MovieDetails = () => {
 
             {/* Additional Content Tabs */}
             <Tabs defaultValue="cast" className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="cast">Актёры</TabsTrigger>
                 <TabsTrigger value="videos">Видео</TabsTrigger>
+                <TabsTrigger value="streaming">Просмотр</TabsTrigger>
                 <TabsTrigger value="images">Фото</TabsTrigger>
                 <TabsTrigger value="reviews">Отзывы</TabsTrigger>
                 <TabsTrigger value="similar">Похожие</TabsTrigger>
@@ -262,6 +264,10 @@ const MovieDetails = () => {
               
               <TabsContent value="videos" className="mt-6">
                 {videos && <VideoSection videos={videos.results} />}
+              </TabsContent>
+              
+              <TabsContent value="streaming" className="mt-6">
+                <StreamingAvailability movieId={movie.id} title={movie.title} />
               </TabsContent>
               
               <TabsContent value="images" className="mt-6">
