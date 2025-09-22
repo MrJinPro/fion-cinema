@@ -1,13 +1,27 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { 
+  useTVDetails, 
+  useTVCredits, 
+  useTVVideos, 
+  useTVImages, 
+  useTVReviews,
+  useSimilarTVShows,
+  useTVRecommendations
+} from '@/hooks/useTMDbApi';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Star, Calendar, Tv, Play } from 'lucide-react';
-import { useTVDetails } from '@/hooks/useTMDbApi';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CastSection } from '@/components/ui/cast-section';
+import { VideoSection } from '@/components/ui/video-section';
+import { ImagesSection } from '@/components/ui/images-section';
+import { ReviewsSection } from '@/components/ui/reviews-section';
+import { SimilarSection } from '@/components/ui/similar-section';
+import { ArrowLeft, Star, Calendar, Tv, Users, PlayCircle, Play } from 'lucide-react';
 import { getTMDbClient } from '@/lib/tmdb';
 
 const TVDetails = () => {
@@ -17,6 +31,12 @@ const TVDetails = () => {
   const [searchValue, setSearchValue] = useState('');
   
   const { data: tvShow, isLoading, error } = useTVDetails(tvId);
+  const { data: credits } = useTVCredits(tvId);
+  const { data: videos } = useTVVideos(tvId);
+  const { data: images } = useTVImages(tvId);
+  const { data: reviews } = useTVReviews(tvId);
+  const { data: similar } = useSimilarTVShows(tvId);
+  const { data: recommendations } = useTVRecommendations(tvId);
   const tmdbClient = getTMDbClient();
 
   const handleSearch = (query: string) => {
@@ -234,6 +254,52 @@ const TVDetails = () => {
                 </Card>
               )}
             </div>
+
+            {/* Additional Content Tabs */}
+            <Tabs defaultValue="cast" className="w-full">
+              <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="cast">Актёры</TabsTrigger>
+                <TabsTrigger value="videos">Видео</TabsTrigger>
+                <TabsTrigger value="images">Фото</TabsTrigger>
+                <TabsTrigger value="reviews">Отзывы</TabsTrigger>
+                <TabsTrigger value="similar">Похожие</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="cast" className="mt-6">
+                {credits && <CastSection credits={credits} />}
+              </TabsContent>
+              
+              <TabsContent value="videos" className="mt-6">
+                {videos && <VideoSection videos={videos.results} />}
+              </TabsContent>
+              
+              <TabsContent value="images" className="mt-6">
+                {images && <ImagesSection images={images} />}
+              </TabsContent>
+              
+              <TabsContent value="reviews" className="mt-6">
+                {reviews && <ReviewsSection reviews={reviews.results} />}
+              </TabsContent>
+              
+              <TabsContent value="similar" className="mt-6">
+                <div className="space-y-6">
+                  {similar && similar.results.length > 0 && (
+                    <SimilarSection 
+                      items={similar.results} 
+                      title="Похожие сериалы" 
+                      type="tv"
+                    />
+                  )}
+                  {recommendations && recommendations.results.length > 0 && (
+                    <SimilarSection 
+                      items={recommendations.results} 
+                      title="Рекомендации" 
+                      type="tv"
+                    />
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
 
           </div>
         </div>

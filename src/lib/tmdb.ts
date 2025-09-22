@@ -83,6 +83,81 @@ export interface TMDbMovieDetails extends TMDbMovie {
   imdb_id: string | null;
 }
 
+// New types for enhanced details
+export interface TMDbCastMember {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+  order: number;
+  known_for_department: string;
+}
+
+export interface TMDbCrewMember {
+  id: number;
+  name: string;
+  job: string;
+  department: string;
+  profile_path: string | null;
+}
+
+export interface TMDbCredits {
+  cast: TMDbCastMember[];
+  crew: TMDbCrewMember[];
+}
+
+export interface TMDbVideo {
+  id: string;
+  key: string;
+  name: string;
+  site: string;
+  type: string;
+  official: boolean;
+  published_at: string;
+  size: number;
+}
+
+export interface TMDbVideoResponse {
+  results: TMDbVideo[];
+}
+
+export interface TMDbImage {
+  aspect_ratio: number;
+  file_path: string;
+  height: number;
+  width: number;
+  vote_average: number;
+  vote_count: number;
+}
+
+export interface TMDbImages {
+  backdrops: TMDbImage[];
+  posters: TMDbImage[];
+  logos: TMDbImage[];
+}
+
+export interface TMDbReview {
+  id: string;
+  author: string;
+  author_details: {
+    name: string;
+    username: string;
+    avatar_path: string | null;
+    rating: number | null;
+  };
+  content: string;
+  created_at: string;
+  updated_at: string;
+  url: string;
+}
+
+export interface TMDbReviewResponse {
+  results: TMDbReview[];
+  page: number;
+  total_pages: number;
+  total_results: number;
+}
+
 export interface TMDbTVDetails extends TMDbTVShow {
   created_by: Array<{
     id: number;
@@ -326,6 +401,60 @@ export class TMDbClient {
 
   async getTVGenres(): Promise<{ genres: TMDbGenre[] }> {
     return this.makeRequest('/genre/tv/list');
+  }
+
+  // Credits (Cast & Crew)
+  async getMovieCredits(id: number): Promise<TMDbCredits> {
+    return this.makeRequest(`/movie/${id}/credits`);
+  }
+
+  async getTVCredits(id: number): Promise<TMDbCredits> {
+    return this.makeRequest(`/tv/${id}/credits`);
+  }
+
+  // Videos (Trailers, Teasers)
+  async getMovieVideos(id: number): Promise<TMDbVideoResponse> {
+    return this.makeRequest(`/movie/${id}/videos`);
+  }
+
+  async getTVVideos(id: number): Promise<TMDbVideoResponse> {
+    return this.makeRequest(`/tv/${id}/videos`);
+  }
+
+  // Images
+  async getMovieImages(id: number): Promise<TMDbImages> {
+    return this.makeRequest(`/movie/${id}/images`);
+  }
+
+  async getTVImages(id: number): Promise<TMDbImages> {
+    return this.makeRequest(`/tv/${id}/images`);
+  }
+
+  // Similar Content
+  async getSimilarMovies(id: number, page = 1): Promise<TMDbSearchResponse<TMDbMovie>> {
+    return this.makeRequest(`/movie/${id}/similar`, { page });
+  }
+
+  async getSimilarTVShows(id: number, page = 1): Promise<TMDbSearchResponse<TMDbTVShow>> {
+    return this.makeRequest(`/tv/${id}/similar`, { page });
+  }
+
+  // Recommendations
+  async getMovieRecommendations(id: number, page = 1): Promise<TMDbSearchResponse<TMDbMovie>> {
+    return this.makeRequest(`/movie/${id}/recommendations`, { page });
+  }
+
+  async getTVRecommendations(id: number, page = 1): Promise<TMDbSearchResponse<TMDbTVShow>> {
+    return this.makeRequest(`/tv/${id}/recommendations`, { page });
+  }
+
+  // Reviews
+  async getMovieReviews(id: number, page = 1): Promise<TMDbReviewResponse> {
+    return this.makeRequest(`/movie/${id}/reviews`, { page });
+  }
+
+  async getTVReviews(id: number, page = 1): Promise<TMDbReviewResponse> {
+    return this.makeRequest(`/tv/${id}/reviews`, { page });
   }
 
   // Утилиты для изображений

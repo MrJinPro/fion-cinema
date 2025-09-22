@@ -121,3 +121,117 @@ export const useTVDetails = (id: number) => {
     staleTime: 60 * 60 * 1000, // 1 час
   });
 };
+
+// Credits hooks
+export const useMovieCredits = (id: number) => {
+  return useQuery({
+    queryKey: ['movie', id, 'credits'],
+    queryFn: () => tmdbClient.getMovieCredits(id),
+    enabled: !!id,
+    staleTime: 60 * 60 * 1000, // 1 час
+  });
+};
+
+export const useTVCredits = (id: number) => {
+  return useQuery({
+    queryKey: ['tv', id, 'credits'],
+    queryFn: () => tmdbClient.getTVCredits(id),
+    enabled: !!id,
+    staleTime: 60 * 60 * 1000, // 1 час
+  });
+};
+
+// Videos hooks
+export const useMovieVideos = (id: number) => {
+  return useQuery({
+    queryKey: ['movie', id, 'videos'],
+    queryFn: () => tmdbClient.getMovieVideos(id),
+    enabled: !!id,
+    staleTime: 60 * 60 * 1000, // 1 час
+  });
+};
+
+export const useTVVideos = (id: number) => {
+  return useQuery({
+    queryKey: ['tv', id, 'videos'],
+    queryFn: () => tmdbClient.getTVVideos(id),
+    enabled: !!id,
+    staleTime: 60 * 60 * 1000, // 1 час
+  });
+};
+
+// Images hooks
+export const useMovieImages = (id: number) => {
+  return useQuery({
+    queryKey: ['movie', id, 'images'],
+    queryFn: () => tmdbClient.getMovieImages(id),
+    enabled: !!id,
+    staleTime: 60 * 60 * 1000, // 1 час
+  });
+};
+
+export const useTVImages = (id: number) => {
+  return useQuery({
+    queryKey: ['tv', id, 'images'],
+    queryFn: () => tmdbClient.getTVImages(id),
+    enabled: !!id,
+    staleTime: 60 * 60 * 1000, // 1 час
+  });
+};
+
+// Similar content hooks
+export const useSimilarMovies = (id: number, page = 1) => {
+  return useQuery({
+    queryKey: ['movie', id, 'similar', page],
+    queryFn: () => tmdbClient.getSimilarMovies(id, page),
+    enabled: !!id,
+    staleTime: 30 * 60 * 1000, // 30 минут
+  });
+};
+
+export const useSimilarTVShows = (id: number, page = 1) => {
+  return useQuery({
+    queryKey: ['tv', id, 'similar', page],
+    queryFn: () => tmdbClient.getSimilarTVShows(id, page),
+    enabled: !!id,
+    staleTime: 30 * 60 * 1000, // 30 минут
+  });
+};
+
+// Recommendations hooks
+export const useMovieRecommendations = (id: number, page = 1) => {
+  return useQuery({
+    queryKey: ['movie', id, 'recommendations', page],
+    queryFn: () => tmdbClient.getMovieRecommendations(id, page),
+    enabled: !!id,
+    staleTime: 30 * 60 * 1000, // 30 минут
+  });
+};
+
+export const useTVRecommendations = (id: number, page = 1) => {
+  return useQuery({
+    queryKey: ['tv', id, 'recommendations', page],
+    queryFn: () => tmdbClient.getTVRecommendations(id, page),
+    enabled: !!id,
+    staleTime: 30 * 60 * 1000, // 30 минут
+  });
+};
+
+// Reviews hooks
+export const useMovieReviews = (id: number, page = 1) => {
+  return useQuery({
+    queryKey: ['movie', id, 'reviews', page],
+    queryFn: () => tmdbClient.getMovieReviews(id, page),
+    enabled: !!id,
+    staleTime: 30 * 60 * 1000, // 30 минут
+  });
+};
+
+export const useTVReviews = (id: number, page = 1) => {
+  return useQuery({
+    queryKey: ['tv', id, 'reviews', page],
+    queryFn: () => tmdbClient.getTVReviews(id, page),
+    enabled: !!id,
+    staleTime: 30 * 60 * 1000, // 30 минут
+  });
+};

@@ -1,13 +1,27 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { 
+  useMovieDetails, 
+  useMovieCredits, 
+  useMovieVideos, 
+  useMovieImages, 
+  useMovieReviews,
+  useSimilarMovies,
+  useMovieRecommendations
+} from '@/hooks/useTMDbApi';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Star, Calendar, Clock, Play } from 'lucide-react';
-import { useMovieDetails } from '@/hooks/useTMDbApi';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CastSection } from '@/components/ui/cast-section';
+import { VideoSection } from '@/components/ui/video-section';
+import { ImagesSection } from '@/components/ui/images-section';
+import { ReviewsSection } from '@/components/ui/reviews-section';
+import { SimilarSection } from '@/components/ui/similar-section';
+import { ArrowLeft, Star, Calendar, Clock, Play, DollarSign } from 'lucide-react';
 import { getTMDbClient } from '@/lib/tmdb';
 
 const MovieDetails = () => {
@@ -17,6 +31,12 @@ const MovieDetails = () => {
   const [searchValue, setSearchValue] = useState('');
   
   const { data: movie, isLoading, error } = useMovieDetails(movieId);
+  const { data: credits } = useMovieCredits(movieId);
+  const { data: videos } = useMovieVideos(movieId);
+  const { data: images } = useMovieImages(movieId);
+  const { data: reviews } = useMovieReviews(movieId);
+  const { data: similar } = useSimilarMovies(movieId);
+  const { data: recommendations } = useMovieRecommendations(movieId);
   const tmdbClient = getTMDbClient();
 
   const handleSearch = (query: string) => {
@@ -196,10 +216,13 @@ const MovieDetails = () => {
               {movie.budget && movie.budget > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base">Бюджет</CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                      <DollarSign className="h-5 w-5" />
+                      Бюджет
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-foreground">
+                    <p className="text-2xl font-bold">
                       ${movie.budget.toLocaleString()}
                     </p>
                   </CardContent>
@@ -209,16 +232,65 @@ const MovieDetails = () => {
               {movie.revenue && movie.revenue > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base">Сборы</CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                      <DollarSign className="h-5 w-5" />
+                      Сборы
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-foreground">
+                    <p className="text-2xl font-bold">
                       ${movie.revenue.toLocaleString()}
                     </p>
                   </CardContent>
                 </Card>
               )}
             </div>
+
+            {/* Additional Content Tabs */}
+            <Tabs defaultValue="cast" className="w-full">
+              <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="cast">Актёры</TabsTrigger>
+                <TabsTrigger value="videos">Видео</TabsTrigger>
+                <TabsTrigger value="images">Фото</TabsTrigger>
+                <TabsTrigger value="reviews">Отзывы</TabsTrigger>
+                <TabsTrigger value="similar">Похожие</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="cast" className="mt-6">
+                {credits && <CastSection credits={credits} />}
+              </TabsContent>
+              
+              <TabsContent value="videos" className="mt-6">
+                {videos && <VideoSection videos={videos.results} />}
+              </TabsContent>
+              
+              <TabsContent value="images" className="mt-6">
+                {images && <ImagesSection images={images} />}
+              </TabsContent>
+              
+              <TabsContent value="reviews" className="mt-6">
+                {reviews && <ReviewsSection reviews={reviews.results} />}
+              </TabsContent>
+              
+              <TabsContent value="similar" className="mt-6">
+                <div className="space-y-6">
+                  {similar && similar.results.length > 0 && (
+                    <SimilarSection 
+                      items={similar.results} 
+                      title="Похожие фильмы" 
+                      type="movie"
+                    />
+                  )}
+                  {recommendations && recommendations.results.length > 0 && (
+                    <SimilarSection 
+                      items={recommendations.results} 
+                      title="Рекомендации" 
+                      type="movie"
+                    />
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </main>
