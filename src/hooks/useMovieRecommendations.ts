@@ -131,8 +131,14 @@ export const useMovieRecommendations = () => {
         page: '1',
       };
 
+      // Add language parameter for Russian content
+      const filtersWithLanguage = {
+        ...filters,
+        language: 'ru-RU',
+      };
+
       // This hook is used within the component that calls this function
-      const response = await fetch(`https://qvavaxqdsbwjcimsbqmx.supabase.co/functions/v1/tmdb-proxy?endpoint=/discover/movie&${new URLSearchParams(filters).toString()}`);
+      const response = await fetch(`https://qvavaxqdsbwjcimsbqmx.supabase.co/functions/v1/tmdb-proxy?endpoint=/discover/movie&${new URLSearchParams(filtersWithLanguage).toString()}`);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
