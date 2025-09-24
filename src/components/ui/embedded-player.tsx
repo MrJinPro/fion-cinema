@@ -30,18 +30,24 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
-  // Safe video sources with minimal ads
+  // Reliable video sources without sandbox issues
   const videoSources = [
     {
-      name: 'VidSrc Pro',
-      url: `https://vidsrc.pro/embed/movie/${movieId}`,
-      description: 'Чистый источник без рекламы',
+      name: 'Embed.su',
+      url: `https://embed.su/embed/movie/${movieId}`,
+      description: 'Стабильный российский источник',
       official: false
     },
     {
-      name: 'SuperEmbed',
-      url: `https://multiembed.mov/directstream.php?video_id=${movieId}&tmdb=1`,
-      description: 'Стабильный источник',
+      name: 'KinoBase',
+      url: `https://kinobase.org/embed/movie/${movieId}`,
+      description: 'Альтернативный источник',
+      official: false
+    },
+    {
+      name: 'Filmix',
+      url: `https://filmix.ac/embed/${movieId}`,
+      description: 'Популярный источник',
       official: false
     }
   ];
@@ -231,7 +237,6 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
               className="w-full h-full rounded-lg"
               allowFullScreen
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-              sandbox="allow-scripts allow-same-origin allow-presentation allow-forms allow-pointer-lock allow-popups allow-popups-to-escape-sandbox"
               onLoad={handleLoad}
               onError={handleError}
               style={{ display: isLoading || error ? 'none' : 'block' }}

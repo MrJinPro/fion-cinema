@@ -47,7 +47,7 @@ export const DisclaimerModal: React.FC<DisclaimerModalProps> = ({
           <Alert className="border-destructive/20 bg-destructive/5">
             <Shield className="h-4 w-4" />
             <AlertDescription className="text-sm">
-              <strong>ВНИМАНИЕ:</strong> Видеоконтент предоставляется сторонними неофициальными источниками
+              <strong>ВНИМАНИЕ:</strong> Видеоконтент предоставляется сторонними неофициальными источниками без защиты sandbox режима
             </AlertDescription>
           </Alert>
 
@@ -60,7 +60,8 @@ export const DisclaimerModal: React.FC<DisclaimerModalProps> = ({
               <ul className="space-y-1 text-muted-foreground">
                 <li>• Видео размещено на сторонних сервисах</li>
                 <li>• Мы не контролируем качество и доступность контента</li>
-                <li>• Источники могут содержать рекламу</li>
+                <li>• Источники могут содержать рекламу и вредоносный код</li>
+                <li>• Отключена защита sandbox для корректного воспроизведения</li>
                 <li>• Некоторые источники могут быть недоступны в вашем регионе</li>
               </ul>
             </div>
