@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Heart, List, Menu, User, LogOut, LogIn } from 'lucide-react';
+import { Heart, List, Menu, User, LogOut, LogIn, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -45,6 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
   const navLinks = [
     { href: '/', label: 'Главная' },
     { href: '/search', label: 'Поиск' },
+    { href: '/#recommendations', label: 'Подобрать фильм', icon: Sparkles },
     ...(user ? [
       { href: '/favorites', label: 'Избранное', icon: Heart },
       { href: '/lists', label: 'Списки', icon: List },

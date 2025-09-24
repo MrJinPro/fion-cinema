@@ -8,6 +8,7 @@ import { AutoCarousel } from '@/components/ui/auto-carousel';
 import { PersonalizedSection } from '@/components/ui/personalized-section';
 import { MovieCard } from '@/components/ui/movie-card';
 import { MovieSkeleton } from '@/components/ui/movie-skeleton';
+import { MovieRecommendationSection } from '@/components/ui/movie-recommendation-section';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -64,6 +65,11 @@ const Index = () => {
               onItemClick={handleMovieClick}
             />
           )}
+
+          {/* Movie Recommendation Section */}
+          <div id="recommendations">
+            <MovieRecommendationSection />
+          </div>
 
           {/* Персонализированная секция */}
           <PersonalizedSection 
