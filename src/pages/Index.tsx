@@ -10,6 +10,7 @@ import { MovieCard } from '@/components/ui/movie-card';
 import { MovieSkeleton } from '@/components/ui/movie-skeleton';
 import { MovieRecommendationSection } from '@/components/ui/movie-recommendation-section';
 import { Button } from '@/components/ui/button';
+import { KinopoiskPremieres, KinopoiskNewReleases } from '@/components/ui/kinopoisk-sections';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Play, TrendingUp, Star, Calendar } from 'lucide-react';
@@ -76,6 +77,10 @@ const Index = () => {
             onItemClick={handleMovieClick}
             onNavigate={navigate}
           />
+
+          {/* Kinopoisk.dev секции */}
+          <KinopoiskPremieres />
+          <KinopoiskNewReleases />
 
           {/* В кинотеатрах сейчас */}
           {nowPlaying?.results && (

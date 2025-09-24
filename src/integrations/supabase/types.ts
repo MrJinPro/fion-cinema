@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      cache_queries: {
+        Row: {
+          query: string
+          response: Json
+          updated_at: string
+        }
+        Insert: {
+          query: string
+          response: Json
+          updated_at?: string
+        }
+        Update: {
+          query?: string
+          response?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           added_at: string
@@ -121,6 +139,39 @@ export type Database = {
           region?: string
           tmdb_title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      movies_kp: {
+        Row: {
+          genres: string[] | null
+          id: number
+          poster: string | null
+          premiere_russia: string | null
+          rating: number | null
+          title: string
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          genres?: string[] | null
+          id: number
+          poster?: string | null
+          premiere_russia?: string | null
+          rating?: number | null
+          title: string
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          genres?: string[] | null
+          id?: number
+          poster?: string | null
+          premiere_russia?: string | null
+          rating?: number | null
+          title?: string
+          updated_at?: string
+          year?: number | null
         }
         Relationships: []
       }

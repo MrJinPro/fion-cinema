@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Filter, Search as SearchIcon, X } from 'lucide-react';
 import { TMDbMovie, TMDbTVShow, TMDbGenre } from '@/lib/tmdb';
 import { useSearchMulti, useMovieGenres, useTVGenres, useDiscoverMovies, useDiscoverTVShows } from '@/hooks/useTMDbApi';
+import { SearchTabs } from '@/components/ui/search-tabs';
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -329,24 +330,14 @@ const Search = () => {
                   Поиск фильмов и сериалов
                 </h1>
               )}
-              
-              {!isLoading && results.length > 0 && (
-                <p className="text-muted-foreground mt-2">
-                  Найдено {results.length} результатов
-                </p>
-              )}
             </div>
 
-            {/* Загрузка */}
-            {isLoading && (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <MovieSkeleton key={i} />
-                ))}
-              </div>
-            )}
-
-            {/* Результаты */}
+            {/* Search Tabs with World and Russian content */}
+            <SearchTabs 
+              searchQuery={searchValue}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+            />
             {!isLoading && results.length > 0 && (
               <>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
