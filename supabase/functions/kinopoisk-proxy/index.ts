@@ -126,13 +126,16 @@ serve(async (req) => {
     // Add all parameters from request body
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
-        kpUrl.searchParams.append(key, String(value));
+        if (value !== undefined && value !== null && value !== '') {
+          kpUrl.searchParams.append(key, String(value));
+        }
       });
     }
 
-    console.log(`Making request to Kinopoisk.dev: ${kpUrl.toString()}`);
-    console.log(`Using API key: ${kpApiKey.substring(0, 10)}...`);
-    console.log(`Request params:`, params);
+    console.log(`📡 Making request to Kinopoisk.dev: ${kpUrl.toString()}`);
+    console.log(`🔑 Using API key: ${kpApiKey.substring(0, 10)}...`);
+    console.log(`📝 Request params:`, JSON.stringify(params, null, 2));
+    console.log(`🎯 Full URL with params: ${kpUrl.href}`);
 
     const response = await fetch(kpUrl.toString(), {
       headers: {
@@ -150,7 +153,10 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log(`Kinopoisk.dev response data received, docs count: ${data?.docs?.length || 0}`);
+    console.log(`✅ Kinopoisk.dev response data received, docs count: ${data?.docs?.length || 0}`);
+    console.log(`📊 API Response status: ${response.status}`);
+    console.log(`📈 Total results: ${data?.total || 0}`);
+    console.log(`📄 Current page: ${data?.page || 1} of ${data?.pages || 1}`);
 
     // Cache the response
     await supabase
