@@ -82,7 +82,7 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
     try {
       console.log(`Parsing Kinogo links for: ${title} (${movieId})`);
       
-      const response = await supabase.functions.invoke('kinogo-parser', {
+      const response = await supabase.functions.invoke('get-parsed-links', {
         body: {
           movieId: movieId,
           title: title,
@@ -95,11 +95,11 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
         throw new Error(response.error.message || 'Ошибка парсинга');
       }
 
-      if (response.data?.success && response.data?.links) {
+      if (response.data?.links && Array.isArray(response.data.links)) {
         setParsedLinks(response.data.links);
-        console.log(`Parsed ${response.data.links.length} Kinogo links`);
+        console.log(`Found ${response.data.links.length} parsed links (cached: ${response.data.cached})`);
       } else {
-        setParsingError(response.data?.message || 'Дополнительные источники не найдены');
+        setParsingError(response.data?.error || 'Дополнительные источники не найдены');
       }
     } catch (error) {
       console.error('Error parsing Kinogo links:', error);

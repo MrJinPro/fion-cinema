@@ -47,7 +47,7 @@ export const DisclaimerModal: React.FC<DisclaimerModalProps> = ({
           <Alert className="border-destructive/20 bg-destructive/5">
             <Shield className="h-4 w-4" />
             <AlertDescription className="text-sm">
-              <strong>ВНИМАНИЕ:</strong> Видеоконтент предоставляется сторонними неофициальными источниками без защиты sandbox режима
+              <strong className="text-red-600">КРИТИЧЕСКОЕ ПРЕДУПРЕЖДЕНИЕ:</strong> Контент может содержать материалы, защищенные авторским правом. Просмотр может нарушать законодательство вашей страны.
             </AlertDescription>
           </Alert>
 

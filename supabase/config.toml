@@ -8,3 +8,12 @@ verify_jwt = false
 
 [functions.kinopoisk-proxy]
 verify_jwt = false
+
+[functions.kinogo-parser]
+verify_jwt = false
+
+[functions.get-parsed-links]
+verify_jwt = false
+
+[functions.cleanup-expired-links]
+verify_jwt = false
