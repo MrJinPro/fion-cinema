@@ -132,10 +132,12 @@ export const useMovieRecommendations = () => {
       };
 
       // This hook is used within the component that calls this function
-      const response = await fetch(`https://qvavaxqdsbwjcimsbqmx.supabase.co/functions/v1/tmdb-proxy?endpoint=discover/movie&${new URLSearchParams(filters).toString()}`);
+      const response = await fetch(`https://qvavaxqdsbwjcimsbqmx.supabase.co/functions/v1/tmdb-proxy?endpoint=/discover/movie&${new URLSearchParams(filters).toString()}`);
       
       if (!response.ok) {
-        throw new Error('Failed to fetch movies');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('TMDb API error:', errorData);
+        throw new Error(errorData.error || 'Failed to fetch movies');
       }
 
       const data = await response.json();
