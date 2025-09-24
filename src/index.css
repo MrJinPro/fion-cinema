@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ViOn Cinema - Неоновая тёмная тема 
+/* FiOn Cinema - Неоновая тёмная тема 
    Все цвета в HSL формате для консистентности
 */
 
@@ -20,7 +20,7 @@
     --popover: 215 28% 8%;
     --popover-foreground: 210 40% 95%;
     
-    /* Неоновые акценты - основные цвета ViOn */
+    /* Неоновые акценты - основные цвета FiOn */
     --primary: 262 83% 58%;          /* #7C3AED - фиолетовый */
     --primary-foreground: 210 40% 98%;
     --primary-glow: 262 83% 65%;     /* Светлее для свечения */

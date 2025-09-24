@@ -96,7 +96,7 @@ const Auth = () => {
         <div className="text-center mb-6">
           <div className="flex items-center justify-center mb-4">
             <Film className="h-8 w-8 text-primary mr-2" />
-            <h1 className="text-2xl font-bold">Vion Movies</h1>
+            <h1 className="text-2xl font-bold">FiOn Cinema</h1>
           </div>
           <p className="text-muted-foreground">
             Войдите в свой аккаунт или создайте новый

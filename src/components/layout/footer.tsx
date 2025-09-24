@@ -13,7 +13,7 @@ export const Footer: React.FC = () => {
               <Logo size="md" />
             </Link>
             <p className="text-sm text-muted-foreground mb-4 max-w-md">
-              ViOn - онлайн-кинотеатр для просмотра информации о фильмах и сериалах. 
+              FiOn Cinema - онлайн-кинотеатр для просмотра информации о фильмах и сериалах. 
               Находите новые произведения, создавайте списки и делитесь впечатлениями.
             </p>
             
@@ -94,7 +94,7 @@ export const Footer: React.FC = () => {
         </div>
 
         <div className="border-t border-border/40 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center text-xs text-muted-foreground">
-          <p>© 2024 ViOn Cinema. Разработано MrJinPro.</p>
+          <p>© 2024 FiOn Cinema. Разработано MrJinPro.</p>
           <p className="mt-2 sm:mt-0">
             Некоммерческое использование. Не предназначено для распространения контента.
           </p>

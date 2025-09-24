@@ -41,23 +41,37 @@ serve(async (req) => {
   }
 
   try {
-    const url = new URL(req.url);
-    const endpoint = url.searchParams.get('endpoint');
+    // Parse request body to get endpoint and params
+    let requestData;
+    try {
+      requestData = await req.json();
+    } catch (error) {
+      console.error('Failed to parse request body:', error);
+      return new Response(
+        JSON.stringify({ error: 'Invalid request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { endpoint, params } = requestData;
     
     if (!endpoint) {
+      console.error('Missing endpoint parameter in request body');
       return new Response(
         JSON.stringify({ error: 'Missing endpoint parameter' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
+    console.log(`📡 Processing request for endpoint: ${endpoint}`);
+
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Create cache key
-    const cacheKey = `kp:${endpoint}:${url.search}`;
+    // Create cache key from endpoint and params
+    const cacheKey = `kp:${endpoint}:${JSON.stringify(params || {})}`;
     
     // Check cache first
     const { data: cachedData } = await supabase
@@ -106,11 +120,21 @@ serve(async (req) => {
       throw new Error('KP_DEV_KEY not configured');
     }
 
-    const kpUrl = `https://api.kinopoisk.dev/v1.4${endpoint}${url.search}`;
-    console.log(`Making request to Kinopoisk.dev: ${kpUrl}`);
-    console.log(`Using API key: ${kpApiKey.substring(0, 10)}...`);
+    // Build kinopoisk API URL with params
+    const kpUrl = new URL(`https://api.kinopoisk.dev/v1.4${endpoint}`);
+    
+    // Add all parameters from request body
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        kpUrl.searchParams.append(key, String(value));
+      });
+    }
 
-    const response = await fetch(kpUrl, {
+    console.log(`Making request to Kinopoisk.dev: ${kpUrl.toString()}`);
+    console.log(`Using API key: ${kpApiKey.substring(0, 10)}...`);
+    console.log(`Request params:`, params);
+
+    const response = await fetch(kpUrl.toString(), {
       headers: {
         'X-API-KEY': kpApiKey,
         'accept': 'application/json'

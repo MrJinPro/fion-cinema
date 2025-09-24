@@ -42,9 +42,9 @@ export const Logo: React.FC<LogoProps> = ({ className, size = 'md' }) => {
         </filter>
       </defs>
       
-      {/* V */}
+      {/* F */}
       <path 
-        d="M20 15 L30 45 L40 15" 
+        d="M20 15 L20 45 M20 15 L40 15 M20 30 L35 30" 
         stroke="url(#orangeGradient)" 
         strokeWidth="4" 
         fill="none" 

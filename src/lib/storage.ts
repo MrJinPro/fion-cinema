@@ -40,7 +40,7 @@ export interface StorageRepository {
 
 // IndexedDB implementation
 class IndexedDBStorage implements StorageRepository {
-  private dbName = 'vion-cinema';
+  private dbName = 'fion-cinema';
   private version = 1;
   private db: IDBDatabase | null = null;
 
@@ -258,8 +258,8 @@ class IndexedDBStorage implements StorageRepository {
 
 // LocalStorage fallback
 class LocalStorageRepository implements StorageRepository {
-  private favoritesKey = 'vion-favorites';
-  private listsKey = 'vion-lists';
+  private favoritesKey = 'fion-favorites';
+  private listsKey = 'fion-lists';
 
   private getFromStorage<T>(key: string, defaultValue: T): T {
     try {

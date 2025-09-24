@@ -17,7 +17,7 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => {
-  console.log("ViOn App загружается...");
+  console.log("FiOn Cinema App загружается...");
   
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ backgroundColor: '#0B0F17', color: '#F8FAFC' }}>
