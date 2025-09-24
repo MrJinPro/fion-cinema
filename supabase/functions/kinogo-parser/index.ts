@@ -68,7 +68,9 @@ async function searchMovieOnKinogo(title: string, year?: number, imdbId?: string
         const html = await response.text();
         
         // Parse search results for movie links
-        const movieLinkMatch = html.match(/<a[^>]+href="([^"]*(?:film|movie)[^"]*)"[^>]*>[\s\S]*?(?:${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${year})/i);
+        const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const movieLinkRegex = new RegExp(`<a[^>]+href="([^"]*(?:film|movie)[^"]*)"[^>]*>[\\s\\S]*?(?:${escapedTitle}|${year})`, 'i');
+        const movieLinkMatch = html.match(movieLinkRegex);
         
         if (movieLinkMatch) {
           let movieUrl = movieLinkMatch[1];
@@ -264,7 +266,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: 'Internal server error', 
-        message: error.message 
+        message: error instanceof Error ? error.message : String(error)
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
