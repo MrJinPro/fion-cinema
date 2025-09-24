@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Play, Maximize2, X, ExternalLink } from 'lucide-react';
+import { Play, Maximize2, X, ExternalLink, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { DisclaimerModal } from './disclaimer-modal';
+import { supabase } from '@/integrations/supabase/client';
 
 interface EmbeddedPlayerProps {
   movieId: number;
@@ -27,30 +28,86 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
+  const [parsedLinks, setParsedLinks] = useState<any[]>([]);
+  const [isParsingLinks, setIsParsingLinks] = useState(false);
+  const [parsingError, setParsingError] = useState<string | null>(null);
+
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
-  // Reliable video sources without sandbox issues
-  const videoSources = [
+  // Base video sources
+  const baseVideoSources = [
     {
       name: 'Embed.su',
       url: `https://embed.su/embed/movie/${movieId}`,
       description: 'Стабильный российский источник',
-      official: false
+      official: false,
+      type: 'embed'
     },
     {
       name: 'KinoBase',
       url: `https://kinobase.org/embed/movie/${movieId}`,
       description: 'Альтернативный источник',
-      official: false
+      official: false,
+      type: 'embed'
     },
     {
       name: 'Filmix',
       url: `https://filmix.ac/embed/${movieId}`,
       description: 'Популярный источник',
-      official: false
+      official: false,
+      type: 'embed'
     }
   ];
+
+  // Combine base sources with parsed Kinogo links
+  const videoSources = [
+    ...baseVideoSources,
+    ...parsedLinks.map((link, index) => ({
+      name: `Kinogo ${link.quality || 'HD'}`,
+      url: link.url,
+      description: `${link.source} - ${link.type}`,
+      official: false,
+      type: link.type || 'embed'
+    }))
+  ];
+
+  // Parse Kinogo links
+  const parseKinogoLinks = async () => {
+    if (parsedLinks.length > 0 || isParsingLinks) return;
+    
+    setIsParsingLinks(true);
+    setParsingError(null);
+    
+    try {
+      console.log(`Parsing Kinogo links for: ${title} (${movieId})`);
+      
+      const response = await supabase.functions.invoke('kinogo-parser', {
+        body: {
+          movieId: movieId,
+          title: title,
+          year: year,
+          imdbId: imdbId
+        }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || 'Ошибка парсинга');
+      }
+
+      if (response.data?.success && response.data?.links) {
+        setParsedLinks(response.data.links);
+        console.log(`Parsed ${response.data.links.length} Kinogo links`);
+      } else {
+        setParsingError(response.data?.message || 'Дополнительные источники не найдены');
+      }
+    } catch (error) {
+      console.error('Error parsing Kinogo links:', error);
+      setParsingError('Ошибка поиска дополнительных источников');
+    } finally {
+      setIsParsingLinks(false);
+    }
+  };
 
   const handlePlayerOpen = () => {
     const hasSeenDisclaimer = localStorage.getItem('player-disclaimer-accepted');
@@ -59,6 +116,7 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
     } else {
       setDisclaimerAccepted(true);
       setIsOpen(true);
+      parseKinogoLinks();
     }
   };
 
@@ -67,6 +125,7 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
     setDisclaimerAccepted(true);
     setShowDisclaimer(false);
     setIsOpen(true);
+    parseKinogoLinks();
   };
 
   const handleDisclaimerDecline = () => {
@@ -154,10 +213,18 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
                 >
                   {videoSources.map((source, index) => (
                     <option key={index} value={index}>
-                      {source.name}
+                      {source.name} {source.name.includes('Kinogo') && '🎬'}
                     </option>
                   ))}
                 </select>
+                
+                {/* Parsing Status */}
+                {isParsingLinks && (
+                  <div className="flex items-center gap-1 text-xs text-gray-300">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Поиск...
+                  </div>
+                )}
                 
                 <Button
                   variant="ghost"
@@ -197,6 +264,26 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
               </AlertDescription>
             </Alert>
           </div>
+
+          {/* Parsing Status */}
+          {(isParsingLinks || parsingError) && (
+            <div className="absolute top-28 left-4 right-4 z-10">
+              <Alert className="bg-info/20 border-info text-info-foreground">
+                <AlertDescription className="flex items-center gap-2">
+                  {isParsingLinks ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Поиск дополнительных источников на Kinogo...
+                    </>
+                  ) : parsingError ? (
+                    <>🔍 {parsingError}</>
+                  ) : (
+                    <>✅ Найдено {parsedLinks.length} дополнительных источников</>
+                  )}
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
 
           {/* Video Player */}
           <div className="w-full h-full pt-32 pb-4">
@@ -253,6 +340,9 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
                     <span className="text-xs text-gray-300">
                       Источник: {currentSourceData.name}
                     </span>
+                    {currentSourceData.name.includes('Kinogo') && (
+                      <span className="text-xs bg-green-600 px-2 py-1 rounded">Kinogo</span>
+                    )}
                   </div>
                 </div>
               </div>
