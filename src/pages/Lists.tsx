@@ -143,7 +143,7 @@ const Lists = () => {
           <div>
             <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
               <List className="h-8 w-8 text-primary" />
-              Мои списки
+              Мои коллекции
             </h1>
             <p className="text-muted-foreground mt-2">
               Создавайте тематические коллекции фильмов и сериалов
@@ -154,7 +154,7 @@ const Lists = () => {
             <DialogTrigger asChild>
               <Button className="hover-neon-primary">
                 <Plus className="mr-2 h-4 w-4" />
-                Создать список
+                Создать коллекцию
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-card border-border">
@@ -337,17 +337,17 @@ const Lists = () => {
           <div className="text-center py-16">
             <List className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-foreground mb-2">
-              Пока нет ни одного списка
+              Пока нет ни одной коллекции
             </h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Создайте свой первый список для организации фильмов и сериалов по темам
+              Создайте свою первую коллекцию для организации фильмов и сериалов по темам
             </p>
             <Button
               onClick={() => setShowCreateDialog(true)}
               className="hover-neon-primary"
             >
               <Plus className="mr-2 h-4 w-4" />
-              Создать первый список
+              Создать первую коллекцию
             </Button>
           </div>
         )}

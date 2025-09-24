@@ -210,6 +210,18 @@ const MovieDetails = () => {
               />
             </div>
 
+            {/* Featured Trailer Section */}
+            {videos && videos.results && videos.results.length > 0 && (
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle>Трейлер</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <VideoSection videos={videos.results.slice(0, 1)} />
+                </CardContent>
+              </Card>
+            )}
+
             {/* Streaming Availability - Prominent Position */}
             <StreamingAvailability movieId={movie.id} title={movie.title} imdbId={movie.imdb_id} />
 

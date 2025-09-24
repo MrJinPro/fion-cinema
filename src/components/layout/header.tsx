@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
     { href: '/#recommendations', label: 'Подобрать фильм', icon: Sparkles },
     ...(user ? [
       { href: '/favorites', label: 'Избранное', icon: Heart },
-      { href: '/lists', label: 'Списки', icon: List },
+      { href: '/lists', label: 'Коллекции', icon: List },
     ] : [])
   ];
 
@@ -111,7 +111,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <DropdownMenuItem asChild>
                   <Link to="/lists" className="flex items-center gap-2">
                     <List className="h-4 w-4" />
-                    Мои списки
+                    Мои коллекции
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

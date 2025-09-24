@@ -289,10 +289,15 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
           <div className="w-full h-full pt-32 pb-4">
             {isLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-black">
-                <div className="text-white text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-                  <p>Загрузка плеера...</p>
-                  <p className="text-sm text-gray-300 mt-2">{currentSourceData.description}</p>
+                <div className="text-white text-center p-8">
+                  <div className="animate-pulse rounded-full h-16 w-16 bg-primary/20 mx-auto mb-4 flex items-center justify-center">
+                    <Play className="h-8 w-8 text-primary" />
+                  </div>
+                  <p className="text-lg mb-2">Мы готовим для вас что-то особенное! 🎬</p>
+                  <p className="text-sm text-gray-300">
+                    Пока не можем показывать фильмы прямо у нас в приложении,<br />
+                    но мы уже готовим всё необходимое, чтоб вам было удобно!
+                  </p>
                 </div>
               </div>
             )}
