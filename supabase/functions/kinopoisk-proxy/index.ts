@@ -102,11 +102,13 @@ serve(async (req) => {
     // Make API request to Kinopoisk.dev
     const kpApiKey = Deno.env.get('KP_DEV_KEY');
     if (!kpApiKey) {
+      console.error('KP_DEV_KEY not configured');
       throw new Error('KP_DEV_KEY not configured');
     }
 
     const kpUrl = `https://api.kinopoisk.dev/v1.4${endpoint}${url.search}`;
     console.log(`Making request to Kinopoisk.dev: ${kpUrl}`);
+    console.log(`Using API key: ${kpApiKey.substring(0, 10)}...`);
 
     const response = await fetch(kpUrl, {
       headers: {
@@ -115,11 +117,16 @@ serve(async (req) => {
       }
     });
 
+    console.log(`Kinopoisk.dev response status: ${response.status}`);
+
     if (!response.ok) {
-      throw new Error(`Kinopoisk.dev API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error(`Kinopoisk.dev API error: ${response.status} - ${errorText}`);
+      throw new Error(`Kinopoisk.dev API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
+    console.log(`Kinopoisk.dev response data received, docs count: ${data?.docs?.length || 0}`);
 
     // Cache the response
     await supabase

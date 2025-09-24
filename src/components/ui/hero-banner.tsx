@@ -2,10 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getTMDbClient } from '@/lib/tmdb';
-import type { TMDbMovie, TMDbTVShow } from '@/lib/tmdb';
+
+interface MixedHeroItem {
+  id: number;
+  title?: string;
+  name?: string;
+  overview?: string;
+  backdrop_path?: string;
+  poster_path?: string;
+  release_date?: string;
+  first_air_date?: string;
+  vote_average?: number;
+  source: 'tmdb' | 'kinopoisk';
+  media_type?: 'movie' | 'tv';
+}
 
 interface HeroBannerProps {
-  items: (TMDbMovie | TMDbTVShow)[];
+  items: MixedHeroItem[];
   onItemClick: (id: number, type: 'movie' | 'tv') => void;
 }
 
@@ -38,20 +51,24 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ items, onItemClick }) =>
   };
 
   const handleItemClick = () => {
-    const type = 'title' in currentItem ? 'movie' : 'tv';
+    const type = currentItem.media_type || 'movie';
     onItemClick(currentItem.id, type);
   };
 
   if (!currentItem) return null;
 
-  const backdropUrl = currentItem.backdrop_path 
+  const backdropUrl = currentItem.source === 'tmdb' && currentItem.backdrop_path
     ? tmdbClient.getBackdropURL(currentItem.backdrop_path, 'original')
+    : currentItem.source === 'kinopoisk' && currentItem.backdrop_path
+    ? currentItem.backdrop_path
     : '';
     
-  const title = 'title' in currentItem ? currentItem.title : currentItem.name;
-  const releaseYear = 'release_date' in currentItem 
+  const title = currentItem.title || currentItem.name || '';
+  const releaseYear = currentItem.release_date 
     ? new Date(currentItem.release_date).getFullYear()
-    : new Date(currentItem.first_air_date).getFullYear();
+    : currentItem.first_air_date 
+    ? new Date(currentItem.first_air_date).getFullYear()
+    : new Date().getFullYear();
 
   return (
     <div className="relative h-[70vh] min-h-[500px] overflow-hidden rounded-xl">

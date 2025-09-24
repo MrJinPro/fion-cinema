@@ -129,25 +129,26 @@ export const useMovieRecommendations = () => {
         with_runtime_lte: aiRecommendation.with_runtime_lte.toString(),
         sort_by: aiRecommendation.sort_by,
         page: '1',
-      };
-
-      // Add language parameter for Russian content
-      const filtersWithLanguage = {
-        ...filters,
         language: 'ru-RU',
       };
 
-      // This hook is used within the component that calls this function
-      const response = await fetch(`https://qvavaxqdsbwjcimsbqmx.supabase.co/functions/v1/tmdb-proxy?endpoint=/discover/movie&${new URLSearchParams(filtersWithLanguage).toString()}`);
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('TMDb API error:', errorData);
-        throw new Error(errorData.error || 'Failed to fetch movies');
+      console.log('Fetching movies with filters:', filters);
+
+      // Use Supabase function to get movies
+      const { data: tmdbData, error: tmdbError } = await supabase.functions.invoke('tmdb-proxy', {
+        body: { 
+          endpoint: '/discover/movie',
+          params: filters
+        }
+      });
+
+      if (tmdbError) {
+        console.error('TMDb API error:', tmdbError);
+        throw new Error(tmdbError.message || 'Failed to fetch movies');
       }
 
-      const data = await response.json();
-      const movies = data.results?.slice(0, 5) || [];
+      const movies = tmdbData?.results?.slice(0, 5) || [];
+      console.log('Found movies:', movies.length);
 
       return {
         movies,
