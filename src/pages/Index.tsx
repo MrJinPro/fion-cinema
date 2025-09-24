@@ -10,6 +10,7 @@ import { MovieCard } from '@/components/ui/movie-card';
 import { MovieSkeleton } from '@/components/ui/movie-skeleton';
 import { Button } from '@/components/ui/button';
 import { KinopoiskPremieres, KinopoiskNewReleases } from '@/components/ui/kinopoisk-sections';
+import { RussianContentSection } from '@/components/ui/russian-content-section';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Play, TrendingUp, Star, Calendar } from 'lucide-react';
@@ -74,6 +75,14 @@ const Index = () => {
             onItemClick={handleMovieClick}
             onNavigate={navigate}
           />
+
+          {/* Российский контент */}
+          <section className="space-y-6 animate-stagger-1">
+            <h2 className="text-3xl font-bold text-gradient-orange neon-underline">
+              Российское кино
+            </h2>
+            <RussianContentSection />
+          </section>
 
           {/* Kinopoisk.dev секции */}
           <KinopoiskPremieres />

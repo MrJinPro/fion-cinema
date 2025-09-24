@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Play, Maximize2, Volume2, VolumeX, Settings, X } from 'lucide-react';
+import { Play, Maximize2, X, ExternalLink } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { DisclaimerModal } from './disclaimer-modal';
 
 interface EmbeddedPlayerProps {
   movieId: number;
@@ -24,38 +25,47 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [currentSource, setCurrentSource] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
-  // Available video sources (multiple reliable options)
+  // Safe video sources with minimal ads
   const videoSources = [
     {
-      name: 'VidSrc.to',
-      url: `https://vidsrc.to/embed/movie/${movieId}`,
-      description: 'Основной источник'
+      name: 'VidSrc Pro',
+      url: `https://vidsrc.pro/embed/movie/${movieId}`,
+      description: 'Чистый источник без рекламы',
+      official: false
     },
     {
-      name: 'VidSrc.me', 
-      url: imdbId ? `https://vidsrc.me/embed/movie?imdb=${imdbId}` : `https://vidsrc.me/embed/movie?tmdb=${movieId}`,
-      description: 'Альтернативный источник'
-    },
-    {
-      name: 'Embed.su',
-      url: `https://embed.su/embed/movie/${movieId}`,
-      description: 'Быстрый источник'
-    },
-    {
-      name: '2Embed',
-      url: `https://www.2embed.to/embed/tmdb/movie?id=${movieId}`,
-      description: 'Резервный источник'
-    },
-    {
-      name: 'MoviesJoy',
-      url: `https://embed.smashystream.com/playere.php?tmdb=${movieId}`,
-      description: 'Дополнительный источник'
+      name: 'SuperEmbed',
+      url: `https://multiembed.mov/directstream.php?video_id=${movieId}&tmdb=1`,
+      description: 'Стабильный источник',
+      official: false
     }
   ];
+
+  const handlePlayerOpen = () => {
+    const hasSeenDisclaimer = localStorage.getItem('player-disclaimer-accepted');
+    if (!hasSeenDisclaimer) {
+      setShowDisclaimer(true);
+    } else {
+      setDisclaimerAccepted(true);
+      setIsOpen(true);
+    }
+  };
+
+  const handleDisclaimerAccept = () => {
+    localStorage.setItem('player-disclaimer-accepted', 'true');
+    setDisclaimerAccepted(true);
+    setShowDisclaimer(false);
+    setIsOpen(true);
+  };
+
+  const handleDisclaimerDecline = () => {
+    setShowDisclaimer(false);
+  };
 
   const handleLoad = () => {
     setIsLoading(false);
@@ -102,17 +112,24 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
   const currentSourceData = videoSources[currentSource];
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
+    <>
+      <DisclaimerModal
+        isOpen={showDisclaimer}
+        onAccept={handleDisclaimerAccept}
+        onDecline={handleDisclaimerDecline}
+        movieTitle={title}
+      />
+      
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <Button 
           variant="default" 
           size="lg"
-          className={`bg-red-600 hover:bg-red-700 text-white ${className}`}
+          className={`bg-destructive hover:bg-destructive/90 text-destructive-foreground ${className}`}
+          onClick={handlePlayerOpen}
         >
           <Play className="mr-2 h-5 w-5" />
           Смотреть онлайн
         </Button>
-      </DialogTrigger>
       
       <DialogContent className="max-w-7xl w-full h-[90vh] p-0 bg-black">
         <div ref={playerContainerRef} className="relative w-full h-full">
@@ -159,9 +176,18 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
 
           {/* Warning Alert */}
           <div className="absolute top-16 left-4 right-4 z-10">
-            <Alert className="bg-orange/90 border-orange text-white">
-              <AlertDescription>
-                ⚠️ Видео предоставляется сторонними сервисами. При ошибке "Sandbox mode not allowed" попробуйте другой источник или отключите блокировщик рекламы.
+            <Alert className="bg-destructive/20 border-destructive text-destructive-foreground">
+              <AlertDescription className="flex items-center justify-between">
+                <span>⚠️ Неофициальный источник. Используйте на свой страх и риск.</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive-foreground hover:bg-destructive/20 ml-2"
+                  onClick={() => window.open('https://www.kinopoisk.ru/', '_blank')}
+                >
+                  <ExternalLink className="h-4 w-4 mr-1" />
+                  Официальные источники
+                </Button>
               </AlertDescription>
             </Alert>
           </div>
@@ -230,6 +256,7 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
         </div>
       </DialogContent>
     </Dialog>
+    </>
   );
 };
 
