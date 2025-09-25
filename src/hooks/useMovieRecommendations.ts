@@ -88,9 +88,28 @@ export const useMovieRecommendations = () => {
       
       const hasIncompleteAnswers = answeredQuestions < totalQuestions;
 
-      // Call AI for recommendations
+      // Call AI for recommendations with proper system prompt
+      const systemPrompt = `Ты помощник по подбору фильмов. На основе предпочтений пользователя создай JSON ответ с параметрами для поиска фильмов в TMDb API. 
+
+Верни ТОЛЬКО JSON в таком формате:
+{
+  "genres": [числовые ID жанров из TMDb],
+  "release_date_gte": "YYYY-MM-DD",
+  "release_date_lte": "YYYY-MM-DD", 
+  "with_runtime_gte": число_минут,
+  "with_runtime_lte": число_минут,
+  "sort_by": "popularity.desc",
+  "explanation": "объяснение рекомендаций на русском"
+}
+
+TMDb жанры: Action=28, Adventure=12, Animation=16, Comedy=35, Crime=80, Documentary=99, Drama=18, Family=10751, Fantasy=14, History=36, Horror=27, Music=10402, Mystery=9648, Romance=10749, Sci-Fi=878, Thriller=53, War=10752, Western=37
+
+Предпочтения пользователя: ${formattedAnswers}`;
+
       const { data: aiData, error: aiError } = await supabase.functions.invoke('ai', {
-        body: { message: formattedAnswers }
+        body: { 
+          message: systemPrompt
+        }
       });
 
       if (aiError) {
