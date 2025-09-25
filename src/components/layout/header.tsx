@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Logo } from '@/components/ui/logo';
 import { SearchInput } from '@/components/ui/search-input';
 import { Button } from '@/components/ui/button';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { t } = useTranslation();
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -43,12 +46,12 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const navLinks = [
-    { href: '/', label: 'Главная' },
-    { href: '/search', label: 'Поиск' },
-    { href: '/#recommendations', label: 'Подобрать фильм', icon: Sparkles },
+    { href: '/', label: t('nav.home') },
+    { href: '/search', label: t('nav.search') },
+    { href: '/#recommendations', label: t('sections.recommendations'), icon: Sparkles },
     ...(user ? [
-      { href: '/favorites', label: 'Избранное', icon: Heart },
-      { href: '/lists', label: 'Коллекции', icon: List },
+      { href: '/favorites', label: t('nav.favorites'), icon: Heart },
+      { href: '/lists', label: t('nav.lists'), icon: List },
     ] : [])
   ];
 
@@ -93,6 +96,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Аутентификация */}
         <div className="flex items-center gap-2">
+          <LanguageSwitcher />
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

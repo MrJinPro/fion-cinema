@@ -1,0 +1,110 @@
+{
+  "nav": {
+    "home": "Home",
+    "search": "Search",
+    "favorites": "Favorites",
+    "lists": "Lists",
+    "about": "About"
+  },
+  "hero": {
+    "title": "Discover Amazing Movies",
+    "subtitle": "Find and explore the best movies and TV shows from around the world",
+    "watchNow": "Watch Now",
+    "addToFavorites": "Add to Favorites"
+  },
+  "sections": {
+    "trending": "Trending Now",
+    "popular": "Popular Movies",
+    "popularTv": "Popular TV Shows",
+    "nowPlaying": "Now Playing",
+    "featured": "Featured Movie",
+    "recommendations": "Recommendations",
+    "similar": "Similar Movies",
+    "cast": "Cast",
+    "reviews": "Reviews",
+    "videos": "Videos & Trailers",
+    "images": "Images",
+    "kinopoiskPremieres": "Russian Premieres (Kinopoisk)",
+    "newRussian": "New Russian Cinema",
+    "modernRussian": "Modern Russian Cinema",
+    "classicSoviet": "Classic Soviet Cinema"
+  },
+  "streaming": {
+    "title": "Watch on Official Platforms",
+    "availableOn": "Available on",
+    "notAvailable": "Coming Soon",
+    "notAvailableDesc": "This title is not currently available on streaming platforms in your region. Check back later!",
+    "netflix": "Netflix",
+    "amazonPrime": "Amazon Prime Video",
+    "disneyPlus": "Disney+",
+    "hbo": "HBO Max",
+    "hulu": "Hulu",
+    "appleTV": "Apple TV+",
+    "paramount": "Paramount+",
+    "peacock": "Peacock",
+    "showtime": "Showtime",
+    "starz": "Starz",
+    "crunchyroll": "Crunchyroll",
+    "funimation": "Funimation"
+  },
+  "player": {
+    "watchOnline": "Watch Online",
+    "officialSources": "Official Sources",
+    "comingSoon": "Coming Soon",
+    "message": "We're preparing something special for you! 🎬",
+    "subtitle": "We can't show movies directly in our app yet, but we're preparing everything to make it convenient for you!",
+    "useOfficialSources": "For now, please use official streaming platforms to watch this content legally and safely."
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry",
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "remove": "Remove",
+    "viewMore": "View More",
+    "viewLess": "View Less",
+    "noResults": "No results found",
+    "tryAgain": "Try again",
+    "language": "Language"
+  },
+  "search": {
+    "placeholder": "Search movies and TV shows...",
+    "results": "Search Results",
+    "noResults": "No movies or TV shows found matching your search."
+  },
+  "filters": {
+    "all": "All",
+    "movies": "Movies",
+    "tv": "TV Shows",
+    "people": "People"
+  },
+  "movie": {
+    "runtime": "Runtime",
+    "releaseDate": "Release Date",
+    "genres": "Genres",
+    "rating": "Rating",
+    "overview": "Overview",
+    "director": "Director",
+    "cast": "Cast",
+    "crew": "Crew"
+  },
+  "favorites": {
+    "title": "My Favorites",
+    "empty": "You haven't added any favorites yet.",
+    "addToFavorites": "Add to Favorites",
+    "removeFromFavorites": "Remove from Favorites"
+  },
+  "lists": {
+    "title": "My Lists",
+    "createNew": "Create New List",
+    "listName": "List Name",
+    "description": "Description",
+    "public": "Make Public",
+    "private": "Keep Private"
+  }
+}

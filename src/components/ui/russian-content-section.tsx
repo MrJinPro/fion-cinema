@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from './card';
 import { MovieCard } from './movie-card';
 import { KinopoiskMovieCard } from './kinopoisk-movie-card';
 import { AutoCarousel } from './auto-carousel';
-import { useRussianMovies, useRussianTrending } from '@/hooks/useRussianMovies';
+import { useRussianMovies } from '@/hooks/useRussianMovies';
 import { useKinopoiskPremieres, useKinopoiskNewReleases } from '@/hooks/useKinopoisk';
 import { MovieSkeleton } from './movie-skeleton';
 import { Alert, AlertDescription } from './alert';
@@ -13,7 +13,6 @@ import { useNavigate } from 'react-router-dom';
 export function RussianContentSection() {
   const navigate = useNavigate();
   const { data: russianMovies, isLoading: tmdbLoading } = useRussianMovies();
-  const { data: russianTrending, isLoading: trendingLoading } = useRussianTrending();
   const { data: kinopoiskPremieres, isLoading: premieresLoading } = useKinopoiskPremieres();
   const { data: kinopoiskNew, isLoading: newLoading } = useKinopoiskNewReleases();
 
@@ -27,7 +26,7 @@ export function RussianContentSection() {
     navigate(`/search?q=${id}`);
   };
 
-  if (tmdbLoading && premieresLoading && trendingLoading && newLoading) {
+  if (tmdbLoading && premieresLoading && newLoading) {
     return (
       <div className="space-y-8">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -48,24 +47,6 @@ export function RussianContentSection() {
         </AlertDescription>
       </Alert>
 
-      {/* TMDB Russian Content */}
-      {russianTrending?.results && russianTrending.results.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-gradient-primary">Популярные российские фильмы</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <AutoCarousel
-              title=""
-              items={russianTrending.results}
-              type="movie"
-              isLoading={trendingLoading}
-              onItemClick={(id) => handleMovieClick(id)}
-              autoPlayInterval={5000}
-            />
-          </CardContent>
-        </Card>
-      )}
 
       {/* Kinopoisk Premieres */}
       {kinopoiskPremieres?.docs && kinopoiskPremieres.docs.length > 0 && (
@@ -146,10 +127,9 @@ export function RussianContentSection() {
       )}
 
       {/* Show message if no content found */}
-      {!tmdbLoading && !premieresLoading && !trendingLoading && !newLoading && 
+      {!tmdbLoading && !premieresLoading && !newLoading && 
        (!russianMovies?.modern?.length && !russianMovies?.classics?.length && 
-        !kinopoiskPremieres?.docs?.length && !kinopoiskNew?.docs?.length && 
-        !russianTrending?.results?.length) && (
+        !kinopoiskPremieres?.docs?.length && !kinopoiskNew?.docs?.length) && (
         <Card>
           <CardContent className="text-center py-12">
             <p className="text-muted-foreground">

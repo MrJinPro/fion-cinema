@@ -1,284 +1,173 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardHeader, CardTitle, CardContent } from './card';
 import { Button } from './button';
-import { Badge } from './badge';
-import { ExternalLink, Play, Download, Tv, Eye, Loader2, AlertTriangle, Monitor, Film } from 'lucide-react';
-import { ExternalLinkModal } from './external-link-modal';
-import { supabase } from '@/integrations/supabase/client';
+import { ExternalLink, Clock } from 'lucide-react';
+import { Alert, AlertDescription } from './alert';
 
 interface StreamingProvider {
-  id: string | number;
-  name: string;
-  logo?: string;
-  type: 'subscription' | 'rent' | 'buy' | 'free';
-  price?: string;
-  url: string;
-  available: boolean;
+  provider_id: number;
+  provider_name: string;
+  logo_path: string;
+  display_priority: number;
 }
 
 interface StreamingAvailabilityProps {
+  watchProviders?: any;
   movieId: number;
   title: string;
-  imdbId?: string;
+  className?: string;
 }
 
-export function StreamingAvailability({ movieId, title, imdbId }: StreamingAvailabilityProps) {
-  const [providers, setProviders] = useState<StreamingProvider[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState<StreamingProvider | null>(null);
-  const [cached, setCached] = useState(false);
+const providerNames: Record<string, { en: string; ru: string }> = {
+  'Netflix': { en: 'Netflix', ru: 'Netflix' },
+  'Amazon Prime Video': { en: 'Amazon Prime Video', ru: 'Amazon Prime Video' },
+  'Disney Plus': { en: 'Disney+', ru: 'Disney+' },
+  'HBO Max': { en: 'HBO Max', ru: 'HBO Max' },
+  'Hulu': { en: 'Hulu', ru: 'Hulu' },
+  'Apple TV': { en: 'Apple TV+', ru: 'Apple TV+' },
+  'Paramount Plus': { en: 'Paramount+', ru: 'Paramount+' },
+  'Peacock': { en: 'Peacock', ru: 'Peacock' },
+  'Showtime': { en: 'Showtime', ru: 'Showtime' },
+  'Starz': { en: 'Starz', ru: 'Starz' },
+  'Crunchyroll': { en: 'Crunchyroll', ru: 'Crunchyroll' },
+  'Funimation': { en: 'Funimation', ru: 'Funimation' }
+};
 
-  useEffect(() => {
-    fetchAvailabilityData();
-  }, [movieId]);
-
-  const fetchAvailabilityData = async () => {
-    try {
-      setLoading(true);
-      
-      // Call our smart availability check function
-      const { data, error } = await supabase.functions.invoke('check-movie-availability', {
-        body: { 
-          movieId, 
-          title,
-          imdbId 
-        }
-      });
-
-      if (error) {
-        console.error('Error calling availability function:', error);
-        // Fallback to basic Russian services
-        setProviders(getBasicRussianServices());
-        return;
-      }
-
-      if (data && data.providers) {
-        setProviders(data.providers);
-        setCached(data.cached || false);
-        console.log(`Loaded ${data.providers.length} providers for ${title}${data.cached ? ' (from cache)' : ''}`);
-      } else {
-        setProviders(getBasicRussianServices());
-      }
-    } catch (error) {
-      console.error('Error fetching availability data:', error);
-      setProviders(getBasicRussianServices());
-    } finally {
-      setLoading(false);
-    }
+const getProviderUrl = (providerName: string, movieId: number, title: string): string => {
+  const encodedTitle = encodeURIComponent(title);
+  
+  const urls: Record<string, string> = {
+    'Netflix': `https://www.netflix.com/search?q=${encodedTitle}`,
+    'Amazon Prime Video': `https://www.amazon.com/s?k=${encodedTitle}&i=instant-video`,
+    'Disney Plus': `https://www.disneyplus.com/search?q=${encodedTitle}`,
+    'HBO Max': `https://www.hbo.com/search?q=${encodedTitle}`,
+    'Hulu': `https://www.hulu.com/search?q=${encodedTitle}`,
+    'Apple TV': `https://tv.apple.com/search?term=${encodedTitle}`,
+    'Paramount Plus': `https://www.paramountplus.com/search?query=${encodedTitle}`,
+    'Peacock': `https://www.peacocktv.com/search?q=${encodedTitle}`,
+    'Showtime': `https://www.showtime.com/search/${encodedTitle}`,
+    'Starz': `https://www.starz.com/search?query=${encodedTitle}`,
+    'Crunchyroll': `https://www.crunchyroll.com/search?q=${encodedTitle}`,
+    'Funimation': `https://www.funimation.com/search/?q=${encodedTitle}`
   };
+  
+  return urls[providerName] || `https://www.google.com/search?q=${encodedTitle}+streaming`;
+};
 
-  const getBasicRussianServices = (): StreamingProvider[] => {
-    return [
-      {
-        id: 'ivi',
-        name: 'IVI',
-        type: 'subscription',
-        price: 'От 299 ₽/мес',
-        url: `https://www.ivi.ru/search/?q=${encodeURIComponent(title)}`,
-        available: true
-      },
-      {
-        id: 'okko',
-        name: 'OKKO',
-        type: 'subscription',
-        price: 'От 199 ₽/мес',
-        url: `https://okko.tv/search?query=${encodeURIComponent(title)}`,
-        available: true
-      },
-      {
-        id: 'kinopoisk',
-        name: 'Кинопоиск HD',
-        type: 'subscription',
-        price: 'От 299 ₽/мес',
-        url: `https://hd.kinopoisk.ru/search?query=${encodeURIComponent(title)}`,
-        available: true
-      }
-    ];
-  };
+export function StreamingAvailability({ watchProviders, movieId, title, className }: StreamingAvailabilityProps) {
+  const { t, i18n } = useTranslation();
+  
+  const providers = watchProviders?.RU || watchProviders?.US;
+  
+  const hasProviders = providers && (
+    (providers.flatrate && providers.flatrate.length > 0) ||
+    (providers.rent && providers.rent.length > 0) ||
+    (providers.buy && providers.buy.length > 0)
+  );
 
-  const handleWatchClick = (provider: StreamingProvider) => {
-    setSelectedProvider(provider);
-    setModalOpen(true);
-  };
-
-  const handleConfirmWatch = () => {
-    if (selectedProvider) {
-      window.open(selectedProvider.url, '_blank', 'noopener,noreferrer');
-    }
-    setModalOpen(false);
-    setSelectedProvider(null);
-  };
-
-  const getProviderIcon = (type: string, name?: string) => {
-    // Use specific icons for known services
-    if (name?.toLowerCase().includes('ivi')) {
-      return <Monitor className="h-4 w-4 text-purple-600" />;
-    }
-    if (name?.toLowerCase().includes('okko')) {
-      return <Film className="h-4 w-4 text-orange-600" />;
-    }
-    if (name?.toLowerCase().includes('кинопоиск')) {
-      return <Eye className="h-4 w-4 text-yellow-600" />;
-    }
+  const renderProviderButton = (provider: StreamingProvider, type: 'flatrate' | 'rent' | 'buy') => {
+    const localizedName = providerNames[provider.provider_name]?.[i18n.language as 'en' | 'ru'] || provider.provider_name;
+    const url = getProviderUrl(provider.provider_name, movieId, title);
     
-    // Fallback based on type
-    switch (type) {
-      case 'subscription':
-        return <Tv className="h-4 w-4 text-blue-600" />;
-      case 'rent':
-        return <Play className="h-4 w-4 text-green-600" />;
-      case 'buy':
-        return <Download className="h-4 w-4 text-red-600" />;
-      case 'free':
-        return <Play className="h-4 w-4 text-purple-600" />;
-      default:
-        return <Play className="h-4 w-4 text-gray-600" />;
-    }
-  };
-
-  const getTypeLabel = (type: string) => {
-    switch (type) {
-      case 'subscription':
-        return 'Подписка';
-      case 'rent':
-        return 'Аренда';
-      case 'buy':
-        return 'Покупка';
-      case 'free':
-        return 'Бесплатно';
-      default:
-        return type;
-    }
-  };
-
-  const getTypeVariant = (type: string): "default" | "secondary" | "destructive" | "outline" => {
-    switch (type) {
-      case 'subscription':
-        return 'default';
-      case 'rent':
-        return 'secondary';
-      case 'buy':
-        return 'outline';
-      case 'free':
-        return 'destructive';
-      default:
-        return 'default';
-    }
-  };
-
-  if (loading) {
+    const typeLabels = {
+      flatrate: { en: 'Stream', ru: 'Стрим' },
+      rent: { en: 'Rent', ru: 'Аренда' },
+      buy: { en: 'Buy', ru: 'Купить' }
+    };
+    
     return (
-      <Card className="w-full border-2 border-info/20 bg-gradient-to-r from-card to-secondary hover-neon-info">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-info">
-            <Eye className="h-6 w-6" />
-            🎬 Где посмотреть
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-info" />
-            <span className="ml-2 text-muted-foreground">Проверяем доступность...</span>
-          </div>
-        </CardContent>
-      </Card>
+      <Button
+        key={`${provider.provider_id}-${type}`}
+        variant="outline"
+        size="sm"
+        className="justify-between min-w-[140px]"
+        onClick={() => window.open(url, '_blank')}
+      >
+        <div className="flex items-center gap-2">
+          {provider.logo_path && (
+            <img
+              src={`https://image.tmdb.org/t/p/w45${provider.logo_path}`}
+              alt={localizedName}
+              className="w-4 h-4 rounded"
+            />
+          )}
+          <span className="text-xs">{localizedName}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="text-xs text-muted-foreground">
+            {typeLabels[type][i18n.language as 'en' | 'ru']}
+          </span>
+          <ExternalLink className="h-3 w-3" />
+        </div>
+      </Button>
     );
-  }
-
-  if (providers.length === 0) {
-    return (
-      <Card className="w-full border-2 border-orange/20 bg-gradient-to-r from-card to-secondary hover-neon-orange">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-orange">
-            <Eye className="h-6 w-6" />
-            🎬 Где посмотреть
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <AlertTriangle className="h-12 w-12 text-orange mx-auto mb-4" />
-            <p className="text-foreground mb-2">
-              Информация о доступности не найдена
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Попробуйте поискать фильм на популярных платформах самостоятельно
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  };
 
   return (
-    <>
-      <Card className="w-full border-2 border-accent/20 bg-gradient-to-r from-card to-secondary hover-neon-accent">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-accent text-gradient-primary">
-              <Eye className="h-6 w-6" />
-              🎬 Где посмотреть
-            </div>
-            {cached && (
-              <Badge variant="secondary" className="text-xs">
-                Данные обновлены
-              </Badge>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {providers.filter(p => p.available).map((provider) => (
-              <div
-                key={provider.id}
-                className="flex items-center justify-between p-4 border-2 border-accent/20 rounded-lg bg-card hover:bg-secondary transition-neon hover:neon-glow-accent hover:scale-105"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-12 h-12 bg-secondary rounded-lg border border-border shadow-sm">
-                    {getProviderIcon(provider.type, provider.name)}
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-lg text-foreground">{provider.name}</h4>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={getTypeVariant(provider.type)} className="text-xs">
-                        {getTypeLabel(provider.type)}
-                      </Badge>
-                      {provider.price && (
-                        <span className="text-sm font-semibold text-accent">
-                          💰 {provider.price}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+    <Card className={className}>
+      <CardHeader>
+        <CardTitle className="text-lg flex items-center gap-2">
+          <ExternalLink className="h-5 w-5" />
+          {t('streaming.title')}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {hasProviders ? (
+          <div className="space-y-4">
+            {providers?.flatrate && providers.flatrate.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium mb-2 text-green-600">
+                  {t('streaming.availableOn')}
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {providers.flatrate.map((provider: StreamingProvider) => 
+                    renderProviderButton(provider, 'flatrate')
+                  )}
                 </div>
-                <Button
-                  size="lg"
-                  variant="default"
-                  onClick={() => handleWatchClick(provider)}
-                  className="bg-accent hover:bg-accent/80 text-white font-semibold hover-neon-accent"
-                >
-                  <Play className="mr-2 h-4 w-4" />
-                  Смотреть
-                </Button>
               </div>
-            ))}
+            )}
+            
+            {providers?.rent && providers.rent.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium mb-2 text-blue-600">
+                  {i18n.language === 'ru' ? 'Аренда' : 'Rent'}
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {providers.rent.map((provider: StreamingProvider) => 
+                    renderProviderButton(provider, 'rent')
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {providers?.buy && providers.buy.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium mb-2 text-purple-600">
+                  {i18n.language === 'ru' ? 'Покупка' : 'Purchase'}
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {providers.buy.map((provider: StreamingProvider) => 
+                    renderProviderButton(provider, 'buy')
+                  )}
+                </div>
+              </div>
+            )}
           </div>
-          
-          <div className="mt-6 p-4 bg-secondary rounded-lg border border-info/20">
-            <p className="text-sm text-info">
-              <AlertTriangle className="inline h-4 w-4 mr-1" />
-              ✨ Показаны только проверенные сервисы где доступен фильм. Данные обновляются ежедневно.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      <ExternalLinkModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onConfirm={handleConfirmWatch}
-        serviceName={selectedProvider?.name || ''}
-      />
-    </>
+        ) : (
+          <Alert>
+            <Clock className="h-4 w-4" />
+            <AlertDescription>
+              <div className="space-y-2">
+                <p className="font-medium">{t('streaming.notAvailable')}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t('streaming.notAvailableDesc')}
+                </p>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+      </CardContent>
+    </Card>
   );
 }

@@ -73,36 +73,3 @@ export function useRussianSearch(query: string, enabled: boolean = true) {
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
 }
-
-export function useRussianTrending() {
-  const tmdbClient = getTMDbClient();
-  
-  return useQuery({
-    queryKey: ['russian-trending'],
-    queryFn: async () => {
-      // Get popular movies and search for Russian content
-      const [popular, russianMovies] = await Promise.all([
-        tmdbClient.getPopularMovies(1),
-        tmdbClient.searchMovies('россия', 1)
-      ]);
-
-      // Combine and filter for Russian content
-      const allMovies = [...(popular.results || []), ...(russianMovies.results || [])];
-      const russianContent = allMovies.filter(movie => 
-        movie.original_language === 'ru' ||
-        movie.title?.toLowerCase().includes('рос') ||
-        movie.overview?.toLowerCase().includes('рос')
-      );
-      
-      // Remove duplicates
-      const uniqueMovies = russianContent.filter((movie, index, self) => 
-        index === self.findIndex(m => m.id === movie.id)
-      );
-
-      return {
-        results: uniqueMovies.slice(0, 20)
-      };
-    },
-    staleTime: 1000 * 60 * 60, // 1 hour
-  });
-}

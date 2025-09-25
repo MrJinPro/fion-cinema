@@ -7,7 +7,8 @@ import {
   useMovieImages, 
   useMovieReviews,
   useSimilarMovies,
-  useMovieRecommendations
+  useMovieRecommendations,
+  useMovieWatchProviders
 } from '@/hooks/useTMDbApi';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
@@ -39,6 +40,7 @@ const MovieDetails = () => {
   const { data: reviews } = useMovieReviews(movieId);
   const { data: similar } = useSimilarMovies(movieId);
   const { data: recommendations } = useMovieRecommendations(movieId);
+  const { data: watchProviders } = useMovieWatchProviders(movieId);
   const tmdbClient = getTMDbClient();
 
   const handleSearch = (query: string) => {
@@ -205,7 +207,7 @@ const MovieDetails = () => {
                 movieId={movie.id}
                 title={movie.title}
                 year={releaseYear || undefined}
-                imdbId={movie.imdb_id}
+                watchProviders={watchProviders}
                 className="mr-4"
               />
             </div>
@@ -223,7 +225,7 @@ const MovieDetails = () => {
             )}
 
             {/* Streaming Availability - Prominent Position */}
-            <StreamingAvailability movieId={movie.id} title={movie.title} imdbId={movie.imdb_id} />
+            <StreamingAvailability movieId={movie.id} title={movie.title} watchProviders={watchProviders} />
 
             {/* Overview */}
             {movie.overview && (

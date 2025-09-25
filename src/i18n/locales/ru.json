@@ -1,0 +1,110 @@
+{
+  "nav": {
+    "home": "Главная",
+    "search": "Поиск",
+    "favorites": "Избранное",
+    "lists": "Списки",
+    "about": "О нас"
+  },
+  "hero": {
+    "title": "Откройте для себя удивительные фильмы",
+    "subtitle": "Находите и изучайте лучшие фильмы и сериалы со всего мира",
+    "watchNow": "Смотреть сейчас",
+    "addToFavorites": "Добавить в избранное"
+  },
+  "sections": {
+    "trending": "Популярное сейчас",
+    "popular": "Популярные фильмы",
+    "popularTv": "Популярные сериалы",
+    "nowPlaying": "В кинотеатрах",
+    "featured": "Рекомендуемый фильм",
+    "recommendations": "Рекомендации",
+    "similar": "Похожие фильмы",
+    "cast": "Актеры",
+    "reviews": "Отзывы",
+    "videos": "Видео и трейлеры",
+    "images": "Изображения",
+    "kinopoiskPremieres": "Российские премьеры (Кинопоиск)",
+    "newRussian": "Новинки российского кино",
+    "modernRussian": "Современное российское кино",
+    "classicSoviet": "Классика советского кино"
+  },
+  "streaming": {
+    "title": "Смотреть на официальных платформах",
+    "availableOn": "Доступно на",
+    "notAvailable": "Скоро появится",
+    "notAvailableDesc": "Этот фильм пока недоступен на стриминговых платформах в вашем регионе. Зайдите позже!",
+    "netflix": "Netflix",
+    "amazonPrime": "Amazon Prime Video",
+    "disneyPlus": "Disney+",
+    "hbo": "HBO Max",
+    "hulu": "Hulu",
+    "appleTV": "Apple TV+",
+    "paramount": "Paramount+",
+    "peacock": "Peacock",
+    "showtime": "Showtime",
+    "starz": "Starz",
+    "crunchyroll": "Crunchyroll",
+    "funimation": "Funimation"
+  },
+  "player": {
+    "watchOnline": "Смотреть онлайн",
+    "officialSources": "Официальные источники",
+    "comingSoon": "Скоро",
+    "message": "Мы готовим для вас что-то особенное! 🎬",
+    "subtitle": "Пока не можем показывать фильмы прямо у нас в приложении, но мы уже готовим всё необходимое, чтоб вам было удобно!",
+    "useOfficialSources": "А пока используйте официальные стриминговые платформы для безопасного и легального просмотра контента."
+  },
+  "common": {
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "retry": "Повторить",
+    "close": "Закрыть",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "add": "Добавить",
+    "remove": "Удалить",
+    "viewMore": "Показать больше",
+    "viewLess": "Показать меньше",
+    "noResults": "Результаты не найдены",
+    "tryAgain": "Попробовать снова",
+    "language": "Язык"
+  },
+  "search": {
+    "placeholder": "Поиск фильмов и сериалов...",
+    "results": "Результаты поиска",
+    "noResults": "Не найдено фильмов или сериалов по вашему запросу."
+  },
+  "filters": {
+    "all": "Все",
+    "movies": "Фильмы",
+    "tv": "Сериалы",
+    "people": "Люди"
+  },
+  "movie": {
+    "runtime": "Длительность",
+    "releaseDate": "Дата выхода",
+    "genres": "Жанры",
+    "rating": "Рейтинг",
+    "overview": "Описание",
+    "director": "Режиссер",
+    "cast": "Актеры",
+    "crew": "Съемочная группа"
+  },
+  "favorites": {
+    "title": "Мое избранное",
+    "empty": "Вы еще не добавили ничего в избранное.",
+    "addToFavorites": "Добавить в избранное",
+    "removeFromFavorites": "Удалить из избранного"
+  },
+  "lists": {
+    "title": "Мои списки",
+    "createNew": "Создать новый список",
+    "listName": "Название списка",
+    "description": "Описание",
+    "public": "Сделать публичным",
+    "private": "Оставить приватным"
+  }
+}
