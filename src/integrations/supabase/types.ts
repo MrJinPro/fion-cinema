@@ -175,48 +175,6 @@ export type Database = {
         }
         Relationships: []
       }
-      parsed_links: {
-        Row: {
-          created_at: string
-          expires_at: string
-          id: string
-          imdb_id: string | null
-          is_active: boolean
-          movie_id: number
-          parsed_at: string
-          source_site: string
-          title: string
-          updated_at: string
-          video_links: Json
-        }
-        Insert: {
-          created_at?: string
-          expires_at?: string
-          id?: string
-          imdb_id?: string | null
-          is_active?: boolean
-          movie_id: number
-          parsed_at?: string
-          source_site: string
-          title: string
-          updated_at?: string
-          video_links?: Json
-        }
-        Update: {
-          created_at?: string
-          expires_at?: string
-          id?: string
-          imdb_id?: string | null
-          is_active?: boolean
-          movie_id?: number
-          parsed_at?: string
-          source_site?: string
-          title?: string
-          updated_at?: string
-          video_links?: Json
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null
