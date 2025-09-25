@@ -1,0 +1,20 @@
+{
+  "name": "FiOn Cinema",
+  "short_name": "FiOn",
+  "description": "Онлайн каталог фильмов и сериалов",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B0F17",
+  "theme_color": "#8B5CF6",
+  "icons": [
+    {
+      "src": "/vion-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["entertainment", "photo", "video"],
+  "screenshots": [],
+  "orientation": "portrait-primary"
+}

@@ -13,12 +13,12 @@
     "addToFavorites": "Добавить в избранное"
   },
   "sections": {
-    "trending": "Популярное сейчас",
+    "trending": "В тренде сегодня",
     "popular": "Популярные фильмы",
     "popularTv": "Популярные сериалы",
-    "nowPlaying": "В кинотеатрах",
+    "nowPlaying": "В кинотеатрах сейчас",
     "featured": "Рекомендуемый фильм",
-    "recommendations": "Рекомендации",
+    "recommendations": "Подобрать фильм",
     "similar": "Похожие фильмы",
     "cast": "Актеры",
     "reviews": "Отзывы",
@@ -26,7 +26,7 @@
     "images": "Изображения",
     "kinopoiskPremieres": "Российские премьеры (Кинопоиск)",
     "newRussian": "Новинки российского кино",
-    "modernRussian": "Современное российское кино",
+    "modernRussian": "Российское кино",
     "classicSoviet": "Классика советского кино"
   },
   "streaming": {

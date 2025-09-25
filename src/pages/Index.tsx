@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
@@ -18,8 +19,10 @@ import { Play, TrendingUp, Star, Calendar } from 'lucide-react';
 import { TMDbMovie, TMDbTVShow } from '@/lib/tmdb';
 import { useTrending, usePopularMovies, usePopularTVShows, useNowPlayingMovies } from '@/hooks/useTMDbApi';
 import { useMixedHeroContent } from '@/hooks/useMixedHeroContent';
+import { PWAInstallPrompt } from '@/components/ui/pwa-install-prompt';
 
 const Index = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState('');
 
@@ -44,6 +47,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <div className="block sm:hidden px-4 py-2 bg-card/50 backdrop-blur-sm border-b border-accent/20">
+        <p className="text-xs text-center text-muted-foreground">
+          📱 Установите приложение для лучшего опыта
+        </p>
+      </div>
       <Header 
         searchValue={searchValue}
         onSearchChange={setSearchValue}
@@ -53,7 +61,7 @@ const Index = () => {
       <main className="space-y-12">
         {/* Hero Banner */}
         {mixedHeroContent && mixedHeroContent.length > 0 && (
-          <div className="container mx-auto px-4 pt-8">
+          <div className="container mx-auto px-2 sm:px-4 pt-4 sm:pt-8">
             <HeroBanner 
               items={mixedHeroContent} 
               onItemClick={handleMovieClick}
@@ -61,7 +69,7 @@ const Index = () => {
           </div>
         )}
 
-        <div className="container mx-auto px-4 space-y-12">
+        <div className="container mx-auto px-2 sm:px-4 space-y-8 sm:space-y-12">
           {/* Featured Movie */}
           {trending?.results && trending.results[0] && (
             <FeaturedMovie 
@@ -80,7 +88,7 @@ const Index = () => {
           {/* Секция рекомендаций фильмов */}
           <section id="recommendations" className="space-y-6 animate-stagger-1">
             <h2 className="text-3xl font-bold text-gradient-primary neon-underline">
-              Подобрать фильм
+              {t('sections.recommendations')}
             </h2>
             <MovieRecommendationSection />
           </section>
@@ -88,7 +96,7 @@ const Index = () => {
           {/* Российский контент */}
           <section className="space-y-6 animate-stagger-1">
             <h2 className="text-3xl font-bold text-gradient-orange neon-underline">
-              Российское кино
+              {t('sections.modernRussian')}
             </h2>
             <RussianContentSection />
           </section>
@@ -100,7 +108,7 @@ const Index = () => {
           {/* В кинотеатрах сейчас */}
           {nowPlaying?.results && (
             <AutoCarousel
-              title="В кинотеатрах сейчас"
+              title={t('sections.nowPlaying')}
               items={nowPlaying.results}
               type="movie"
               isLoading={nowPlayingLoading}
@@ -112,16 +120,16 @@ const Index = () => {
           {/* В тренде сегодня */}
           <section className="space-y-6 animate-stagger-1">
             <h2 className="text-3xl font-bold text-gradient-primary neon-underline">
-              В тренде сегодня
+              {t('sections.trending')}
             </h2>
             {trendingLoading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-6">
                 {Array.from({ length: 10 }).map((_, index) => (
                   <MovieSkeleton key={index} />
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-6">
                 {trending?.results?.slice(0, 10).map((item, index) => (
                   <MovieCard
                     key={item.id}
@@ -137,16 +145,16 @@ const Index = () => {
           {/* Популярные фильмы */}
           <section className="space-y-6 animate-stagger-2">
             <h2 className="text-3xl font-bold text-gradient-primary neon-underline">
-              Популярные фильмы
+              {t('sections.popular')}
             </h2>
             {moviesLoading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-6">
                 {Array.from({ length: 10 }).map((_, index) => (
                   <MovieSkeleton key={index} />
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-6">
                 {popularMovies?.results?.slice(0, 10).map((movie, index) => (
                   <MovieCard
                     key={movie.id}
@@ -162,16 +170,16 @@ const Index = () => {
           {/* Популярные сериалы */}
           <section className="space-y-6 animate-stagger-3">
             <h2 className="text-3xl font-bold text-gradient-primary neon-underline">
-              Популярные сериалы
+              {t('sections.popularTv')}
             </h2>
             {tvLoading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-6">
                 {Array.from({ length: 10 }).map((_, index) => (
                   <MovieSkeleton key={index} />
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-6">
                 {popularTVShows?.results?.slice(0, 10).map((show, index) => (
                   <MovieCard
                     key={show.id}
@@ -187,6 +195,7 @@ const Index = () => {
       </main>
 
       <Footer />
+      <PWAInstallPrompt />
     </div>
   );
 };

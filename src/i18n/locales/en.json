@@ -13,12 +13,12 @@
     "addToFavorites": "Add to Favorites"
   },
   "sections": {
-    "trending": "Trending Now",
+    "trending": "Trending Today",
     "popular": "Popular Movies",
     "popularTv": "Popular TV Shows",
-    "nowPlaying": "Now Playing",
+    "nowPlaying": "Now in Cinemas",
     "featured": "Featured Movie",
-    "recommendations": "Recommendations",
+    "recommendations": "Pick a Movie",
     "similar": "Similar Movies",
     "cast": "Cast",
     "reviews": "Reviews",
@@ -26,7 +26,7 @@
     "images": "Images",
     "kinopoiskPremieres": "Russian Premieres (Kinopoisk)",
     "newRussian": "New Russian Cinema",
-    "modernRussian": "Modern Russian Cinema",
+    "modernRussian": "Russian Cinema",
     "classicSoviet": "Classic Soviet Cinema"
   },
   "streaming": {
