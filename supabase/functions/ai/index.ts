@@ -32,6 +32,8 @@ serve(async (req) => {
       });
     }
 
+    console.log("AI Gateway request:", message);
+
     // Call the Lovable AI Gateway
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -40,21 +42,14 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-				
-				model: "google/gemini-2.5-flash",
-				
+        model: "google/gemini-2.5-flash",
         messages: [
-					
-          {
-            role: "system",
-            content: "Вы эксперт по рекомендациям фильмов. На основе предпочтений пользователя (настроение, компания для просмотра, жанры, доступное время, предпочтение по возрасту фильмов) предоставьте конкретные критерии поиска для The Movie Database (TMDb) API. ВСЕГДА отвечайте на русском языке JSON объектом, содержащим: genres (массив ID жанров), release_date_gte (YYYY-MM-DD), release_date_lte (YYYY-MM-DD), with_runtime_gte (минуты), with_runtime_lte (минуты), sort_by (popularity.desc/vote_average.desc), и explanation (объяснение на русском языке, почему эти фильмы подходят). Будьте лаконичны и сосредоточьтесь на практичных параметрах поиска. Ответ должен быть ТОЛЬКО на русском языке.",
-          },
-					
           {
             role: "user",
             content: message,
           },
         ],
+        max_completion_tokens: 1000,
       }),
     });
 
