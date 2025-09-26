@@ -13,6 +13,7 @@ import MovieDetails from "./pages/MovieDetails";
 import TVDetails from "./pages/TVDetails";
 import PersonDetails from "./pages/PersonDetails";
 import Auth from "./pages/Auth";
+import RussianCinema from "./pages/RussianCinema";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => {
               <Route path="/favorites" element={<Favorites />} />
               <Route path="/lists" element={<Lists />} />
               <Route path="/about" element={<About />} />
+              <Route path="/russian-cinema" element={<RussianCinema />} />
               <Route path="/movie/:id" element={<MovieDetails />} />
               <Route path="/tv/:id" element={<TVDetails />} />
               <Route path="/person/:id" element={<PersonDetails />} />

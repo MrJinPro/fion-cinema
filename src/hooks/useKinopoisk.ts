@@ -65,10 +65,11 @@ export function useKinopoiskPremieres() {
     queryKey: ['kinopoisk-premieres'],
     queryFn: () => fetchKinopoiskData('/movie', {
       'premiere.russia': `01.01.${new Date().getFullYear()}-31.12.${new Date().getFullYear()}`,
+      'countries.name': 'Россия',
       'sortField': 'premiere.russia',
       'sortType': '-1',
-      'limit': '20',
-      'rating.kp': '5-10'
+      'limit': '30',
+      'rating.kp': '6-10'
     }),
     staleTime: 1000 * 60 * 60, // 1 hour
   });
@@ -79,10 +80,11 @@ export function useKinopoiskNewReleases() {
     queryKey: ['kinopoisk-new-releases'],
     queryFn: () => fetchKinopoiskData('/movie', {
       'year': `${new Date().getFullYear() - 1}-${new Date().getFullYear()}`,
-      'rating.kp': '6-10',
-      'sortField': 'rating.kp',
+      'countries.name': 'Россия',
+      'rating.kp': '6.5-10',
+      'sortField': 'year',
       'sortType': '-1',
-      'limit': '20'
+      'limit': '30'
     }),
     staleTime: 1000 * 60 * 60, // 1 hour
   });
