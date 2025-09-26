@@ -23,6 +23,7 @@ import { ReviewsSection } from '@/components/ui/reviews-section';
 import { SimilarSection } from '@/components/ui/similar-section';
 import { ArrowLeft, Star, Calendar, Tv, Users, PlayCircle, Play } from 'lucide-react';
 import { getTMDbClient } from '@/lib/tmdb';
+import { SEOHead } from '@/components/seo/SEOHead';
 
 const TVDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -103,9 +104,48 @@ const TVDetails = () => {
   const firstAirYear = tvShow.first_air_date ? new Date(tvShow.first_air_date).getFullYear() : null;
   const lastAirYear = tvShow.last_air_date ? new Date(tvShow.last_air_date).getFullYear() : null;
 
+  // SEO данные для страницы сериала
+  const tvStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "TVSeries",
+    "name": tvShow.name,
+    "description": tvShow.overview,
+    "startDate": tvShow.first_air_date,
+    "endDate": tvShow.last_air_date,
+    "numberOfSeasons": tvShow.number_of_seasons,
+    "numberOfEpisodes": tvShow.number_of_episodes,
+    "genre": tvShow.genres?.map(g => g.name),
+    "aggregateRating": tvShow.vote_average ? {
+      "@type": "AggregateRating",
+      "ratingValue": tvShow.vote_average,
+      "bestRating": 10,
+      "worstRating": 0,
+      "ratingCount": tvShow.vote_count
+    } : undefined,
+    "image": posterUrl,
+    "actor": credits?.cast?.slice(0, 5).map(actor => ({
+      "@type": "Person",
+      "name": actor.name
+    }))
+  };
+
+  const seoTitle = `${tvShow.name}${firstAirYear ? ` (${firstAirYear})` : ''} - Смотреть сериал онлайн`;
+  const seoDescription = tvShow.overview 
+    ? `${tvShow.overview.slice(0, 150)}... Смотрите сериал ${tvShow.name} онлайн с русскими субтитрами.`
+    : `Смотрите сериал ${tvShow.name} онлайн в HD качестве. ${tvShow.number_of_seasons ? `${tvShow.number_of_seasons} сезон${tvShow.number_of_seasons > 1 ? 'а' : ''}` : 'Все сезоны'} доступны для просмотра.`;
+
   return (
     <div className="min-h-screen bg-background">
-      <Header 
+      <SEOHead
+        title={seoTitle}
+        description={seoDescription}
+        keywords={`${tvShow.name}, сериал, смотреть онлайн, ${tvShow.genres?.map(g => g.name).join(', ')}, ${firstAirYear}`}
+        canonicalUrl={`https://vion.app/tv/${tvShow.id}`}
+        ogImage={posterUrl || '/og-tv.jpg'}
+        ogType="video.tv_show"
+        structuredData={tvStructuredData}
+      />
+      <Header
         searchValue={searchValue}
         onSearchChange={setSearchValue}
         onSearch={handleSearch}

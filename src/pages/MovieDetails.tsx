@@ -26,6 +26,7 @@ import { StreamingAvailability } from '@/components/ui/streaming-availability';
 import EmbeddedPlayer from '@/components/ui/embedded-player';
 import { ArrowLeft, Star, Calendar, Clock, Play, DollarSign } from 'lucide-react';
 import { getTMDbClient } from '@/lib/tmdb';
+import { SEOHead } from '@/components/seo/SEOHead';
 
 const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -107,9 +108,47 @@ const MovieDetails = () => {
   const releaseYear = movie.release_date ? new Date(movie.release_date).getFullYear() : null;
   const runtime = movie.runtime ? `${Math.floor(movie.runtime / 60)}ч ${movie.runtime % 60}мин` : null;
 
+  // SEO данные для страницы фильма
+  const movieStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Movie",
+    "name": movie.title,
+    "description": movie.overview,
+    "datePublished": movie.release_date,
+    "duration": movie.runtime ? `PT${movie.runtime}M` : undefined,
+    "genre": movie.genres?.map(g => g.name),
+    "aggregateRating": movie.vote_average ? {
+      "@type": "AggregateRating",
+      "ratingValue": movie.vote_average,
+      "bestRating": 10,
+      "worstRating": 0,
+      "ratingCount": movie.vote_count
+    } : undefined,
+    "image": posterUrl,
+    "director": credits?.crew?.find(person => person.job === 'Director')?.name,
+    "actor": credits?.cast?.slice(0, 5).map(actor => ({
+      "@type": "Person",
+      "name": actor.name
+    }))
+  };
+
+  const seoTitle = `${movie.title}${releaseYear ? ` (${releaseYear})` : ''} - Смотреть онлайн`;
+  const seoDescription = movie.overview 
+    ? `${movie.overview.slice(0, 150)}... Смотрите ${movie.title} онлайн с русскими субтитрами и озвучкой.`
+    : `Смотрите фильм ${movie.title} онлайн в HD качестве. Трейлеры, рецензии, актёры и подробная информация о фильме.`;
+
   return (
     <div className="min-h-screen bg-background">
-      <Header 
+      <SEOHead
+        title={seoTitle}
+        description={seoDescription}
+        keywords={`${movie.title}, фильм, смотреть онлайн, ${movie.genres?.map(g => g.name).join(', ')}, ${releaseYear}`}
+        canonicalUrl={`https://vion.app/movie/${movie.id}`}
+        ogImage={posterUrl || '/og-movie.jpg'}
+        ogType="video.movie"
+        structuredData={movieStructuredData}
+      />
+      <Header
         searchValue={searchValue}
         onSearchChange={setSearchValue}
         onSearch={handleSearch}

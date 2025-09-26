@@ -20,6 +20,7 @@ import { TMDbMovie, TMDbTVShow } from '@/lib/tmdb';
 import { useTrending, usePopularMovies, usePopularTVShows, useNowPlayingMovies } from '@/hooks/useTMDbApi';
 import { useMixedHeroContent } from '@/hooks/useMixedHeroContent';
 import { PWAInstallPrompt } from '@/components/ui/pwa-install-prompt';
+import { SEOHead } from '@/components/seo/SEOHead';
 
 const Index = () => {
   const { t } = useTranslation();
@@ -45,8 +46,33 @@ const Index = () => {
     navigate(`/${type}/${id}`);
   };
 
+  // SEO данные для главной страницы
+  const homeStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Vion - Русский Кинопоиск",
+    "description": "Лучший кинопоиск на русском языке. Фильмы, сериалы, трейлеры, рецензии и персональные рекомендации.",
+    "url": "https://vion.app",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://vion.app/search?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    },
+    "sameAs": [
+      "https://vk.com/vion_movies",
+      "https://t.me/vion_movies"
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Vion - Русский Кинопоиск | Фильмы и Сериалы Онлайн"
+        description="Откройте мир кино с Vion! Популярные фильмы, новые сериалы, персональные рекомендации и подробная информация о фильмах на русском языке. Смотрите трейлеры, читайте рецензии."
+        keywords="фильмы онлайн, сериалы, кинопоиск, русские фильмы, трейлеры, рецензии фильмов, новинки кино, популярные фильмы, рейтинг фильмов"
+        canonicalUrl="https://vion.app"
+        structuredData={homeStructuredData}
+      />
       <div className="block sm:hidden px-4 py-2 bg-card/50 backdrop-blur-sm border-b border-accent/20">
         <p className="text-xs text-center text-muted-foreground">
           📱 Установите приложение для лучшего опыта

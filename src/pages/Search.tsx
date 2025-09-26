@@ -14,6 +14,7 @@ import { Filter, Search as SearchIcon, X } from 'lucide-react';
 import { TMDbMovie, TMDbTVShow, TMDbGenre } from '@/lib/tmdb';
 import { useSearchMulti, useMovieGenres, useTVGenres, useDiscoverMovies, useDiscoverTVShows } from '@/hooks/useTMDbApi';
 import { SearchTabs } from '@/components/ui/search-tabs';
+import { SEOHead } from '@/components/seo/SEOHead';
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -182,8 +183,45 @@ const Search = () => {
     navigate(`/${type}/${item.id}`);
   };
 
+  // SEO данные для страницы поиска
+  const searchStructuredData = searchValue ? {
+    "@context": "https://schema.org",
+    "@type": "SearchResultsPage",
+    "url": `https://vion.app/search?q=${encodeURIComponent(searchValue)}`,
+    "mainEntity": {
+      "@type": "ItemList",
+      "numberOfItems": results.length,
+      "itemListElement": results.slice(0, 10).map((item, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "item": {
+          "@type": getItemType(item) === 'movie' ? "Movie" : "TVSeries",
+          "name": 'title' in item ? item.title : item.name,
+          "description": item.overview,
+          "image": `https://image.tmdb.org/t/p/w500${item.poster_path}`
+        }
+      }))
+    }
+  } : undefined;
+
+  const seoTitle = searchValue 
+    ? `Поиск "${searchValue}" - Результаты поиска фильмов и сериалов`
+    : 'Поиск фильмов и сериалов - Каталог кино';
+  
+  const seoDescription = searchValue 
+    ? `Результаты поиска по запросу "${searchValue}". Найдено ${results.length} фильмов и сериалов. Смотрите онлайн в HD качестве.`
+    : 'Поиск и каталог фильмов и сериалов. Найдите любой фильм или сериал с помощью удобных фильтров по жанрам, году, рейтингу.';
+
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title={seoTitle}
+        description={seoDescription}
+        keywords={`поиск фильмов, поиск сериалов, каталог кино, ${searchValue ? `${searchValue}, ` : ''}фильмы онлайн`}
+        canonicalUrl={`https://vion.app/search${searchValue ? `?q=${encodeURIComponent(searchValue)}` : ''}`}
+        structuredData={searchStructuredData}
+        noIndex={!searchValue} // Не индексируем пустую страницу поиска
+      />
       <Header
         searchValue={searchValue}
         onSearchChange={setSearchValue}

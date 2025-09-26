@@ -54,22 +54,26 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      console.error("AI Gateway error:", await response.text());
-			if (response.status === 429) {
-				console.error("Rate limit exceeded");
-				return new Response(JSON.stringify({ error: "Rate limit exceeded" }), {
-					status: 429,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				});
-			}
+      const errorText = await response.text();
+      console.error("AI Gateway error:", errorText, "Status:", response.status);
+      
+      if (response.status === 429) {
+        console.error("Rate limit exceeded");
+        return new Response(JSON.stringify({ error: "Rate limit exceeded" }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
-      return new Response(JSON.stringify({ error: "Failed to get AI response" }), {
+      return new Response(JSON.stringify({ error: `AI service error: ${response.status}` }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const data = await response.json();
+    console.log("AI Gateway response:", data);
+    
     const aiMessage = data.choices?.[0]?.message?.content;
 
     if (!aiMessage) {
@@ -79,6 +83,8 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    console.log("AI response content:", aiMessage);
 
     return new Response(JSON.stringify({ response: aiMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
