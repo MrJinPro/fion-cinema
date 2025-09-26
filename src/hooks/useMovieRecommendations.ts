@@ -113,7 +113,13 @@ TMDb жанры: Action=28, Adventure=12, Animation=16, Comedy=35, Crime=80, Doc
       });
 
       if (aiError) {
-        throw new Error(aiError.message || 'Failed to get AI recommendations');
+        console.error('AI function error:', aiError);
+        throw new Error(`AI service error: ${aiError.message || 'Unknown error'}`);
+      }
+
+      if (!aiData?.response) {
+        console.error('No response from AI service');
+        throw new Error('AI service returned empty response');
       }
 
       let aiRecommendation: AIRecommendation;
