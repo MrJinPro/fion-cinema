@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.cleanup-expired-links]
 verify_jwt = false
+
+[functions.populate-collections]
+verify_jwt = false

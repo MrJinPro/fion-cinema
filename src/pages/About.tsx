@@ -280,26 +280,55 @@ const About = () => {
           <Card className="bg-orange/10 border-orange/20">
             <CardHeader>
               <CardTitle className="text-orange">
-                Важная информация
+                Правовая информация
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3 text-sm text-muted-foreground">
-                <p>
-                  • FiOn Cinema является некоммерческим образовательным проектом
-                </p>
-                <p>
-                  • Мы не размещаем, не хостим и не распространяем защищённый авторским правом контент
-                </p>
-                <p>
-                  • Все изображения и данные предоставлены TMDb и используются в соответствии с их условиями
-                </p>
-                <p>
-                  • При использовании данного проекта в коммерческих целях необходимо получить соответствующие лицензии
-                </p>
-                <p>
-                  • Проект создан исключительно в демонстрационных и образовательных целях
-                </p>
+              <div className="space-y-4 text-sm text-muted-foreground">
+                <div>
+                  <h4 className="font-semibold text-foreground mb-2">Пользовательское соглашение</h4>
+                  <p>Используя FiOn Cinema, вы соглашаетесь с тем, что:</p>
+                  <ul className="list-disc list-inside space-y-1 mt-2 ml-4">
+                    <li>Сервис предназначен исключительно для информационных целей</li>
+                    <li>Вы не будете использовать сервис для коммерческих целей без соответствующих лицензий</li>
+                    <li>Вы понимаете, что FiOn Cinema не предоставляет доступ к контенту для просмотра</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-foreground mb-2">Политика конфиденциальности</h4>
+                  <p>FiOn Cinema собирает минимальную информацию о пользователях:</p>
+                  <ul className="list-disc list-inside space-y-1 mt-2 ml-4">
+                    <li>Данные для аутентификации (при регистрации)</li>
+                    <li>Пользовательские предпочтения и избранное</li>
+                    <li>Аналитические данные использования (анонимно)</li>
+                  </ul>
+                  <p className="mt-2">Мы не передаем персональные данные третьим лицам.</p>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-foreground mb-2">Авторские права</h4>
+                  <ul className="list-disc list-inside space-y-1 ml-4">
+                    <li>FiOn Cinema является некоммерческим образовательным проектом</li>
+                    <li>Мы не размещаем, не хостим и не распространяем защищённый авторским правом контент</li>
+                    <li>Все изображения и данные предоставлены TMDb и используются в соответствии с их API условиями</li>
+                    <li>Ссылки на стриминговые платформы предоставляются только для информации</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-foreground mb-2">Отказ от ответственности</h4>
+                  <p>
+                    FiOn Cinema предоставляется "как есть" без каких-либо гарантий. 
+                    Мы не несем ответственности за точность информации или доступность внешних ссылок.
+                  </p>
+                </div>
+                
+                <div className="pt-2 border-t border-border">
+                  <p className="text-xs">
+                    Последнее обновление: {new Date().toLocaleDateString('ru-RU')}
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>

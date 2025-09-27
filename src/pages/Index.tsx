@@ -20,6 +20,7 @@ import { useTrending, usePopularMovies, usePopularTVShows, useNowPlayingMovies }
 import { useMixedHeroContent } from '@/hooks/useMixedHeroContent';
 import { PWAInstallPrompt } from '@/components/ui/pwa-install-prompt';
 import { SEOHead } from '@/components/seo/SEOHead';
+import { CuratedCollectionsSection } from '@/components/ui/curated-collections-section';
 const Index = () => {
   const {
     t
@@ -122,6 +123,9 @@ const Index = () => {
                 {trending?.results?.slice(0, 10).map((item, index) => <MovieCard key={item.id} item={item} type={'title' in item ? 'movie' : 'tv'} className="animate-scale-in hover-neon-primary transition-neon" />)}
               </div>}
           </section>
+
+          {/* Curated Collections */}
+          <CuratedCollectionsSection />
 
           {/* Популярные фильмы */}
           <section className="space-y-6 animate-stagger-2">

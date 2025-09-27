@@ -4,6 +4,7 @@ import { SEOHead } from '@/components/seo/SEOHead';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { RussianContentSection } from '@/components/ui/russian-content-section';
+import { MobileNavigationFix } from '@/components/ui/mobile-navigation-fix';
 
 export default function RussianCinema() {
   const navigate = useNavigate();
@@ -23,6 +24,8 @@ export default function RussianCinema() {
         description="Лучшие российские фильмы, сериалы и документальные фильмы. Новинки российского кино 2024-2025, топ фильмов по рейтингу, классика и современные российские продюсерские компании."
         keywords="российское кино, русские фильмы, российские сериалы, новинки кино 2024, российские режиссеры, кинопоиск"
       />
+      
+      <MobileNavigationFix className="md:hidden" />
       
       <Header 
         searchValue={searchValue}

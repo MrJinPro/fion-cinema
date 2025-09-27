@@ -37,22 +37,38 @@ const providerNames: Record<string, { en: string; ru: string }> = {
 const getProviderUrl = (providerName: string, movieId: number, title: string): string => {
   const encodedTitle = encodeURIComponent(title);
   
-  const urls: Record<string, string> = {
+  // Российские стриминговые платформы
+  const russianProviders: Record<string, string> = {
+    'Kinopoisk HD': `https://hd.kinopoisk.ru/film/${movieId}`,
+    'START': `https://start.ru/search?q=${encodedTitle}`,
+    'Okko': `https://okko.tv/search?text=${encodedTitle}`,
+    'ivi': `https://www.ivi.tv/search/?q=${encodedTitle}`,
+    'Premier': `https://premier.one/search?query=${encodedTitle}`,
+    'More.tv': `https://more.tv/search?query=${encodedTitle}`,
+    'Amediateka': `https://amediateka.ru/search?query=${encodedTitle}`,
+    'KION': `https://kion.ru/search?query=${encodedTitle}`,
+    'СТС': `https://ctc.ru/movies/search/?q=${encodedTitle}`,
+    'НТВ+': `https://ntvplus.ru/search?q=${encodedTitle}`
+  };
+  
+  // Международные платформы
+  const globalProviders: Record<string, string> = {
     'Netflix': `https://www.netflix.com/search?q=${encodedTitle}`,
-    'Amazon Prime Video': `https://www.amazon.com/s?k=${encodedTitle}&i=instant-video`,
+    'Amazon Prime Video': `https://www.primevideo.com/search/ref=atv_nb_sr?phrase=${encodedTitle}`,
     'Disney Plus': `https://www.disneyplus.com/search?q=${encodedTitle}`,
-    'HBO Max': `https://www.hbo.com/search?q=${encodedTitle}`,
+    'HBO Max': `https://play.hbomax.com/search?q=${encodedTitle}`,
     'Hulu': `https://www.hulu.com/search?q=${encodedTitle}`,
-    'Apple TV': `https://tv.apple.com/search?term=${encodedTitle}`,
+    'Apple TV Plus': `https://tv.apple.com/search?term=${encodedTitle}`,
     'Paramount Plus': `https://www.paramountplus.com/search?query=${encodedTitle}`,
     'Peacock': `https://www.peacocktv.com/search?q=${encodedTitle}`,
     'Showtime': `https://www.showtime.com/search/${encodedTitle}`,
     'Starz': `https://www.starz.com/search?query=${encodedTitle}`,
-    'Crunchyroll': `https://www.crunchyroll.com/search?q=${encodedTitle}`,
-    'Funimation': `https://www.funimation.com/search/?q=${encodedTitle}`
+    'YouTube': `https://www.youtube.com/results?search_query=${encodedTitle}+полный+фильм`,
+    'Google Play Movies': `https://play.google.com/store/search?q=${encodedTitle}&c=movies`,
+    'Apple TV': `https://tv.apple.com/search?term=${encodedTitle}`
   };
   
-  return urls[providerName] || `https://www.google.com/search?q=${encodedTitle}+streaming`;
+  return russianProviders[providerName] || globalProviders[providerName] || `https://www.kinopoisk.ru/index.php?kp_query=${encodedTitle}`;
 };
 
 export function StreamingAvailability({ watchProviders, movieId, title, className }: StreamingAvailabilityProps) {

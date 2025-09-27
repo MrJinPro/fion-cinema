@@ -402,7 +402,7 @@ export const MovieDetails = () => {
 
               {/* Streaming Availability */}
               <StreamingAvailability 
-                watchProviders={watchProviders?.results}
+                watchProviders={watchProviders?.results?.RU || watchProviders?.results?.US}
                 movieId={movieId}
                 title={movie.title}
               />

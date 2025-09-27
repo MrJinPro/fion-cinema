@@ -16,6 +16,7 @@ import PersonDetails from "./pages/PersonDetails";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import RussianCinema from "./pages/RussianCinema";
+import Collection from "./pages/Collection";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => {
               <Route path="/lists/:id" element={<ListDetails />} />
               <Route path="/about" element={<About />} />
               <Route path="/russian-cinema" element={<RussianCinema />} />
+              <Route path="/collections/:slug" element={<Collection />} />
               <Route path="/movie/:id" element={<MovieDetails />} />
               <Route path="/tv/:id" element={<TVDetails />} />
               <Route path="/person/:id" element={<PersonDetails />} />
