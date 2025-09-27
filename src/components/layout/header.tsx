@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Logo } from '@/components/ui/logo';
 import { SearchInput } from '@/components/ui/search-input';
 import { Button } from '@/components/ui/button';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
+import { MovieRecommendationDialog } from '@/components/ui/movie-recommendation-dialog';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { t } = useTranslation();
+  const [isRecommendationDialogOpen, setIsRecommendationDialogOpen] = useState(false);
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -45,11 +47,19 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
+  const handleRecommendationClick = () => {
+    if (!user) {
+      toast.error('Для подбора фильмов необходимо войти в аккаунт');
+      navigate('/auth');
+      return;
+    }
+    setIsRecommendationDialogOpen(true);
+  };
+
   const navLinks = [
     { href: '/', label: t('nav.home') },
     { href: '/search', label: t('nav.search') },
     { href: '/russian-cinema', label: 'Российское кино' },
-    { href: '/#recommendations', label: t('sections.recommendations'), icon: Sparkles },
     ...(user ? [
       { href: '/favorites', label: t('nav.favorites'), icon: Heart },
       { href: '/lists', label: t('nav.lists'), icon: List },
@@ -83,6 +93,13 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </Link>
           ))}
+          <button
+            onClick={handleRecommendationClick}
+            className="text-sm font-medium transition-colors hover:text-primary neon-underline text-muted-foreground flex items-center gap-2"
+          >
+            <Sparkles className="h-4 w-4" />
+            {t('sections.recommendations')}
+          </button>
         </nav>
 
         {/* Поиск */}
@@ -156,6 +173,11 @@ export const Header: React.FC<HeaderProps> = ({
           placeholder="Найти фильм или сериал..."
         />
       </div>
+      
+      <MovieRecommendationDialog
+        isOpen={isRecommendationDialogOpen}
+        onClose={() => setIsRecommendationDialogOpen(false)}
+      />
     </header>
   );
 };

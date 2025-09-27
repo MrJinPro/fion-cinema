@@ -7,7 +7,7 @@ import { HeroBanner } from '@/components/ui/hero-banner';
 import { FeaturedMovie } from '@/components/ui/featured-movie';
 import { AutoCarousel } from '@/components/ui/auto-carousel';
 import { PersonalizedSection } from '@/components/ui/personalized-section';
-import { MovieRecommendationSection } from '@/components/ui/movie-recommendation-section';
+
 import { MovieCard } from '@/components/ui/movie-card';
 import { MovieSkeleton } from '@/components/ui/movie-skeleton';
 import { Button } from '@/components/ui/button';
@@ -111,13 +111,6 @@ const Index = () => {
             onNavigate={navigate}
           />
 
-          {/* Секция рекомендаций фильмов */}
-          <section id="recommendations" className="space-y-6 animate-stagger-1">
-            <h2 className="text-3xl font-bold text-gradient-primary neon-underline">
-              {t('sections.recommendations')}
-            </h2>
-            <MovieRecommendationSection />
-          </section>
 
           {/* Российский контент */}
           <section className="space-y-6 animate-stagger-1">

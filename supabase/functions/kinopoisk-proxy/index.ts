@@ -43,12 +43,32 @@ serve(async (req) => {
   try {
     // Parse request body to get endpoint and params
     let requestData;
+    const contentType = req.headers.get('content-type');
+    
+    // Handle empty body or non-JSON requests
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error('Invalid content type or missing body');
+      return new Response(
+        JSON.stringify({ error: 'Content-Type must be application/json' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     try {
-      requestData = await req.json();
+      const body = await req.text();
+      if (!body.trim()) {
+        console.error('Empty request body');
+        return new Response(
+          JSON.stringify({ error: 'Request body cannot be empty' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      requestData = JSON.parse(body);
     } catch (error) {
       console.error('Failed to parse request body:', error);
       return new Response(
-        JSON.stringify({ error: 'Invalid request body' }),
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
