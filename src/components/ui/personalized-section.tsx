@@ -8,23 +8,25 @@ import { useAuth } from '@/hooks/useAuth';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useTrending } from '@/hooks/useTMDbApi';
 import type { TMDbMovie, TMDbTVShow } from '@/lib/tmdb';
-
 interface PersonalizedSectionProps {
   onItemClick: (id: number, type: 'movie' | 'tv') => void;
   onNavigate: (path: string) => void;
 }
-
 export const PersonalizedSection: React.FC<PersonalizedSectionProps> = ({
   onItemClick,
   onNavigate
 }) => {
-  const { user } = useAuth();
-  const { favorites } = useFavorites();
-  const { data: trending } = useTrending('all', 'week');
-
+  const {
+    user
+  } = useAuth();
+  const {
+    favorites
+  } = useFavorites();
+  const {
+    data: trending
+  } = useTrending('all', 'week');
   if (!user) {
-    return (
-      <section className="space-y-6 animate-stagger-3">
+    return <section className="space-y-6 animate-stagger-3">
         <div className="text-center py-12 px-6 bg-gradient-to-br from-card via-card to-secondary/50 rounded-xl border">
           <div className="max-w-md mx-auto space-y-4">
             <div className="flex justify-center">
@@ -61,10 +63,7 @@ export const PersonalizedSection: React.FC<PersonalizedSectionProps> = ({
               </div>
             </div>
             
-            <Button 
-              onClick={() => onNavigate('/auth')}
-              className="bg-gradient-primary hover:bg-gradient-orange text-white border-0 hover-neon-primary transition-neon"
-            >
+            <Button onClick={() => onNavigate('/auth')} className="bg-gradient-primary hover:bg-gradient-orange text-white border-0 hover-neon-primary transition-neon">
               Начать путешествие
             </Button>
           </div>
@@ -112,19 +111,15 @@ export const PersonalizedSection: React.FC<PersonalizedSectionProps> = ({
             </CardContent>
           </Card>
         </div>
-      </section>
-    );
+      </section>;
   }
-
   const favoritesCount = favorites.length;
   const recentFavorites = favorites.slice(0, 4);
   const recommendations = trending?.results?.slice(0, 4) || [];
-
-  return (
-    <section className="space-y-6 animate-stagger-3">
+  return <section className="space-y-6 animate-stagger-3">
       {/* Приветствие */}
       <Card className="bg-gradient-to-br from-primary/10 via-accent/5 to-card border-primary/20 hover-neon-primary transition-neon">
-        <CardHeader>
+        <CardHeader className="mx-0 px-[15px] py-[18px] my-[7px]">
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-gradient-primary">
@@ -192,20 +187,12 @@ export const PersonalizedSection: React.FC<PersonalizedSectionProps> = ({
 
       {/* Быстрые действия */}
       <div className="flex flex-wrap gap-3">
-        <Button 
-          variant="outline"
-          onClick={() => onNavigate('/favorites')}
-          className="hover-neon-accent transition-neon"
-        >
+        <Button variant="outline" onClick={() => onNavigate('/favorites')} className="hover-neon-accent transition-neon">
           <Heart className="w-4 h-4 mr-2" />
           Мои избранные
         </Button>
         
-        <Button 
-          variant="outline"
-          onClick={() => onNavigate('/lists')}
-          className="hover-neon-info transition-neon"
-        >
+        <Button variant="outline" onClick={() => onNavigate('/lists')} className="hover-neon-info transition-neon">
           <List className="w-4 h-4 mr-2" />
           Мои списки
         </Button>
@@ -217,23 +204,13 @@ export const PersonalizedSection: React.FC<PersonalizedSectionProps> = ({
       </div>
 
       {/* Рекомендации на основе избранного */}
-      {recommendations.length > 0 && (
-        <div className="space-y-4">
+      {recommendations.length > 0 && <div className="space-y-4">
           <h3 className="text-xl font-semibold text-gradient-orange neon-underline">
             Рекомендации для вас
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {recommendations.map((item, index) => (
-              <MovieCard
-                key={item.id}
-                item={item}
-                type={'title' in item ? 'movie' : 'tv'}
-                className="animate-scale-in hover-neon-primary transition-neon"
-              />
-            ))}
+            {recommendations.map((item, index) => <MovieCard key={item.id} item={item} type={'title' in item ? 'movie' : 'tv'} className="animate-scale-in hover-neon-primary transition-neon" />)}
           </div>
-        </div>
-      )}
-    </section>
-  );
+        </div>}
+    </section>;
 };
