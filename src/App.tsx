@@ -13,6 +13,7 @@ import MovieDetails from "./pages/MovieDetails";
 import TVDetails from "./pages/TVDetails";
 import PersonDetails from "./pages/PersonDetails";
 import Auth from "./pages/Auth";
+import Admin from "./pages/Admin";
 import RussianCinema from "./pages/RussianCinema";
 import NotFound from "./pages/NotFound";
 
@@ -39,6 +40,7 @@ const App = () => {
               <Route path="/tv/:id" element={<TVDetails />} />
               <Route path="/person/:id" element={<PersonDetails />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/admin" element={<Admin />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
