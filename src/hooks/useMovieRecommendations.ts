@@ -159,18 +159,27 @@ TMDb жанры: Action=28, Adventure=12, Animation=16, Comedy=35, Crime=80, Doc
 
       console.log('Fetching movies with filters:', filters);
 
-      // Use Supabase function to get movies
-      const { data: tmdbData, error: tmdbError } = await supabase.functions.invoke('tmdb-proxy', {
-        body: { 
-          endpoint: '/discover/movie',
-          params: filters
-        }
+      // Use TMDb proxy with GET request and URL parameters
+      const searchParams = new URLSearchParams({
+        endpoint: '/discover/movie',
+        ...filters
+      });
+      
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tmdb-proxy?${searchParams}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        },
       });
 
-      if (tmdbError) {
-        console.error('TMDb API error:', tmdbError);
-        throw new Error(tmdbError.message || 'Failed to fetch movies');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('TMDb proxy error:', response.status, errorText);
+        throw new Error(`TMDb proxy error: ${response.status}`);
       }
+
+      const tmdbData = await response.json();
 
       const movies = tmdbData?.results?.slice(0, 5) || [];
       console.log('Found movies:', movies.length);
