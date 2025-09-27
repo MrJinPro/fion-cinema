@@ -4,10 +4,13 @@
  */
 
 export interface FavoriteItem {
-  id: number;
+  id: string;
+  tmdb_id: number;
+  media_type: 'movie' | 'tv';
   type: 'movie' | 'tv';
   title: string;
   poster_path: string | null;
+  release_date: string | null;
   vote_average: number;
   added_at: string;
 }
@@ -245,7 +248,7 @@ class IndexedDBStorage implements StorageRepository {
       }
 
       list.items = list.items.filter(
-        item => !(item.id === itemId && item.type === itemType)
+        item => !(item.tmdb_id === itemId && item.type === itemType)
       );
 
       await this.updateList(listId, { items: list.items });
@@ -297,13 +300,13 @@ class LocalStorageRepository implements StorageRepository {
 
   async removeFromFavorites(id: number, type: 'movie' | 'tv'): Promise<void> {
     const favorites = await this.getFavorites();
-    const filtered = favorites.filter(f => !(f.id === id && f.type === type));
+    const filtered = favorites.filter(f => !(f.tmdb_id === id && f.type === type));
     this.setToStorage(this.favoritesKey, filtered);
   }
 
   async isFavorite(id: number, type: 'movie' | 'tv'): Promise<boolean> {
     const favorites = await this.getFavorites();
-    return favorites.some(f => f.id === id && f.type === type);
+    return favorites.some(f => f.tmdb_id === id && f.type === type);
   }
 
   async getLists(): Promise<UserList[]> {
@@ -377,7 +380,7 @@ class LocalStorageRepository implements StorageRepository {
     }
 
     list.items = list.items.filter(
-      item => !(item.id === itemId && item.type === itemType)
+      item => !(item.tmdb_id === itemId && item.type === itemType)
     );
 
     await this.updateList(listId, { items: list.items });

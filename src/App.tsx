@@ -9,6 +9,7 @@ import Search from "./pages/Search";
 import About from "./pages/About";
 import Favorites from "./pages/Favorites";
 import Lists from "./pages/Lists";
+import { ListDetails } from "./pages/ListDetails";
 import MovieDetails from "./pages/MovieDetails";
 import TVDetails from "./pages/TVDetails";
 import PersonDetails from "./pages/PersonDetails";
@@ -34,6 +35,7 @@ const App = () => {
               <Route path="/search" element={<Search />} />
               <Route path="/favorites" element={<Favorites />} />
               <Route path="/lists" element={<Lists />} />
+              <Route path="/lists/:id" element={<ListDetails />} />
               <Route path="/about" element={<About />} />
               <Route path="/russian-cinema" element={<RussianCinema />} />
               <Route path="/movie/:id" element={<MovieDetails />} />

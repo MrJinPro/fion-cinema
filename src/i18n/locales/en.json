@@ -3,7 +3,7 @@
     "home": "Home",
     "search": "Search",
     "favorites": "Favorites",
-    "lists": "Lists",
+    "lists": "Collections",
     "about": "About",
     "russianCinema": "Russian Cinema"
   },
@@ -102,12 +102,14 @@
     "removeFromFavorites": "Remove from Favorites"
   },
   "lists": {
-    "title": "My Lists",
-    "createNew": "Create New List",
-    "listName": "List Name",
+    "title": "My Collections",
+    "createNew": "Create New Collection",
+    "listName": "Collection Name",
     "description": "Description",
     "public": "Make Public",
-    "private": "Keep Private"
+    "private": "Keep Private",
+    "addToCollection": "Add to Collection",
+    "watchLater": "Watch Later"
   },
   "footer": {
     "appDescription": "FiOn Cinema - Your gateway to the world of movies and TV shows. Discover, explore, and enjoy the best cinematic content from around the globe.",
@@ -117,7 +119,7 @@
     "aboutProject": "About Project",
     "legalInfo": "Legal Information",
     "tmdbTerms": "TMDb Terms",
-    "copyright": "© 2024 FiOn Cinema. Made with ❤️ by Developer.",
+    "copyright": "© 2024 FiOn Cinema. Made with ❤️ by MrJinPro.",
     "disclaimer": "This application is for educational and entertainment purposes only. All content is provided for non-commercial use."
   },
   "russianContent": {

@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Heart, Star, Play } from 'lucide-react';
+import { Heart, Star, Play, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TMDbMovie, TMDbTVShow, getTMDbClient } from '@/lib/tmdb';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useAuth } from '@/hooks/useAuth';
+import { AddToCollectionDialog } from '@/components/ui/add-to-collection-dialog';
 import { toast } from 'sonner';
 
 interface MovieCardProps {
@@ -25,6 +26,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
   const tmdbClient = getTMDbClient();
+  const [showCollectionDialog, setShowCollectionDialog] = useState(false);
   
   const title = type === 'movie' ? (item as TMDbMovie).title : (item as TMDbTVShow).name;
   const releaseDate = type === 'movie' 
@@ -54,6 +56,18 @@ export const MovieCard: React.FC<MovieCardProps> = ({
     } catch (error) {
       toast.error('Произошла ошибка');
     }
+  };
+
+  const handleAddToCollectionClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!user) {
+      navigate('/auth');
+      toast.info('Войдите, чтобы создавать коллекции');
+      return;
+    }
+
+    setShowCollectionDialog(true);
   };
 
   return (
@@ -93,18 +107,29 @@ export const MovieCard: React.FC<MovieCardProps> = ({
           </Button>
         </div>
 
-        {/* Кнопка избранного */}
-        <Button
-          size="sm"
-          variant="secondary"
-          className={cn(
-            "absolute top-2 right-2 h-8 w-8 p-0 opacity-0 transition-all duration-300 group-hover:opacity-100",
-            isItemFavorite && "opacity-100 bg-primary text-primary-foreground hover-neon-primary"
-          )}
-          onClick={handleFavoriteClick}
-        >
-          <Heart className={cn("h-4 w-4", isItemFavorite && "fill-current")} />
-        </Button>
+        {/* Кнопки действий */}
+        <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 transition-all duration-300 group-hover:opacity-100">
+          <Button
+            size="sm"
+            variant="secondary"
+            className={cn(
+              "h-8 w-8 p-0 bg-background/80 hover:bg-primary hover:text-primary-foreground",
+              isItemFavorite && "bg-primary text-primary-foreground"
+            )}
+            onClick={handleFavoriteClick}
+          >
+            <Heart className={cn("h-4 w-4", isItemFavorite && "fill-current")} />
+          </Button>
+          
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-8 w-8 p-0 bg-background/80 hover:bg-primary hover:text-primary-foreground"
+            onClick={handleAddToCollectionClick}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
 
         {/* Рейтинг */}
         {item.vote_average > 0 && (
@@ -145,6 +170,14 @@ export const MovieCard: React.FC<MovieCardProps> = ({
           )}
         </div>
       </CardContent>
+
+      {/* Диалог добавления в коллекцию */}
+      <AddToCollectionDialog
+        isOpen={showCollectionDialog}
+        onClose={() => setShowCollectionDialog(false)}
+        item={item}
+        mediaType={type}
+      />
     </Card>
   );
 };
