@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
+import { useMovieCache } from './useMovieCache';
 
 export interface UserRating {
   id: string;
@@ -16,6 +17,7 @@ export interface UserRating {
 export const useUserRatings = (contentId: number, contentType: 'movie' | 'tv') => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { ensureMovieExists } = useMovieCache();
   const [userRating, setUserRating] = useState<UserRating | null>(null);
   const [averageRating, setAverageRating] = useState<number | null>(null);
   const [ratingCount, setRatingCount] = useState<number>(0);
@@ -76,6 +78,17 @@ export const useUserRatings = (contentId: number, contentType: 'movie' | 'tv') =
     }
 
     try {
+      // Убеждаемся, что фильм/сериал существует в базе данных перед сохранением оценки
+      const movieExists = await ensureMovieExists(contentId, contentType);
+      if (!movieExists) {
+        toast({
+          title: "Ошибка",
+          description: "Не удалось сохранить данные о контенте",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const ratingData = {
         user_id: user.id,
         content_id: contentId,

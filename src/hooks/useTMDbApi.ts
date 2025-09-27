@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getTMDbClient } from '@/lib/tmdb';
+import { useMovieCache } from './useMovieCache';
 import type { 
   TMDbMovie, 
   TMDbTVShow, 
@@ -127,9 +128,16 @@ export const useDiscoverTVShows = (filters: {
 
 // Hook для получения деталей фильма
 export const useMovieDetails = (id: number) => {
+  const { cacheMovie } = useMovieCache();
+  
   return useQuery({
     queryKey: ['movie', id],
-    queryFn: () => tmdbClient.getMovieDetails(id),
+    queryFn: async () => {
+      const movieData = await tmdbClient.getMovieDetails(id);
+      // Автоматически кэшируем фильм при получении
+      await cacheMovie(movieData);
+      return movieData;
+    },
     enabled: !!id,
     staleTime: 60 * 60 * 1000, // 1 час
   });
@@ -137,9 +145,16 @@ export const useMovieDetails = (id: number) => {
 
 // Hook для получения деталей сериала
 export const useTVDetails = (id: number) => {
+  const { cacheTVShow } = useMovieCache();
+  
   return useQuery({
     queryKey: ['tv', id],
-    queryFn: () => tmdbClient.getTVDetails(id),
+    queryFn: async () => {
+      const tvData = await tmdbClient.getTVDetails(id);
+      // Автоматически кэшируем сериал при получении
+      await cacheTVShow(tvData);
+      return tvData;
+    },
     enabled: !!id,
     staleTime: 60 * 60 * 1000, // 1 час
   });
