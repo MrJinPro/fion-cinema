@@ -2,11 +2,11 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Logo } from '@/components/ui/logo';
-
 export const Footer: React.FC = () => {
-  const { t } = useTranslation();
-  return (
-    <footer className="border-t border-border/40 bg-card/30 backdrop-blur">
+  const {
+    t
+  } = useTranslation();
+  return <footer className="border-t border-border/40 bg-card/30 backdrop-blur">
       <div className="container px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Логотип и описание */}
@@ -20,11 +20,7 @@ export const Footer: React.FC = () => {
             
             {/* TMDb Attribution */}
             <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-              <img 
-                src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg"
-                alt="TMDb"
-                className="h-4"
-              />
+              <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg" alt="TMDb" className="h-4" />
               <span>
                 {t('footer.tmdbAttribution')}
               </span>
@@ -68,17 +64,10 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/legal" className="hover:text-primary transition-colors">
-                  {t('footer.legalInfo')}
-                </Link>
+                
               </li>
               <li>
-                <a 
-                  href="https://www.themoviedb.org/terms-of-use" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="hover:text-primary transition-colors"
-                >
+                <a href="https://www.themoviedb.org/terms-of-use" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
                   {t('footer.tmdbTerms')}
                 </a>
               </li>
@@ -93,6 +82,5 @@ export const Footer: React.FC = () => {
           </p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
