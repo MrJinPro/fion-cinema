@@ -62,6 +62,42 @@ export type Database = {
         }
         Relationships: []
       }
+      cinema_match_sessions: {
+        Row: {
+          context_data: Json | null
+          created_at: string | null
+          feedback: Json | null
+          id: string
+          mood_data: Json | null
+          recommendations: Json | null
+          selected_movie_id: number | null
+          session_type: string
+          user_id: string | null
+        }
+        Insert: {
+          context_data?: Json | null
+          created_at?: string | null
+          feedback?: Json | null
+          id?: string
+          mood_data?: Json | null
+          recommendations?: Json | null
+          selected_movie_id?: number | null
+          session_type?: string
+          user_id?: string | null
+        }
+        Update: {
+          context_data?: Json | null
+          created_at?: string | null
+          feedback?: Json | null
+          id?: string
+          mood_data?: Json | null
+          recommendations?: Json | null
+          selected_movie_id?: number | null
+          session_type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           added_at: string
@@ -331,6 +367,153 @@ export type Database = {
         }
         Relationships: []
       }
+      movies_tmdb: {
+        Row: {
+          adult: boolean | null
+          backdrop_path: string | null
+          budget: number | null
+          cached_at: string | null
+          created_at: string | null
+          expires_at: string | null
+          genres: Json | null
+          homepage: string | null
+          id: number
+          imdb_id: string | null
+          original_title: string | null
+          overview: string | null
+          popularity: number | null
+          poster_path: string | null
+          production_companies: Json | null
+          production_countries: Json | null
+          release_date: string | null
+          revenue: number | null
+          runtime: number | null
+          spoken_languages: Json | null
+          status: string | null
+          tagline: string | null
+          title: string
+          updated_at: string | null
+          video: boolean | null
+          vote_average: number | null
+          vote_count: number | null
+        }
+        Insert: {
+          adult?: boolean | null
+          backdrop_path?: string | null
+          budget?: number | null
+          cached_at?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          genres?: Json | null
+          homepage?: string | null
+          id: number
+          imdb_id?: string | null
+          original_title?: string | null
+          overview?: string | null
+          popularity?: number | null
+          poster_path?: string | null
+          production_companies?: Json | null
+          production_countries?: Json | null
+          release_date?: string | null
+          revenue?: number | null
+          runtime?: number | null
+          spoken_languages?: Json | null
+          status?: string | null
+          tagline?: string | null
+          title: string
+          updated_at?: string | null
+          video?: boolean | null
+          vote_average?: number | null
+          vote_count?: number | null
+        }
+        Update: {
+          adult?: boolean | null
+          backdrop_path?: string | null
+          budget?: number | null
+          cached_at?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          genres?: Json | null
+          homepage?: string | null
+          id?: number
+          imdb_id?: string | null
+          original_title?: string | null
+          overview?: string | null
+          popularity?: number | null
+          poster_path?: string | null
+          production_companies?: Json | null
+          production_countries?: Json | null
+          release_date?: string | null
+          revenue?: number | null
+          runtime?: number | null
+          spoken_languages?: Json | null
+          status?: string | null
+          tagline?: string | null
+          title?: string
+          updated_at?: string | null
+          video?: boolean | null
+          vote_average?: number | null
+          vote_count?: number | null
+        }
+        Relationships: []
+      }
+      persons_tmdb: {
+        Row: {
+          adult: boolean | null
+          also_known_as: Json | null
+          biography: string | null
+          birthday: string | null
+          cached_at: string | null
+          created_at: string | null
+          deathday: string | null
+          expires_at: string | null
+          gender: number | null
+          id: number
+          known_for_department: string | null
+          name: string
+          place_of_birth: string | null
+          popularity: number | null
+          profile_path: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          adult?: boolean | null
+          also_known_as?: Json | null
+          biography?: string | null
+          birthday?: string | null
+          cached_at?: string | null
+          created_at?: string | null
+          deathday?: string | null
+          expires_at?: string | null
+          gender?: number | null
+          id: number
+          known_for_department?: string | null
+          name: string
+          place_of_birth?: string | null
+          popularity?: number | null
+          profile_path?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          adult?: boolean | null
+          also_known_as?: Json | null
+          biography?: string | null
+          birthday?: string | null
+          cached_at?: string | null
+          created_at?: string | null
+          deathday?: string | null
+          expires_at?: string | null
+          gender?: number | null
+          id?: number
+          known_for_department?: string | null
+          name?: string
+          place_of_birth?: string | null
+          popularity?: number | null
+          profile_path?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -382,6 +565,123 @@ export type Database = {
         }
         Relationships: []
       }
+      tv_shows_tmdb: {
+        Row: {
+          adult: boolean | null
+          backdrop_path: string | null
+          cached_at: string | null
+          created_at: string | null
+          episode_run_time: Json | null
+          expires_at: string | null
+          first_air_date: string | null
+          genres: Json | null
+          homepage: string | null
+          id: number
+          last_air_date: string | null
+          name: string
+          networks: Json | null
+          number_of_episodes: number | null
+          number_of_seasons: number | null
+          original_name: string | null
+          overview: string | null
+          popularity: number | null
+          poster_path: string | null
+          production_companies: Json | null
+          status: string | null
+          tagline: string | null
+          updated_at: string | null
+          vote_average: number | null
+          vote_count: number | null
+        }
+        Insert: {
+          adult?: boolean | null
+          backdrop_path?: string | null
+          cached_at?: string | null
+          created_at?: string | null
+          episode_run_time?: Json | null
+          expires_at?: string | null
+          first_air_date?: string | null
+          genres?: Json | null
+          homepage?: string | null
+          id: number
+          last_air_date?: string | null
+          name: string
+          networks?: Json | null
+          number_of_episodes?: number | null
+          number_of_seasons?: number | null
+          original_name?: string | null
+          overview?: string | null
+          popularity?: number | null
+          poster_path?: string | null
+          production_companies?: Json | null
+          status?: string | null
+          tagline?: string | null
+          updated_at?: string | null
+          vote_average?: number | null
+          vote_count?: number | null
+        }
+        Update: {
+          adult?: boolean | null
+          backdrop_path?: string | null
+          cached_at?: string | null
+          created_at?: string | null
+          episode_run_time?: Json | null
+          expires_at?: string | null
+          first_air_date?: string | null
+          genres?: Json | null
+          homepage?: string | null
+          id?: number
+          last_air_date?: string | null
+          name?: string
+          networks?: Json | null
+          number_of_episodes?: number | null
+          number_of_seasons?: number | null
+          original_name?: string | null
+          overview?: string | null
+          popularity?: number | null
+          poster_path?: string | null
+          production_companies?: Json | null
+          status?: string | null
+          tagline?: string | null
+          updated_at?: string | null
+          vote_average?: number | null
+          vote_count?: number | null
+        }
+        Relationships: []
+      }
+      user_behavior: {
+        Row: {
+          action_type: string
+          content_id: number | null
+          content_type: string | null
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          content_id?: number | null
+          content_type?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          content_id?: number | null
+          content_type?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_lists: {
         Row: {
           created_at: string
@@ -408,6 +708,81 @@ export type Database = {
           is_public?: boolean | null
           name?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_ratings: {
+        Row: {
+          content_id: number
+          content_type: string
+          created_at: string | null
+          id: string
+          rating: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content_id: number
+          content_type: string
+          created_at?: string | null
+          id?: string
+          rating: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content_id?: number
+          content_type?: string
+          created_at?: string | null
+          id?: string
+          rating?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_reviews: {
+        Row: {
+          content: string
+          content_id: number
+          content_type: string
+          created_at: string | null
+          helpful_votes: number | null
+          id: string
+          is_approved: boolean | null
+          is_moderated: boolean | null
+          is_spoiler: boolean | null
+          title: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          content_id: number
+          content_type: string
+          created_at?: string | null
+          helpful_votes?: number | null
+          id?: string
+          is_approved?: boolean | null
+          is_moderated?: boolean | null
+          is_spoiler?: boolean | null
+          title?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          content_id?: number
+          content_type?: string
+          created_at?: string | null
+          helpful_votes?: number | null
+          id?: string
+          is_approved?: boolean | null
+          is_moderated?: boolean | null
+          is_spoiler?: boolean | null
+          title?: string | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
