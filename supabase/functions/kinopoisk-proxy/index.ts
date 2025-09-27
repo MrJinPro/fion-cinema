@@ -122,11 +122,11 @@ serve(async (req) => {
       .single();
 
     const now = new Date();
-    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+    const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000); // Снизили кэш до 10 минут для отладки
 
-    // Return cached data if it's fresh
-    if (cachedData && new Date(cachedData.updated_at) > oneHourAgo) {
-      console.log(`Returning cached data for: ${cacheKey}`);
+    // Return cached data if it's fresh (теперь проверяем 10 минут)
+    if (cachedData && new Date(cachedData.updated_at) > tenMinutesAgo) {
+      console.log(`🗄️ Returning cached data for: ${cacheKey} (cached at: ${cachedData.updated_at})`);
       return new Response(
         JSON.stringify(cachedData.response),
         { 

@@ -17,24 +17,35 @@ export interface ModernRussianFilm {
 
 async function fetchModernRussianFilms(): Promise<ModernRussianFilm[]> {
   const currentYear = new Date().getFullYear();
+  const now = new Date();
+  const from = new Date(now.getTime() - 60*24*3600*1000).toISOString().slice(0,10); // последние 60 дней
   
   try {
-    // Используем kinopoisk-proxy для получения современных российских фильмов
+    console.log('🎬 Fetching modern Russian films with updated parameters...');
+    
+    // Используем улучшенные параметры для получения свежих фильмов
     const { data, error } = await supabase.functions.invoke('kinopoisk-proxy', {
       body: { 
         endpoint: '/movie',
         params: {
-          'year': `2023-${currentYear}`,
           'countries.name': 'Россия',
-          'rating.kp': '6.5-10',
-          'sortField': 'rating.kp',
+          'premiere.russia': `>=${from}`, // фильмы с премьерой за последние 60 дней
+          'rating.kp': '5.0-10', // снизили минимальный рейтинг
+          'sortField': 'premiere.russia', // сортировка по дате премьеры
           'sortType': '-1',
-          'limit': '20'
+          'limit': '20',
+          'selectFields': 'id,name,alternativeName,year,poster,rating,genres,premiere' // добавили selectFields
         }
       },
       headers: {
         'Content-Type': 'application/json',
       },
+    });
+
+    console.log('📊 API Response received:', { 
+      hasData: !!data, 
+      hasError: !!error, 
+      docsCount: data?.docs?.length || 0 
     });
 
     if (error) {
@@ -106,8 +117,8 @@ function getFallbackModernFilms(): ModernRussianFilm[] {
 
 export function useModernRussianFilms() {
   return useQuery({
-    queryKey: ['modern-russian-films', new Date().getHours()], // Обновляем каждый час
+    queryKey: ['modern-russian-films', Math.floor(Date.now() / (10 * 60 * 1000))], // Обновляем каждые 10 минут для отладки
     queryFn: fetchModernRussianFilms,
-    staleTime: 1000 * 60 * 60, // 1 час кэш
+    staleTime: 1000 * 60 * 10, // 10 минут кэш для отладки
   });
 }
