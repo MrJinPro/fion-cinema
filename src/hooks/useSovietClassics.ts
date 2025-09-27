@@ -40,26 +40,42 @@ export function useSovietClassics() {
       for (const classic of SOVIET_CLASSICS) {
         try {
           const movie = await tmdbClient.getMovieDetails(classic.tmdbId);
-          if (movie) {
+          if (movie && movie.id) {
             movies.push({
               id: movie.id,
               title: classic.title,
-              original_title: movie.original_title,
+              original_title: movie.original_title || classic.title,
               year: classic.year,
-              poster_path: movie.poster_path,
-              vote_average: movie.vote_average,
-              overview: movie.overview,
-              release_date: movie.release_date
+              poster_path: movie.poster_path || null,
+              vote_average: movie.vote_average || 8.0,
+              overview: movie.overview || `Легендарный советский фильм ${classic.year} года.`,
+              release_date: movie.release_date || `${classic.year}-01-01`
+            });
+          } else {
+            // Fallback данные если TMDB не работает
+            movies.push({
+              id: classic.tmdbId,
+              title: classic.title,
+              original_title: classic.title,
+              year: classic.year,
+              poster_path: null,
+              vote_average: 8.0,
+              overview: `Легендарный советский фильм ${classic.year} года.`,
+              release_date: `${classic.year}-01-01`
             });
           }
         } catch (error) {
+          console.warn(`Failed to load movie ${classic.title}:`, error);
           // Fallback данные если TMDB не работает
           movies.push({
             id: classic.tmdbId,
             title: classic.title,
+            original_title: classic.title,
             year: classic.year,
+            poster_path: null,
             vote_average: 8.0,
-            overview: `Легендарный советский фильм ${classic.year} года.`
+            overview: `Легендарный советский фильм ${classic.year} года.`,
+            release_date: `${classic.year}-01-01`
           });
         }
       }

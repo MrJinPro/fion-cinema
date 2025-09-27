@@ -24,6 +24,11 @@ export const AddToCollectionDialog: React.FC<AddToCollectionDialogProps> = ({
   item,
   mediaType
 }) => {
+  // Проверяем что item не undefined
+  if (!item) {
+    console.warn('AddToCollectionDialog: item is undefined');
+    return null;
+  }
   const [lists, setLists] = useState<UserList[]>([]);
   const [selectedLists, setSelectedLists] = useState<Set<string>>(new Set());
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -142,7 +147,10 @@ export const AddToCollectionDialog: React.FC<AddToCollectionDialogProps> = ({
     onClose();
   };
 
-  const title = mediaType === 'movie' ? (item as TMDbMovie).title : (item as TMDbTVShow).name;
+  const title = !item ? 'Неизвестное название' :
+    mediaType === 'movie' 
+      ? (item as TMDbMovie)?.title || 'Неизвестный фильм'
+      : (item as TMDbTVShow)?.name || 'Неизвестный сериал';
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>

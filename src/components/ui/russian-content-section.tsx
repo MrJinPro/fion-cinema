@@ -37,22 +37,43 @@ export function RussianContentSection() {
   };
 
   // Конвертируем Kinopoisk фильм в TMDb формат
-  const convertKinopoiskToTMDb = (movie: any) => ({
-    id: movie.id,
-    title: movie.name,
-    original_title: movie.alternativeName || movie.name,
-    poster_path: movie.poster?.url || '',
-    backdrop_path: '',
-    genre_ids: [],
-    overview: movie.description || '',
-    release_date: `${movie.year}-01-01`,
-    vote_average: movie.rating?.kp || 0,
-    vote_count: 1000,
-    popularity: 100,
-    adult: false,
-    original_language: 'ru',
-    video: false
-  });
+  const convertKinopoiskToTMDb = (movie: any) => {
+    if (!movie) {
+      return {
+        id: 0,
+        title: 'Неизвестный фильм',
+        original_title: '',
+        poster_path: '',
+        backdrop_path: '',
+        genre_ids: [],
+        overview: '',
+        release_date: '',
+        vote_average: 0,
+        vote_count: 0,
+        popularity: 0,
+        adult: false,
+        original_language: 'ru',
+        video: false
+      };
+    }
+    
+    return {
+      id: movie.id || 0,
+      title: movie.name || movie.title || 'Неизвестный фильм',
+      original_title: movie.alternativeName || movie.name || movie.title || '',
+      poster_path: movie.poster?.url || '',
+      backdrop_path: '',
+      genre_ids: [],
+      overview: movie.description || '',
+      release_date: movie.year ? `${movie.year}-01-01` : '',
+      vote_average: movie.rating?.kp || 0,
+      vote_count: 1000,
+      popularity: 100,
+      adult: false,
+      original_language: 'ru',
+      video: false
+    };
+  };
   if (sovietLoading && modernLoading) {
     return (
       <div className="space-y-8">

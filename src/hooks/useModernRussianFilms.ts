@@ -42,8 +42,14 @@ async function fetchModernRussianFilms(): Promise<ModernRussianFilm[]> {
       return getFallbackModernFilms();
     }
 
+    if (!data || !data.docs || !Array.isArray(data.docs)) {
+      console.warn('Invalid data structure from Kinopoisk API');
+      return getFallbackModernFilms();
+    }
+
     // Перемешиваем результаты для разнообразия
-    const shuffled = data?.docs ? shuffleArray([...data.docs]) : [];
+    const validMovies = data.docs.filter(movie => movie && movie.id && movie.name);
+    const shuffled = validMovies.length > 0 ? shuffleArray([...validMovies]) : [];
     return shuffled.slice(0, 12); // Показываем только 12 фильмов
     
   } catch (error) {

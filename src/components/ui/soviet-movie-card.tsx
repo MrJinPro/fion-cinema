@@ -26,22 +26,43 @@ export const SovietMovieCard: React.FC<SovietMovieCardProps> = ({
   };
 
   // Конвертируем SovietMovie в формат TMDbMovie для AddToCollectionDialog
-  const convertToTMDbFormat = (sovietMovie: SovietMovie) => ({
-    id: sovietMovie.id,
-    title: sovietMovie.title,
-    original_title: sovietMovie.original_title || sovietMovie.title,
-    poster_path: sovietMovie.poster_path || '',
-    backdrop_path: '',
-    genre_ids: [],
-    overview: sovietMovie.overview || '',
-    release_date: sovietMovie.release_date || `${sovietMovie.year}-01-01`,
-    vote_average: sovietMovie.vote_average || 8.0,
-    vote_count: 1000,
-    popularity: 100,
-    adult: false,
-    original_language: 'ru',
-    video: false
-  });
+  const convertToTMDbFormat = (sovietMovie: SovietMovie) => {
+    if (!sovietMovie) {
+      return {
+        id: 0,
+        title: 'Неизвестный фильм',
+        original_title: '',
+        poster_path: '',
+        backdrop_path: '',
+        genre_ids: [],
+        overview: '',
+        release_date: '',
+        vote_average: 0,
+        vote_count: 0,
+        popularity: 0,
+        adult: false,
+        original_language: 'ru',
+        video: false
+      };
+    }
+    
+    return {
+      id: sovietMovie.id || 0,
+      title: sovietMovie.title || 'Неизвестный фильм',
+      original_title: sovietMovie.original_title || sovietMovie.title || '',
+      poster_path: sovietMovie.poster_path || '',
+      backdrop_path: '',
+      genre_ids: [],
+      overview: sovietMovie.overview || '',
+      release_date: sovietMovie.release_date || `${sovietMovie.year}-01-01`,
+      vote_average: sovietMovie.vote_average || 8.0,
+      vote_count: 1000,
+      popularity: 100,
+      adult: false,
+      original_language: 'ru',
+      video: false
+    };
+  };
 
   return (
     <>
