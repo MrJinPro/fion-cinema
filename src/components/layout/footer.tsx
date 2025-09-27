@@ -1,8 +1,10 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Logo } from '@/components/ui/logo';
 
 export const Footer: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <footer className="border-t border-border/40 bg-card/30 backdrop-blur">
       <div className="container px-4 py-8">
@@ -13,8 +15,7 @@ export const Footer: React.FC = () => {
               <Logo size="md" />
             </Link>
             <p className="text-sm text-muted-foreground mb-4 max-w-md">
-              FiOn Cinema - онлайн-кинотеатр для просмотра информации о фильмах и сериалах. 
-              Находите новые произведения, создавайте списки и делитесь впечатлениями.
+              {t('footer.appDescription')}
             </p>
             
             {/* TMDb Attribution */}
@@ -25,41 +26,33 @@ export const Footer: React.FC = () => {
                 className="h-4"
               />
               <span>
-                Данные о фильмах и сериалах предоставлены{' '}
-                <a 
-                  href="https://www.themoviedb.org/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-info hover:underline"
-                >
-                  The Movie Database (TMDb)
-                </a>
+                {t('footer.tmdbAttribution')}
               </span>
             </div>
           </div>
 
           {/* Навигация */}
           <div>
-            <h3 className="font-semibold text-sm mb-4 text-foreground">Навигация</h3>
+            <h3 className="font-semibold text-sm mb-4 text-foreground">{t('footer.navigation')}</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link to="/" className="hover:text-primary transition-colors">
-                  Главная
+                  {t('nav.home')}
                 </Link>
               </li>
               <li>
                 <Link to="/search" className="hover:text-primary transition-colors">
-                  Поиск
+                  {t('nav.search')}
                 </Link>
               </li>
               <li>
                 <Link to="/favorites" className="hover:text-primary transition-colors">
-                  Избранное
+                  {t('nav.favorites')}
                 </Link>
               </li>
               <li>
                 <Link to="/lists" className="hover:text-primary transition-colors">
-                  Мои списки
+                  {t('nav.lists')}
                 </Link>
               </li>
             </ul>
@@ -67,16 +60,16 @@ export const Footer: React.FC = () => {
 
           {/* Информация */}
           <div>
-            <h3 className="font-semibold text-sm mb-4 text-foreground">Информация</h3>
+            <h3 className="font-semibold text-sm mb-4 text-foreground">{t('footer.information')}</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link to="/about" className="hover:text-primary transition-colors">
-                  О проекте
+                  {t('footer.aboutProject')}
                 </Link>
               </li>
               <li>
                 <Link to="/legal" className="hover:text-primary transition-colors">
-                  Правовая информация
+                  {t('footer.legalInfo')}
                 </Link>
               </li>
               <li>
@@ -86,7 +79,7 @@ export const Footer: React.FC = () => {
                   rel="noopener noreferrer"
                   className="hover:text-primary transition-colors"
                 >
-                  Условия TMDb
+                  {t('footer.tmdbTerms')}
                 </a>
               </li>
             </ul>
@@ -94,9 +87,9 @@ export const Footer: React.FC = () => {
         </div>
 
         <div className="border-t border-border/40 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center text-xs text-muted-foreground">
-          <p>© 2024 FiOn Cinema. Разработано MrJinPro.</p>
+          <p>{t('footer.copyright')}</p>
           <p className="mt-2 sm:mt-0">
-            Некоммерческое использование. Не предназначено для распространения контента.
+            {t('footer.disclaimer')}
           </p>
         </div>
       </div>

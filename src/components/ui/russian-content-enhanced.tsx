@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardHeader, CardTitle, CardContent } from './card';
 import { MovieSkeleton } from './movie-skeleton';
 import { Alert, AlertDescription } from './alert';
@@ -8,6 +9,7 @@ import { Info, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useKinopoiskCategories, useCategoryMovies, useRussianMoviesFromDB } from '@/hooks/useWebScraping';
 export function RussianContentEnhanced() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState<string>('russian-cinema');
   const {
@@ -39,7 +41,7 @@ export function RussianContentEnhanced() {
 
       {/* Categories Navigation */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-gradient-primary">Категории российского кино</h2>
+        <h2 className="text-2xl font-bold text-gradient-primary">{t('russianContent.title')}</h2>
         {categories && <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
             {categories.map(category => <Button key={category.slug} variant={activeCategory === category.slug ? "default" : "outline"} size="sm" onClick={() => setActiveCategory(category.slug)} className="text-xs">
                 {category.name}
@@ -51,7 +53,7 @@ export function RussianContentEnhanced() {
       <div className="space-y-6">
         {categories && <div>
             <h3 className="text-xl font-semibold mb-4">
-              {categories.find(c => c.slug === activeCategory)?.name || 'Российское кино'}
+              {categories.find(c => c.slug === activeCategory)?.name || t('russianContent.title')}
             </h3>
             <p className="text-muted-foreground mb-6">
               {categories.find(c => c.slug === activeCategory)?.description}
@@ -81,10 +83,10 @@ export function RussianContentEnhanced() {
                   </div>)}
               </div> : <div className="text-center py-12">
                 <p className="text-muted-foreground mb-4">
-                  Загружаем фильмы для этой категории...
+                  {t('russianContent.noMoviesFound')}
                 </p>
                 {russianMoviesDB && russianMoviesDB.length > 0 && <div>
-                    <h4 className="text-lg font-medium mb-4">Популярные российские фильмы из нашей базы:</h4>
+                    <h4 className="text-lg font-medium mb-4">{t('russianContent.fallbackTitle')}</h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                       {russianMoviesDB.slice(0, 12).map(movie => <div key={movie.id} className="group cursor-pointer" onClick={() => handleKinopoiskClick(parseInt(movie.id))}>
                           <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-muted transition-transform group-hover:scale-105">

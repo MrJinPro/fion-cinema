@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import fionLogo from '@/assets/fion-logo.png';
+import vionLogo from '@/assets/vion-logo.png';
 
 interface LogoProps {
   className?: string;
@@ -16,8 +16,8 @@ export const Logo: React.FC<LogoProps> = ({ className, size = 'md' }) => {
 
   return (
     <img 
-      src={fionLogo}
-      alt="FION FILM ON"
+      src={vionLogo}
+      alt="VION CINEMA"
       className={cn(sizeClasses[size], className)}
     />
   );

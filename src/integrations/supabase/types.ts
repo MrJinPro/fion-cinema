@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      actors: {
+        Row: {
+          created_at: string
+          id: string
+          name_en: string | null
+          name_ru: string
+          profile_path: string | null
+          tmdb_id: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name_en?: string | null
+          name_ru: string
+          profile_path?: string | null
+          tmdb_id?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name_en?: string | null
+          name_ru?: string
+          profile_path?: string | null
+          tmdb_id?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cache_queries: {
         Row: {
           query: string
@@ -146,30 +176,36 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string | null
+          description_en: string | null
           id: string
           kinopoisk_url: string | null
           movie_count: number | null
           name: string
+          name_en: string | null
           slug: string
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           description?: string | null
+          description_en?: string | null
           id?: string
           kinopoisk_url?: string | null
           movie_count?: number | null
           name: string
+          name_en?: string | null
           slug: string
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           description?: string | null
+          description_en?: string | null
           id?: string
           kinopoisk_url?: string | null
           movie_count?: number | null
           name?: string
+          name_en?: string | null
           slug?: string
           updated_at?: string | null
         }
@@ -217,10 +253,15 @@ export type Database = {
       movies_kp: {
         Row: {
           actors: string[] | null
+          actors_en: string[] | null
           country: string | null
+          country_en: string | null
           description: string | null
+          description_en: string | null
           director: string | null
+          director_en: string | null
           genres: string[] | null
+          genres_en: string[] | null
           id: number
           kinopoisk_id: string | null
           kinopoisk_url: string | null
@@ -231,16 +272,22 @@ export type Database = {
           rating: number | null
           streaming_services: Json | null
           title: string
+          title_en: string | null
           trailer_url: string | null
           updated_at: string
           year: number | null
         }
         Insert: {
           actors?: string[] | null
+          actors_en?: string[] | null
           country?: string | null
+          country_en?: string | null
           description?: string | null
+          description_en?: string | null
           director?: string | null
+          director_en?: string | null
           genres?: string[] | null
+          genres_en?: string[] | null
           id: number
           kinopoisk_id?: string | null
           kinopoisk_url?: string | null
@@ -251,16 +298,22 @@ export type Database = {
           rating?: number | null
           streaming_services?: Json | null
           title: string
+          title_en?: string | null
           trailer_url?: string | null
           updated_at?: string
           year?: number | null
         }
         Update: {
           actors?: string[] | null
+          actors_en?: string[] | null
           country?: string | null
+          country_en?: string | null
           description?: string | null
+          description_en?: string | null
           director?: string | null
+          director_en?: string | null
           genres?: string[] | null
+          genres_en?: string[] | null
           id?: number
           kinopoisk_id?: string | null
           kinopoisk_url?: string | null
@@ -271,6 +324,7 @@ export type Database = {
           rating?: number | null
           streaming_services?: Json | null
           title?: string
+          title_en?: string | null
           trailer_url?: string | null
           updated_at?: string
           year?: number | null

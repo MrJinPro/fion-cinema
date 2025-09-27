@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardHeader, CardTitle, CardContent } from './card';
 import { PersonCard } from './person-card';
 import { ScrollArea } from './scroll-area';
@@ -9,6 +10,7 @@ interface CastSectionProps {
 }
 
 export function CastSection({ credits }: CastSectionProps) {
+  const { t } = useTranslation();
   const cast = credits.cast.slice(0, 20); // Top 20 cast members
   const crew = credits.crew.filter(member => 
     ['Director', 'Producer', 'Screenplay', 'Writer'].includes(member.job)
@@ -19,7 +21,7 @@ export function CastSection({ credits }: CastSectionProps) {
       {/* Cast */}
       <Card>
         <CardHeader>
-          <CardTitle>В ролях</CardTitle>
+          <CardTitle>{t('sections.cast')}</CardTitle>
         </CardHeader>
         <CardContent>
           <ScrollArea className="w-full">
@@ -36,7 +38,7 @@ export function CastSection({ credits }: CastSectionProps) {
       {crew.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Съёмочная группа</CardTitle>
+            <CardTitle>{t('sections.crew')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ScrollArea className="w-full">

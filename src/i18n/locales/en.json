@@ -4,7 +4,8 @@
     "search": "Search",
     "favorites": "Favorites",
     "lists": "Lists",
-    "about": "About"
+    "about": "About",
+    "russianCinema": "Russian Cinema"
   },
   "hero": {
     "title": "Discover Amazing Movies",
@@ -21,6 +22,7 @@
     "recommendations": "Pick a Movie",
     "similar": "Similar Movies",
     "cast": "Cast",
+    "crew": "Crew",
     "reviews": "Reviews",
     "videos": "Videos & Trailers",
     "images": "Images",
@@ -106,5 +108,31 @@
     "description": "Description",
     "public": "Make Public",
     "private": "Keep Private"
+  },
+  "footer": {
+    "appDescription": "FiOn Cinema - Your gateway to the world of movies and TV shows. Discover, explore, and enjoy the best cinematic content from around the globe.",
+    "tmdbAttribution": "This product uses the TMDb API but is not endorsed or certified by TMDb.",
+    "navigation": "Navigation",
+    "information": "Information",
+    "aboutProject": "About Project",
+    "legalInfo": "Legal Information",
+    "tmdbTerms": "TMDb Terms",
+    "copyright": "© 2024 FiOn Cinema. Made with ❤️ by Developer.",
+    "disclaimer": "This application is for educational and entertainment purposes only. All content is provided for non-commercial use."
+  },
+  "russianContent": {
+    "title": "Russian Cinema",
+    "subtitle": "Discover the best Russian films, series and documentaries. From the latest releases to classics of domestic cinematography.",
+    "categories": {
+      "popular": "Popular Movies",
+      "newReleases": "New Releases",
+      "classics": "Classics",
+      "series": "TV Series",
+      "documentaries": "Documentaries"
+    },
+    "noMoviesFound": "No movies found in this category",
+    "fallbackTitle": "Popular Russian Movies",
+    "loadingCategories": "Loading categories...",
+    "loadingMovies": "Loading movies..."
   }
 }
