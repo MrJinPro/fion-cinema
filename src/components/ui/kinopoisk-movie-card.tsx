@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, Calendar } from "lucide-react";
 import { KinopoiskMovie } from "@/hooks/useKinopoisk";
+import { PosterImage } from "@/components/ui/poster-image";
 
 interface KinopoiskMovieCardProps {
   movie: KinopoiskMovie;
@@ -16,19 +17,12 @@ export function KinopoiskMovieCard({ movie, className = "" }: KinopoiskMovieCard
 
   return (
     <Card className={`group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg bg-card border-border ${className}`}>
-      <div className="relative aspect-[2/3] overflow-hidden rounded-t-lg">
-        {posterUrl ? (
-          <img
-            src={posterUrl}
-            alt={title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full bg-muted flex items-center justify-center">
-            <span className="text-muted-foreground">Нет постера</span>
-          </div>
-        )}
+      <div className="relative overflow-hidden rounded-t-lg">
+        <PosterImage
+          src={posterUrl}
+          alt={title}
+          className="transition-transform duration-300 group-hover:scale-110"
+        />
         
         {rating && rating > 0 && (
           <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1">

@@ -5,6 +5,7 @@ import { ScrollArea } from './scroll-area';
 import { Badge } from './badge';
 import { Star, Play } from 'lucide-react';
 import { getTMDbClient } from '@/lib/tmdb';
+import { PosterImage } from '@/components/ui/poster-image';
 import type { TMDbMovie, TMDbTVShow } from '@/lib/tmdb';
 
 interface SimilarSectionProps {
@@ -28,18 +29,11 @@ function SimilarMovieCard({ item, type }: { item: TMDbMovie | TMDbTVShow; type: 
 
   return (
     <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={handleClick}>
-      <div className="aspect-[2/3] relative overflow-hidden rounded-t-lg">
-        {posterUrl ? (
-          <img
-            src={posterUrl}
-            alt={title}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-muted flex items-center justify-center">
-            <Play className="h-8 w-8 text-muted-foreground" />
-          </div>
-        )}
+      <div className="relative overflow-hidden rounded-t-lg">
+        <PosterImage
+          src={posterUrl}
+          alt={title}
+        />
       </div>
       <CardContent className="p-3">
         <h4 className="font-medium text-sm leading-tight mb-1 line-clamp-2">

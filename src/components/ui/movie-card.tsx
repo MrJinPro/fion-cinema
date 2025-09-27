@@ -9,6 +9,7 @@ import { TMDbMovie, TMDbTVShow, getTMDbClient } from '@/lib/tmdb';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useAuth } from '@/hooks/useAuth';
 import { AddToCollectionDialog } from '@/components/ui/add-to-collection-dialog';
+import { PosterImage } from '@/components/ui/poster-image';
 import { toast } from 'sonner';
 
 interface MovieCardProps {
@@ -78,19 +79,12 @@ export const MovieCard: React.FC<MovieCardProps> = ({
       )}
       onClick={handleClick}
     >
-      <div className="relative aspect-[2/3] overflow-hidden">
-        {posterUrl ? (
-          <img
-            src={posterUrl}
-            alt={title}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            loading="lazy"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-muted">
-            <Play className="h-12 w-12 text-muted-foreground" />
-          </div>
-        )}
+      <div className="relative overflow-hidden">
+        <PosterImage
+          src={posterUrl}
+          alt={title}
+          className="transition-transform duration-300 group-hover:scale-105"
+        />
         
         {/* Градиентный оверлей */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />

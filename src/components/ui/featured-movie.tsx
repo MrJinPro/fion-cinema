@@ -5,6 +5,7 @@ import { Star, Play, Heart, Plus } from 'lucide-react';
 import { getTMDbClient } from '@/lib/tmdb';
 import { useAuth } from '@/hooks/useAuth';
 import { useFavorites } from '@/hooks/useFavorites';
+import { PosterImage } from '@/components/ui/poster-image';
 import type { TMDbMovie, TMDbTVShow } from '@/lib/tmdb';
 
 interface FeaturedMovieProps {
@@ -49,11 +50,11 @@ export const FeaturedMovie: React.FC<FeaturedMovieProps> = ({ item, onItemClick 
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Poster */}
         <div className="flex-shrink-0">
-          <div className="relative group">
-            <img
+          <div className="relative group w-48 h-72">
+            <PosterImage
               src={posterUrl}
               alt={title}
-              className="w-48 h-72 object-cover rounded-lg shadow-lg transition-transform duration-300 group-hover:scale-105"
+              className="rounded-lg shadow-lg transition-transform duration-300 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center">
               <Button 

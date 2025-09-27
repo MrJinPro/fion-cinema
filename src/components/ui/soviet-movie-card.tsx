@@ -6,6 +6,7 @@ import { Star, Calendar, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SovietMovie } from '@/hooks/useSovietClassics';
 import { AddToCollectionDialog } from '@/components/ui/add-to-collection-dialog';
+import { PosterImage } from '@/components/ui/poster-image';
 
 interface SovietMovieCardProps {
   movie: SovietMovie;
@@ -74,25 +75,13 @@ export const SovietMovieCard: React.FC<SovietMovieCardProps> = ({
         onClick={onClick}
       >
         <CardContent className="p-0">
-          <div className="relative aspect-[2/3]">
-            {movie.poster_path ? (
-              <img
-                src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                alt={movie.title}
-                className="h-full w-full object-cover transition-transform group-hover:scale-110"
-                loading="lazy"
-                onError={(e) => {
-                  e.currentTarget.src = '/placeholder.svg';
-                }}
-              />
-            ) : (
-              <div className="h-full w-full bg-muted flex items-center justify-center">
-                <div className="text-center p-4">
-                  <Calendar className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">{movie.title}</p>
-                </div>
-              </div>
-            )}
+          <div className="relative">
+            <PosterImage
+              src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null}
+              alt={movie.title}
+              className="transition-transform group-hover:scale-110"
+              showTitle={true}
+            />
             
             {/* Оверлей с информацией */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
