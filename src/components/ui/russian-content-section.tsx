@@ -2,7 +2,6 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from './card';
 import { MovieCard } from './movie-card';
 import { KinopoiskMovieCard } from './kinopoisk-movie-card';
-
 import { useRussianMovies } from '@/hooks/useRussianMovies';
 import { useKinopoiskPremieres, useKinopoiskNewReleases } from '@/hooks/useKinopoisk';
 import { MovieSkeleton } from './movie-skeleton';
@@ -40,14 +39,10 @@ export function RussianContentSection() {
         </div>
       </div>;
   }
-
-  return (
-    <div className="space-y-12">
+  return <div className="space-y-12">
       {/* TMDB Russian Movies */}
-      {russianMovies && (
-        <>
-          {russianMovies.popular && russianMovies.popular.length > 0 && (
-            <Card>
+      {russianMovies && <>
+          {russianMovies.popular && russianMovies.popular.length > 0 && <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Info className="h-5 w-5" />
@@ -56,116 +51,63 @@ export function RussianContentSection() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {russianMovies.popular.map((movie) => (
-                    <div key={movie.id} onClick={() => handleMovieClick(movie.id)}>
-                      <MovieCard
-                        item={movie}
-                        type="movie"
-                      />
-                    </div>
-                  ))}
+                  {russianMovies.popular.map(movie => <div key={movie.id} onClick={() => handleMovieClick(movie.id)}>
+                      <MovieCard item={movie} type="movie" />
+                    </div>)}
                 </div>
               </CardContent>
-            </Card>
-          )}
+            </Card>}
 
-          {russianMovies.classics && russianMovies.classics.length > 0 && (
-            <Card>
+          {russianMovies.classics && russianMovies.classics.length > 0 && <Card>
               <CardHeader>
                 <CardTitle>Классика российского кино</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {russianMovies.classics.map((movie) => (
-                    <div key={movie.id} onClick={() => handleMovieClick(movie.id)}>
-                      <MovieCard
-                        item={movie}
-                        type="movie"
-                      />
-                    </div>
-                  ))}
+                  {russianMovies.classics.map(movie => <div key={movie.id} onClick={() => handleMovieClick(movie.id)}>
+                      <MovieCard item={movie} type="movie" />
+                    </div>)}
                 </div>
               </CardContent>
-            </Card>
-          )}
+            </Card>}
 
-          {russianMovies.modern && russianMovies.modern.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Современные российские фильмы</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {russianMovies.modern.map((movie) => (
-                    <div key={movie.id} onClick={() => handleMovieClick(movie.id)}>
-                      <MovieCard
-                        item={movie}
-                        type="movie"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </>
-      )}
+          {russianMovies.modern && russianMovies.modern.length > 0}
+        </>}
 
       {/* Kinopoisk Premieres */}
-      {kinopoiskPremieres && kinopoiskPremieres.docs && kinopoiskPremieres.docs.length > 0 && (
-        <Card>
+      {kinopoiskPremieres && kinopoiskPremieres.docs && kinopoiskPremieres.docs.length > 0 && <Card>
           <CardHeader>
             <CardTitle>Премьеры российского кино</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {kinopoiskPremieres.docs.map((movie) => (
-                <div key={movie.id} onClick={() => handleKinopoiskClick(movie.id)}>
-                  <KinopoiskMovieCard
-                    movie={movie}
-                  />
-                </div>
-              ))}
+              {kinopoiskPremieres.docs.map(movie => <div key={movie.id} onClick={() => handleKinopoiskClick(movie.id)}>
+                  <KinopoiskMovieCard movie={movie} />
+                </div>)}
             </div>
           </CardContent>
-        </Card>
-      )}
+        </Card>}
 
       {/* Kinopoisk New Releases */}
-      {kinopoiskNew && kinopoiskNew.docs && kinopoiskNew.docs.length > 0 && (
-        <Card>
+      {kinopoiskNew && kinopoiskNew.docs && kinopoiskNew.docs.length > 0 && <Card>
           <CardHeader>
             <CardTitle>Новинки российского кино</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {kinopoiskNew.docs.map((movie) => (
-                <div key={movie.id} onClick={() => handleKinopoiskClick(movie.id)}>
-                  <KinopoiskMovieCard
-                    movie={movie}
-                  />
-                </div>
-              ))}
+              {kinopoiskNew.docs.map(movie => <div key={movie.id} onClick={() => handleKinopoiskClick(movie.id)}>
+                  <KinopoiskMovieCard movie={movie} />
+                </div>)}
             </div>
           </CardContent>
-        </Card>
-      )}
+        </Card>}
 
       {/* No content message */}
-      {(!russianMovies || (
-        (!russianMovies.popular || russianMovies.popular.length === 0) &&
-        (!russianMovies.classics || russianMovies.classics.length === 0) &&
-        (!russianMovies.modern || russianMovies.modern.length === 0)
-      )) && 
-      (!kinopoiskPremieres || !kinopoiskPremieres.docs || kinopoiskPremieres.docs.length === 0) &&
-      (!kinopoiskNew || !kinopoiskNew.docs || kinopoiskNew.docs.length === 0) && (
-        <Alert>
+      {(!russianMovies || (!russianMovies.popular || russianMovies.popular.length === 0) && (!russianMovies.classics || russianMovies.classics.length === 0) && (!russianMovies.modern || russianMovies.modern.length === 0)) && (!kinopoiskPremieres || !kinopoiskPremieres.docs || kinopoiskPremieres.docs.length === 0) && (!kinopoiskNew || !kinopoiskNew.docs || kinopoiskNew.docs.length === 0) && <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
             Фильмы в данной категории временно недоступны. Попробуйте позже.
           </AlertDescription>
-        </Alert>
-      )}
-    </div>
-  );
+        </Alert>}
+    </div>;
 }
