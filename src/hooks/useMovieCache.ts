@@ -191,19 +191,8 @@ export const useMovieCache = () => {
           return true;
         }
 
-        // Если фильма нет, пытаемся получить его из TMDB и сохранить
-        try {
-          const { data, error } = await supabase.functions.invoke('tmdb-proxy', {
-            body: { endpoint: `movie/${contentId}` }
-          });
-          if (!error && data) {
-            return await cacheMovie(data);
-          }
-        } catch (error) {
-          console.error('Error fetching movie from TMDB:', error);
-        }
-
-        // Если не удалось получить из TMDB, создаем минимальную запись
+        // Создаем минимальную запись без попытки получить данные из TMDB
+        // Кэширование будет происходить автоматически через useTMDbApi хуки
         const { error } = await supabase
           .from('movies_tmdb')
           .insert({
@@ -231,7 +220,7 @@ export const useMovieCache = () => {
           return true;
         }
 
-        // Если сериала нет, создаем минимальную запись
+        // Создаем минимальную запись для TV шоу
         const { error } = await supabase
           .from('tv_shows_tmdb')
           .insert({
@@ -252,7 +241,7 @@ export const useMovieCache = () => {
       console.error('Error in ensureMovieExists:', error);
       return false;
     }
-  }, [cacheMovie]);
+  }, []);
 
   return {
     cacheMovie,

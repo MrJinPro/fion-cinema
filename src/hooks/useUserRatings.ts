@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
-import { useMovieCache } from './useMovieCache';
 
 export interface UserRating {
   id: string;
@@ -17,7 +16,6 @@ export interface UserRating {
 export const useUserRatings = (contentId: number, contentType: 'movie' | 'tv') => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { ensureMovieExists } = useMovieCache();
   const [userRating, setUserRating] = useState<UserRating | null>(null);
   const [averageRating, setAverageRating] = useState<number | null>(null);
   const [ratingCount, setRatingCount] = useState<number>(0);
@@ -78,39 +76,34 @@ export const useUserRatings = (contentId: number, contentType: 'movie' | 'tv') =
     }
 
     try {
-      // Убеждаемся, что фильм/сериал существует в базе данных перед сохранением оценки
-      const movieExists = await ensureMovieExists(contentId, contentType);
-      if (!movieExists) {
-        toast({
-          title: "Ошибка",
-          description: "Не удалось сохранить данные о контенте",
-          variant: "destructive",
-        });
-        return;
-      }
-
       const ratingData = {
         user_id: user.id,
         content_id: contentId,
         content_type: contentType,
-        rating: rating
+        rating: Math.round(rating) // Убеждаемся что рейтинг целое число
       };
 
       if (userRating) {
         // Update existing rating
         const { error } = await supabase
           .from('user_ratings')
-          .update({ rating })
+          .update({ rating: ratingData.rating })
           .eq('id', userRating.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error updating rating:', error);
+          throw error;
+        }
       } else {
         // Insert new rating
         const { error } = await supabase
           .from('user_ratings')
           .insert(ratingData);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error inserting rating:', error);
+          throw error;
+        }
       }
 
       toast({
@@ -124,7 +117,7 @@ export const useUserRatings = (contentId: number, contentType: 'movie' | 'tv') =
       console.error('Error submitting rating:', error);
       toast({
         title: "Ошибка",
-        description: "Не удалось сохранить оценку",
+        description: "Не удалось сохранить оценку. Попробуйте еще раз.",
         variant: "destructive",
       });
     }
