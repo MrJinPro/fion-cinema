@@ -58,31 +58,9 @@ export function RussianContentSection() {
               </CardContent>
             </Card>}
 
-          {russianMovies.classics && russianMovies.classics.length > 0 && <Card>
-              <CardHeader>
-                <CardTitle>Классика российского кино</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {russianMovies.classics.map(movie => <div key={movie.id} onClick={() => handleMovieClick(movie.id)}>
-                      <MovieCard item={movie} type="movie" />
-                    </div>)}
-                </div>
-              </CardContent>
-            </Card>}
+          {russianMovies.classics && russianMovies.classics.length > 0}
 
-          {russianMovies.modern && russianMovies.modern.length > 0 && <Card>
-              <CardHeader>
-                <CardTitle>Советская классика</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {russianMovies.modern.map(movie => <div key={movie.id} onClick={() => handleMovieClick(movie.id)}>
-                      <MovieCard item={movie} type="movie" />
-                    </div>)}
-                </div>
-              </CardContent>
-            </Card>}
+          {russianMovies.modern && russianMovies.modern.length > 0}
         </>}
 
       {/* Kinopoisk Premieres */}
