@@ -98,6 +98,95 @@ export type Database = {
         }
         Relationships: []
       }
+      collection_items: {
+        Row: {
+          added_at: string | null
+          collection_id: string | null
+          curator_note: string | null
+          custom_description: string | null
+          id: string
+          media_type: string
+          position: number
+          tmdb_id: number
+        }
+        Insert: {
+          added_at?: string | null
+          collection_id?: string | null
+          curator_note?: string | null
+          custom_description?: string | null
+          id?: string
+          media_type: string
+          position: number
+          tmdb_id: number
+        }
+        Update: {
+          added_at?: string | null
+          collection_id?: string | null
+          curator_note?: string | null
+          custom_description?: string | null
+          id?: string
+          media_type?: string
+          position?: number
+          tmdb_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "curated_collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curated_collections: {
+        Row: {
+          collection_type: string
+          created_at: string | null
+          description: string | null
+          description_en: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          poster_url: string | null
+          slug: string
+          title: string
+          title_en: string | null
+          total_items: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          collection_type: string
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          poster_url?: string | null
+          slug: string
+          title: string
+          title_en?: string | null
+          total_items?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          collection_type?: string
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          poster_url?: string | null
+          slug?: string
+          title?: string
+          title_en?: string | null
+          total_items?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           added_at: string
