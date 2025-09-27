@@ -62,21 +62,21 @@ const Index = () => {
   const homeStructuredData = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "Vion - Русский Кинопоиск",
-    "description": "Лучший кинопоиск на русском языке. Фильмы, сериалы, трейлеры, рецензии и персональные рекомендации.",
-    "url": "https://vion.app",
+    "name": "FiOn - Русский Кино-каталог",
+    "description": "Лучший кино-каталог на русском языке. Фильмы, сериалы, трейлеры, рецензии и персональные рекомендации.",
+    "url": "https://fion.online",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://vion.app/search?q={search_term_string}",
+      "target": "https://fion.online/search?q={search_term_string}",
       "query-input": "required name=search_term_string"
     },
-    "sameAs": ["https://vk.com/vion_movies", "https://t.me/vion_movies"]
+    "sameAs": ["https://www.tiktok.com/@fion_cinema", "https://t.me/fion_cinema"]
   };
   return <div className="min-h-screen bg-background">
-      <SEOHead title="Vion - Русский Кинопоиск | Фильмы и Сериалы Онлайн" description="Откройте мир кино с Vion! Популярные фильмы, новые сериалы, персональные рекомендации и подробная информация о фильмах на русском языке. Смотрите трейлеры, читайте рецензии." keywords="фильмы онлайн, сериалы, кинопоиск, русские фильмы, трейлеры, рецензии фильмов, новинки кино, популярные фильмы, рейтинг фильмов" canonicalUrl="https://vion.app" structuredData={homeStructuredData} />
+      <SEOHead title="FiOn - Русский Кино-каталог | Фильмы и Сериалы Онлайн" description="Откройте мир кино с FiOn! Популярные фильмы, новые сериалы, персональные рекомендации и подробная информация о фильмах на русском языке. Смотрите трейлеры, читайте рецензии." keywords="фильмы онлайн, сериалы, кинопоиск, русские фильмы, трейлеры, рецензии фильмов, новинки кино, популярные фильмы, рейтинг фильмов" canonicalUrl="https://vion.app" structuredData={homeStructuredData} />
       <div className="block sm:hidden px-4 py-2 bg-card/50 backdrop-blur-sm border-b border-accent/20">
         <p className="text-xs text-center text-muted-foreground">
-          📱 Установите приложение для лучшего опыта
+          📱 Установите приложение
         </p>
       </div>
       <Header searchValue={searchValue} onSearchChange={setSearchValue} onSearch={handleSearch} />
