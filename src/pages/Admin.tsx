@@ -41,6 +41,7 @@ const Admin = () => {
   });
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
+  const [populatingCollections, setPopulatingCollections] = useState(false);
 
   useEffect(() => {
     if (!roleLoading && !isAdmin) {
@@ -136,6 +137,32 @@ const Admin = () => {
         description: 'Не удалось обновить роль пользователя',
         variant: 'destructive',
       });
+    }
+  };
+
+  const populateCollections = async () => {
+    setPopulatingCollections(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('populate-collections');
+      
+      if (error) throw error;
+      
+      toast({
+        title: 'Подборки заполнены',
+        description: 'Базовые подборки фильмов успешно заполнены',
+      });
+      
+      // Refresh stats after populating
+      await fetchStats();
+    } catch (error) {
+      console.error('Error populating collections:', error);
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось заполнить подборки',
+        variant: 'destructive',
+      });
+    } finally {
+      setPopulatingCollections(false);
     }
   };
 
@@ -243,7 +270,7 @@ const Admin = () => {
                         <Badge variant={user.role === 'admin' ? 'default' : user.role === 'moderator' ? 'secondary' : 'outline'}>
                           {user.role}
                         </Badge>
-                        {user.id !== user?.id && (
+                        {user.id !== user.id && (
                           <div className="flex gap-1">
                             <Button
                               size="sm"
@@ -285,9 +312,39 @@ const Admin = () => {
                 <CardTitle>Управление контентом</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <Film className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Управление контентом будет доступно в следующих обновлениях</p>
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Подборки фильмов</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Заполните базовые подборки фильмами из TMDB API
+                    </p>
+                    <Button 
+                      onClick={populateCollections}
+                      disabled={populatingCollections}
+                      className="w-full sm:w-auto"
+                    >
+                      {populatingCollections ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Заполняем подборки...
+                        </>
+                      ) : (
+                        <>
+                          <Database className="h-4 w-4 mr-2" />
+                          Заполнить подборки
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  
+                  <div className="border-t pt-6">
+                    <div className="text-center py-8">
+                      <Film className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">
+                        Дополнительное управление контентом будет доступно в следующих обновлениях
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>

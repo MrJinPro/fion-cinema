@@ -38,7 +38,7 @@ export const useUserRatings = (contentId: number, contentType: 'movie' | 'tv') =
           .eq('content_id', contentId)
           .eq('content_type', contentType)
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
         
         setUserRating(userRatingData as UserRating);
       }
