@@ -142,34 +142,136 @@ export type Database = {
         }
         Relationships: []
       }
+      movie_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          kinopoisk_url: string | null
+          movie_count: number | null
+          name: string
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          kinopoisk_url?: string | null
+          movie_count?: number | null
+          name: string
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          kinopoisk_url?: string | null
+          movie_count?: number | null
+          name?: string
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      movie_category_items: {
+        Row: {
+          category_id: string | null
+          created_at: string | null
+          id: string
+          movie_id: number | null
+          position: number | null
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string | null
+          id?: string
+          movie_id?: number | null
+          position?: number | null
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string | null
+          id?: string
+          movie_id?: number | null
+          position?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movie_category_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "movie_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movie_category_items_movie_id_fkey"
+            columns: ["movie_id"]
+            isOneToOne: false
+            referencedRelation: "movies_kp"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       movies_kp: {
         Row: {
+          actors: string[] | null
+          country: string | null
+          description: string | null
+          director: string | null
           genres: string[] | null
           id: number
+          kinopoisk_id: string | null
+          kinopoisk_url: string | null
+          last_scraped: string | null
+          original_title: string | null
           poster: string | null
           premiere_russia: string | null
           rating: number | null
+          streaming_services: Json | null
           title: string
+          trailer_url: string | null
           updated_at: string
           year: number | null
         }
         Insert: {
+          actors?: string[] | null
+          country?: string | null
+          description?: string | null
+          director?: string | null
           genres?: string[] | null
           id: number
+          kinopoisk_id?: string | null
+          kinopoisk_url?: string | null
+          last_scraped?: string | null
+          original_title?: string | null
           poster?: string | null
           premiere_russia?: string | null
           rating?: number | null
+          streaming_services?: Json | null
           title: string
+          trailer_url?: string | null
           updated_at?: string
           year?: number | null
         }
         Update: {
+          actors?: string[] | null
+          country?: string | null
+          description?: string | null
+          director?: string | null
           genres?: string[] | null
           id?: number
+          kinopoisk_id?: string | null
+          kinopoisk_url?: string | null
+          last_scraped?: string | null
+          original_title?: string | null
           poster?: string | null
           premiere_russia?: string | null
           rating?: number | null
+          streaming_services?: Json | null
           title?: string
+          trailer_url?: string | null
           updated_at?: string
           year?: number | null
         }
@@ -196,6 +298,33 @@ export type Database = {
           display_name?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      scraping_cache: {
+        Row: {
+          content: Json
+          created_at: string | null
+          expires_at: string
+          id: string
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          content: Json
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          updated_at?: string | null
+          url?: string
         }
         Relationships: []
       }
@@ -234,7 +363,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      cleanup_expired_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
