@@ -12,9 +12,32 @@ serve(async (req) => {
   }
 
   try {
-    const { message } = await req.json();
+    const requestBody = await req.text();
+    console.log("Raw request body:", requestBody);
+    
+    if (!requestBody) {
+      console.error("Empty request body received");
+      return new Response(JSON.stringify({ error: "Request body is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    let parsedBody;
+    try {
+      parsedBody = JSON.parse(requestBody);
+    } catch (parseError) {
+      console.error("Failed to parse request body:", parseError);
+      return new Response(JSON.stringify({ error: "Invalid JSON in request body" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { message } = parsedBody;
 
     if (!message) {
+      console.error("No message field in request");
       return new Response(JSON.stringify({ error: "Message is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

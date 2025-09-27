@@ -9,21 +9,31 @@ export interface RussianContent {
 }
 
 async function fetchRussianContent(endpoint: string, params: Record<string, string> = {}): Promise<any> {
-  const { data, error } = await supabase.functions.invoke('kinopoisk-proxy', {
-    body: { 
-      endpoint,
-      params 
-    },
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  console.log('Fetching Russian content:', { endpoint, params });
+  
+  try {
+    const { data, error } = await supabase.functions.invoke('kinopoisk-proxy', {
+      body: { 
+        endpoint,
+        params 
+      },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-  if (error) {
-    throw new Error(`Kinopoisk API error: ${error.message}`);
+    if (error) {
+      console.error('Kinopoisk proxy error:', error);
+      // Return empty result instead of throwing error
+      return { docs: [], total: 0 };
+    }
+
+    return data || { docs: [], total: 0 };
+  } catch (err) {
+    console.error('Fetch error:', err);
+    // Return empty result for any network/parsing errors
+    return { docs: [], total: 0 };
   }
-
-  return data;
 }
 
 // Современные российские фильмы (2020-2025)
@@ -40,6 +50,8 @@ export function useRussianMoviesModern() {
       'type': 'movie'
     }),
     staleTime: 1000 * 60 * 60 * 2, // 2 hours
+    retry: 3,
+    retryDelay: 1000
   });
 }
 

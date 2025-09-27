@@ -49,8 +49,15 @@ serve(async (req) => {
     if (!contentType || !contentType.includes('application/json')) {
       console.error('Invalid content type or missing body');
       return new Response(
-        JSON.stringify({ error: 'Content-Type must be application/json' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          docs: [], 
+          total: 0, 
+          limit: 0, 
+          page: 1, 
+          pages: 0,
+          error: 'Content-Type must be application/json' 
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
@@ -59,8 +66,15 @@ serve(async (req) => {
       if (!body.trim()) {
         console.error('Empty request body');
         return new Response(
-          JSON.stringify({ error: 'Request body cannot be empty' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ 
+            docs: [], 
+            total: 0, 
+            limit: 0, 
+            page: 1, 
+            pages: 0,
+            error: 'Request body cannot be empty' 
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
@@ -68,8 +82,15 @@ serve(async (req) => {
     } catch (error) {
       console.error('Failed to parse request body:', error);
       return new Response(
-        JSON.stringify({ error: 'Invalid JSON in request body' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          docs: [], 
+          total: 0, 
+          limit: 0, 
+          page: 1, 
+          pages: 0,
+          error: 'Invalid JSON in request body' 
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
