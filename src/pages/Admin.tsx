@@ -270,7 +270,7 @@ const Admin = () => {
                         <Badge variant={user.role === 'admin' ? 'default' : user.role === 'moderator' ? 'secondary' : 'outline'}>
                           {user.role}
                         </Badge>
-                        {user.id !== user?.id && (
+                        {true && (
                           <div className="flex gap-1">
                             <Button
                               size="sm"

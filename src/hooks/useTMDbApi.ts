@@ -133,10 +133,15 @@ export const useMovieDetails = (id: number) => {
   return useQuery({
     queryKey: ['movie', id],
     queryFn: async () => {
-      const movieData = await tmdbClient.getMovieDetails(id);
-      // Автоматически кэшируем фильм при получении
-      await cacheMovie(movieData);
-      return movieData;
+      try {
+        const movieData = await tmdbClient.getMovieDetails(id);
+        // Автоматически кэшируем фильм при получении
+        cacheMovie(movieData);
+        return movieData;
+      } catch (error) {
+        console.error('Error fetching movie details:', error);
+        throw error;
+      }
     },
     enabled: !!id,
     staleTime: 60 * 60 * 1000, // 1 час
@@ -150,10 +155,15 @@ export const useTVDetails = (id: number) => {
   return useQuery({
     queryKey: ['tv', id],
     queryFn: async () => {
-      const tvData = await tmdbClient.getTVDetails(id);
-      // Автоматически кэшируем сериал при получении
-      await cacheTVShow(tvData);
-      return tvData;
+      try {
+        const tvData = await tmdbClient.getTVDetails(id);
+        // Автоматически кэшируем сериал при получении
+        cacheTVShow(tvData);
+        return tvData;
+      } catch (error) {
+        console.error('Error fetching TV details:', error);
+        throw error;
+      }
     },
     enabled: !!id,
     staleTime: 60 * 60 * 1000, // 1 час
