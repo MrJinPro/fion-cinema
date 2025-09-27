@@ -193,10 +193,11 @@ export const useMovieCache = () => {
 
         // Если фильма нет, пытаемся получить его из TMDB и сохранить
         try {
-          const response = await fetch(`/api/tmdb/movie/${contentId}`);
-          if (response.ok) {
-            const movieData = await response.json();
-            return await cacheMovie(movieData);
+          const { data, error } = await supabase.functions.invoke('tmdb-proxy', {
+            body: { endpoint: `movie/${contentId}` }
+          });
+          if (!error && data) {
+            return await cacheMovie(data);
           }
         } catch (error) {
           console.error('Error fetching movie from TMDB:', error);
