@@ -10,7 +10,7 @@ import About from "./pages/About";
 import Favorites from "./pages/Favorites";
 import Lists from "./pages/Lists";
 import { ListDetails } from "./pages/ListDetails";
-import MovieDetails from "./pages/MovieDetails";
+import { MovieDetails } from "./pages/MovieDetails";
 import TVDetails from "./pages/TVDetails";
 import PersonDetails from "./pages/PersonDetails";
 import Auth from "./pages/Auth";

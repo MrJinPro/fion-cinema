@@ -39,7 +39,7 @@ import { VideoSection } from '@/components/ui/video-section';
 import { ImagesSection } from '@/components/ui/images-section';
 import { ReviewsSection } from '@/components/ui/reviews-section';
 import { SimilarSection } from '@/components/ui/similar-section';
-import { EmbeddedPlayer } from '@/components/ui/embedded-player';
+import EmbeddedPlayer from '@/components/ui/embedded-player';
 import { AddToCollectionDialog } from '@/components/ui/add-to-collection-dialog';
 import { StreamingAvailability } from '@/components/ui/streaming-availability';
 import { useAuth } from '@/hooks/useAuth';
@@ -108,16 +108,18 @@ export const MovieDetails = () => {
   const handleFavoriteToggle = async () => {
     if (!user) return;
     
-    if (isFavorite(movieId)) {
-      await removeFromFavorites(movieId);
+    if (isFavorite(movieId, 'movie')) {
+      await removeFromFavorites({ tmdbId: movieId, mediaType: 'movie' });
     } else {
       await addToFavorites({
-        tmdb_id: movieId,
-        title: movie?.title || '',
-        poster_path: movie?.poster_path || null,
-        vote_average: movie?.vote_average || null,
-        release_date: movie?.release_date || null,
-        media_type: 'movie'
+        item: {
+          id: movieId,
+          title: movie?.title || '',
+          poster_path: movie?.poster_path || null,
+          vote_average: movie?.vote_average || null,
+          release_date: movie?.release_date || null,
+        } as any,
+        mediaType: 'movie'
       });
     }
   };
@@ -356,8 +358,8 @@ export const MovieDetails = () => {
                       onClick={handleFavoriteToggle}
                       className={`flex items-center gap-2 ${isMobile ? '' : 'flex-1'}`}
                     >
-                      <Heart className={`h-4 w-4 ${isFavorite(movieId) ? 'fill-red-500 text-red-500' : ''}`} />
-                      {isFavorite(movieId) ? 'В избранном' : 'В избранное'}
+                      <Heart className={`h-4 w-4 ${isFavorite(movieId, 'movie') ? 'fill-red-500 text-red-500' : ''}`} />
+                      {isFavorite(movieId, 'movie') ? 'В избранном' : 'В избранное'}
                     </Button>
                     <Button
                       variant="outline"
@@ -400,8 +402,9 @@ export const MovieDetails = () => {
 
               {/* Streaming Availability */}
               <StreamingAvailability 
-                watchProviders={watchProviders?.results?.RU}
-                movieTitle={movie.title}
+                watchProviders={watchProviders?.results}
+                movieId={movieId}
+                title={movie.title}
               />
 
               {/* Overview */}
@@ -454,7 +457,7 @@ export const MovieDetails = () => {
                 <Users className="h-6 w-6 text-primary" />
                 <h2 className="text-2xl font-bold">Актёры и съёмочная группа</h2>
               </div>
-              <CastSection cast={credits?.cast || []} />
+              <CastSection credits={credits || { cast: [], crew: [] }} />
             </section>
 
             {/* Videos Section */}
@@ -502,15 +505,15 @@ export const MovieDetails = () => {
                   {similarMovies?.results && similarMovies.results.length > 0 && (
                     <SimilarSection 
                       title="Похожие фильмы" 
-                      movies={similarMovies.results} 
-                      mediaType="movie"
+                      items={similarMovies.results} 
+                      type="movie"
                     />
                   )}
                   {recommendations?.results && recommendations.results.length > 0 && (
                     <SimilarSection 
                       title="Рекомендации" 
-                      movies={recommendations.results} 
-                      mediaType="movie"
+                      items={recommendations.results} 
+                      type="movie"
                     />
                   )}
                 </div>
@@ -522,13 +525,9 @@ export const MovieDetails = () => {
       <Footer />
       {showCollectionDialog && (
         <AddToCollectionDialog
-          movie={{
-            id: movie.id,
-            title: movie.title,
-            poster_path: movie.poster_path,
-            vote_average: movie.vote_average,
-            release_date: movie.release_date
-          }}
+          isOpen={showCollectionDialog}
+          item={movie}
+          mediaType="movie"
           onClose={() => setShowCollectionDialog(false)}
         />
       )}
