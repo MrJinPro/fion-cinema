@@ -24,15 +24,19 @@ import { ReviewsSection } from '@/components/ui/reviews-section';
 import { SimilarSection } from '@/components/ui/similar-section';
 import { StreamingAvailability } from '@/components/ui/streaming-availability';
 import EmbeddedPlayer from '@/components/ui/embedded-player';
-import { ArrowLeft, Star, Calendar, Clock, Play, DollarSign } from 'lucide-react';
+import { ArrowLeft, Star, Calendar, Clock, Play, DollarSign, BookmarkPlus } from 'lucide-react';
 import { getTMDbClient } from '@/lib/tmdb';
 import { SEOHead } from '@/components/seo/SEOHead';
+import { AddToCollectionDialog } from '@/components/ui/add-to-collection-dialog';
+import { useAuth } from '@/hooks/useAuth';
 
 const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const movieId = parseInt(id || '0');
   const [searchValue, setSearchValue] = useState('');
+  const [showCollectionDialog, setShowCollectionDialog] = useState(false);
+  const { user } = useAuth();
   
   const { data: movie, isLoading, error } = useMovieDetails(movieId);
   const { data: credits } = useMovieCredits(movieId);
@@ -249,6 +253,14 @@ const MovieDetails = () => {
                 watchProviders={watchProviders}
                 className="mr-4"
               />
+              <Button
+                variant="outline"
+                onClick={() => user ? setShowCollectionDialog(true) : navigate('/auth')}
+                className="flex items-center gap-2"
+              >
+                <BookmarkPlus className="h-4 w-4" />
+                Добавить в коллекцию
+              </Button>
             </div>
 
             {/* Featured Trailer Section */}
@@ -363,6 +375,13 @@ const MovieDetails = () => {
           </div>
         </div>
       </main>
+
+      <AddToCollectionDialog
+        isOpen={showCollectionDialog}
+        onClose={() => setShowCollectionDialog(false)}
+        item={movie}
+        mediaType="movie"
+      />
 
       <Footer />
     </div>
