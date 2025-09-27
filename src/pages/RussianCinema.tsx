@@ -1,14 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SEOHead } from '@/components/seo/SEOHead';
-import { RussianContentEnhanced } from '@/components/ui/russian-content-enhanced';
+import { Header } from '@/components/layout/header';
+import { Footer } from '@/components/layout/footer';
+import { RussianContentSection } from '@/components/ui/russian-content-section';
 
 export default function RussianCinema() {
+  const navigate = useNavigate();
+  const [searchValue, setSearchValue] = useState('');
+
+  const handleSearch = (value: string) => {
+    setSearchValue(value);
+    if (value.trim()) {
+      navigate(`/search?q=${encodeURIComponent(value.trim())}`);
+    }
+  };
+
   return (
     <>
       <SEOHead 
         title="Российское кино - современные фильмы и сериалы | VION"
         description="Лучшие российские фильмы, сериалы и документальные фильмы. Новинки российского кино 2024-2025, топ фильмов по рейтингу, классика и современные российские продюсерские компании."
         keywords="российское кино, русские фильмы, российские сериалы, новинки кино 2024, российские режиссеры, кинопоиск"
+      />
+      
+      <Header 
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        onSearch={handleSearch}
       />
       
       <main className="container mx-auto px-4 py-8 space-y-8">
@@ -22,8 +41,10 @@ export default function RussianCinema() {
           </p>
         </header>
 
-        <RussianContentEnhanced />
+        <RussianContentSection />
       </main>
+      
+      <Footer />
     </>
   );
 }

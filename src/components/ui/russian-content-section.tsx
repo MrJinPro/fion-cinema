@@ -1,102 +1,152 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from './card';
-import { MovieCard } from './movie-card';
+import { SovietMovieCard } from './soviet-movie-card';
 import { KinopoiskMovieCard } from './kinopoisk-movie-card';
-import { useRussianMovies } from '@/hooks/useRussianMovies';
-import { useKinopoiskPremieres, useKinopoiskNewReleases } from '@/hooks/useKinopoisk';
+import { useSovietClassics } from '@/hooks/useSovietClassics';
+import { useModernRussianFilms } from '@/hooks/useModernRussianFilms';
 import { MovieSkeleton } from './movie-skeleton';
 import { Alert, AlertDescription } from './alert';
-import { Info } from 'lucide-react';
+import { Info, Film, Star, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { AddToCollectionDialog } from './add-to-collection-dialog';
+import { Button } from './button';
 export function RussianContentSection() {
   const navigate = useNavigate();
+  const [selectedKinopoiskMovie, setSelectedKinopoiskMovie] = useState<any>(null);
+  const [showCollectionDialog, setShowCollectionDialog] = useState(false);
+  
   const {
-    data: russianMovies,
-    isLoading: tmdbLoading
-  } = useRussianMovies();
+    data: sovietClassics,
+    isLoading: sovietLoading
+  } = useSovietClassics();
   const {
-    data: kinopoiskPremieres,
-    isLoading: premieresLoading
-  } = useKinopoiskPremieres();
-  const {
-    data: kinopoiskNew,
-    isLoading: newLoading
-  } = useKinopoiskNewReleases();
+    data: modernFilms,
+    isLoading: modernLoading
+  } = useModernRussianFilms();
   const handleMovieClick = (id: number) => {
     navigate(`/movie/${id}`);
   };
+  
   const handleKinopoiskClick = (id: number) => {
-    // For now, we can try to search for this movie in TMDB
-    // In future, we could create a dedicated Kinopoisk detail page
     navigate(`/search?q=${id}`);
   };
-  if (tmdbLoading && premieresLoading && newLoading) {
-    return <div className="space-y-8">
+
+  const handleAddToCollection = (movie: any) => {
+    setSelectedKinopoiskMovie(movie);
+    setShowCollectionDialog(true);
+  };
+
+  // Конвертируем Kinopoisk фильм в TMDb формат
+  const convertKinopoiskToTMDb = (movie: any) => ({
+    id: movie.id,
+    title: movie.name,
+    original_title: movie.alternativeName || movie.name,
+    poster_path: movie.poster?.url || '',
+    backdrop_path: '',
+    genre_ids: [],
+    overview: movie.description || '',
+    release_date: `${movie.year}-01-01`,
+    vote_average: movie.rating?.kp || 0,
+    vote_count: 1000,
+    popularity: 100,
+    adult: false,
+    original_language: 'ru',
+    video: false
+  });
+  if (sovietLoading && modernLoading) {
+    return (
+      <div className="space-y-8">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {Array.from({
-          length: 12
-        }).map((_, i) => <MovieSkeleton key={i} />)}
+          {Array.from({ length: 12 }).map((_, i) => (
+            <MovieSkeleton key={i} />
+          ))}
         </div>
-      </div>;
+      </div>
+    );
   }
-  return <div className="space-y-12">
-      {/* TMDB Russian Movies */}
-      {russianMovies && <>
-          {russianMovies.popular && russianMovies.popular.length > 0 && <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Info className="h-5 w-5" />
-                  Популярные российские фильмы
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {russianMovies.popular.map(movie => <div key={movie.id} onClick={() => handleMovieClick(movie.id)}>
-                      <MovieCard item={movie} type="movie" />
-                    </div>)}
+  return (
+    <div className="space-y-12">
+      {/* Легенды советского кино */}
+      {sovietClassics && sovietClassics.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Star className="h-5 w-5 text-yellow-500" />
+              Легенды советского кино
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {sovietClassics.map(movie => (
+                <SovietMovieCard
+                  key={movie.id}
+                  movie={movie}
+                  onClick={() => handleMovieClick(movie.id)}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Популярные российские фильмы 2023-2025 */}
+      {modernFilms && modernFilms.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Film className="h-5 w-5 text-primary" />
+              Популярные российские фильмы 2023-2025
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {modernFilms.map(movie => (
+                <div key={movie.id} className="relative group">
+                  <div 
+                    onClick={() => handleKinopoiskClick(movie.id)}
+                    className="cursor-pointer transition-transform hover:scale-105"
+                  >
+                    <KinopoiskMovieCard movie={movie} />
+                  </div>
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToCollection(movie);
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>}
-
-          {russianMovies.classics && russianMovies.classics.length > 0}
-
-          {russianMovies.modern && russianMovies.modern.length > 0}
-        </>}
-
-      {/* Kinopoisk Premieres */}
-      {kinopoiskPremieres && kinopoiskPremieres.docs && kinopoiskPremieres.docs.length > 0 && <Card>
-          <CardHeader>
-            <CardTitle>Премьеры российского кино</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {kinopoiskPremieres.docs.map(movie => <div key={movie.id} onClick={() => handleKinopoiskClick(movie.id)}>
-                  <KinopoiskMovieCard movie={movie} />
-                </div>)}
+              ))}
             </div>
           </CardContent>
-        </Card>}
+        </Card>
+      )}
 
-      {/* Kinopoisk New Releases */}
-      {kinopoiskNew && kinopoiskNew.docs && kinopoiskNew.docs.length > 0 && <Card>
-          <CardHeader>
-            <CardTitle>Новинки российского кино</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {kinopoiskNew.docs.map(movie => <div key={movie.id} onClick={() => handleKinopoiskClick(movie.id)}>
-                  <KinopoiskMovieCard movie={movie} />
-                </div>)}
-            </div>
-          </CardContent>
-        </Card>}
-
-      {/* No content message */}
-      {(!russianMovies || (!russianMovies.popular || russianMovies.popular.length === 0) && (!russianMovies.classics || russianMovies.classics.length === 0) && (!russianMovies.modern || russianMovies.modern.length === 0)) && (!kinopoiskPremieres || !kinopoiskPremieres.docs || kinopoiskPremieres.docs.length === 0) && (!kinopoiskNew || !kinopoiskNew.docs || kinopoiskNew.docs.length === 0) && <Alert>
+      {/* Сообщение об отсутствии контента */}
+      {(!sovietClassics || sovietClassics.length === 0) && 
+       (!modernFilms || modernFilms.length === 0) && (
+        <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
             Фильмы в данной категории временно недоступны. Попробуйте позже.
           </AlertDescription>
-        </Alert>}
-    </div>;
+        </Alert>
+      )}
+
+      {/* Dialog для добавления Kinopoisk фильмов в коллекцию */}
+      {selectedKinopoiskMovie && (
+        <AddToCollectionDialog
+          isOpen={showCollectionDialog}
+          onClose={() => setShowCollectionDialog(false)}
+          item={convertKinopoiskToTMDb(selectedKinopoiskMovie)}
+          mediaType="movie"
+        />
+      )}
+    </div>
+  );
 }
