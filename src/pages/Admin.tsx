@@ -44,16 +44,33 @@ const Admin = () => {
   const [populatingCollections, setPopulatingCollections] = useState(false);
 
   useEffect(() => {
-    if (!roleLoading && !isAdmin) {
-      navigate('/');
-      return;
-    }
+    console.log('Admin: Auth state:', { 
+      roleLoading, 
+      hasUser: !!user, 
+      userId: user?.id, 
+      isAdmin, 
+      loading
+    });
+    
+    if (!roleLoading) {
+      if (!user) {
+        console.log('Admin: No authenticated user, redirecting to auth');
+        navigate('/auth');
+        return;
+      }
+      
+      if (!isAdmin) {
+        console.log('Admin: User is not admin, redirecting to home');
+        navigate('/');
+        return;
+      }
 
-    if (isAdmin) {
-      fetchStats();
-      fetchUsers();
+      if (isAdmin) {
+        fetchStats();
+        fetchUsers();
+      }
     }
-  }, [isAdmin, roleLoading, navigate]);
+  }, [isAdmin, roleLoading, navigate, user, loading]);
 
   const fetchStats = async () => {
     try {
@@ -174,8 +191,38 @@ const Admin = () => {
     );
   }
 
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-4">Требуется аутентификация</h2>
+          <p className="text-muted-foreground mb-4">
+            Для доступа к панели администратора необходимо войти в систему
+          </p>
+          <Button onClick={() => navigate('/auth')}>
+            Войти в систему
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAdmin) {
-    return null;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-4">Доступ запрещен</h2>
+          <p className="text-muted-foreground mb-4">
+            У вас нет прав администратора для доступа к этой странице
+          </p>
+          <Button onClick={() => navigate('/')}>
+            На главную
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
