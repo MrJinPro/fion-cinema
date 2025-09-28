@@ -49,6 +49,7 @@ export const Categories = () => {
   const { data: categoryStats } = getCategoryStats();
 
   // Создаем фильтр на основе выбранных параметров
+  console.log('Categories Debug:', { availableYears, genres: genres?.genres, selectedYear, selectedGenre });
   const filters: MovieFilter = {
     year: selectedYear,
     genre: selectedGenre,
@@ -198,16 +199,22 @@ export const Categories = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Все года</SelectItem>
-                      {availableYears?.slice(0, 20).map(year => (
-                        <SelectItem key={year} value={year.toString()}>
-                          {year}
-                          {categoryStats?.yearCounts[year] && (
-                            <span className="ml-2 text-muted-foreground">
-                              ({categoryStats.yearCounts[year]})
-                            </span>
-                          )}
-                        </SelectItem>
-                      ))}
+                      {availableYears?.slice(0, 20)
+                        .filter(year => year && typeof year === 'number' && year > 1800)
+                        .map(year => {
+                          const yearStr = year.toString();
+                          console.log('Year SelectItem:', { year, yearStr });
+                          return (
+                            <SelectItem key={year} value={yearStr}>
+                              {year}
+                              {categoryStats?.yearCounts[year] && (
+                                <span className="ml-2 text-muted-foreground">
+                                  ({categoryStats.yearCounts[year]})
+                                </span>
+                              )}
+                            </SelectItem>
+                          );
+                        })}
                     </SelectContent>
                   </Select>
                 </div>
@@ -227,11 +234,17 @@ export const Categories = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Все жанры</SelectItem>
-                      {genres?.genres.map(genre => (
-                        <SelectItem key={genre.id} value={genre.id.toString()}>
-                          {genre.name}
-                        </SelectItem>
-                      ))}
+                      {genres?.genres
+                        .filter(genre => genre.id && genre.id > 0 && genre.name && genre.name.trim() !== '')
+                        .map(genre => {
+                          const genreIdStr = genre.id.toString();
+                          console.log('Genre SelectItem:', { genreId: genre.id, genreIdStr, genreName: genre.name });
+                          return (
+                            <SelectItem key={genre.id} value={genreIdStr}>
+                              {genre.name}
+                            </SelectItem>
+                          );
+                        })}
                     </SelectContent>
                   </Select>
                 </div>
