@@ -25,82 +25,170 @@ export interface CategoryData {
 export const useCategoryFilters = () => {
   const tmdbClient = getTMDbClient();
 
-  // Получение фильмов по годам
+  // Получение фильмов по годам с умным кэшированием
   const getMoviesByYear = (year: number, page = 1) => {
     return useQuery({
       queryKey: ['movies', 'by-year', year, page],
       queryFn: async () => {
-        // Сначала проверяем кэш в базе данных
-        const { data: cachedMovies } = await supabase
+        console.log(`🎬 Searching movies for year ${year}, page ${page}`);
+        
+        // Сначала проверяем сколько всего у нас фильмов за этот год
+        const { count } = await supabase
           .from('movies_tmdb')
-          .select('*')
+          .select('*', { count: 'exact', head: true })
           .gte('release_date', `${year}-01-01`)
-          .lt('release_date', `${year + 1}-01-01`)
-          .order('vote_average', { ascending: false })
-          .range((page - 1) * 20, page * 20 - 1);
+          .lt('release_date', `${year + 1}-01-01`);
 
-        if (cachedMovies && cachedMovies.length > 0) {
-          console.log(`Found ${cachedMovies.length} cached movies for year ${year}`);
+        console.log(`📊 Found ${count || 0} cached movies for year ${year}`);
+
+        // Если у нас достаточно фильмов за год (больше 20), используем кэш
+        if (count && count >= 20) {
+          const { data: cachedMovies } = await supabase
+            .from('movies_tmdb')
+            .select('*')
+            .gte('release_date', `${year}-01-01`)
+            .lt('release_date', `${year + 1}-01-01`)
+            .order('popularity', { ascending: false })
+            .range((page - 1) * 20, page * 20 - 1);
+
+          console.log(`✅ Using cached data: ${cachedMovies?.length || 0} movies`);
           return {
-            results: cachedMovies,
-            total_pages: Math.ceil(cachedMovies.length / 20),
-            total_results: cachedMovies.length,
-            page
+            results: cachedMovies || [],
+            total_pages: Math.ceil(count / 20),
+            total_results: count,
+            page,
+            fromCache: true
           };
         }
 
-        // Если нет в кэше, запрашиваем у TMDB
-        console.log(`Fetching movies for year ${year} from TMDB, page ${page}`);
-        return await tmdbClient.discoverMovies({
+        // Если недостаточно в кэше - обращаемся к TMDB
+        console.log(`🌐 Insufficient cached data. Fetching from TMDB...`);
+        const tmdbResult = await tmdbClient.discoverMovies({
           primary_release_year: year,
           sort_by: 'popularity.desc',
           page
         });
+
+        // Кэшируем результаты
+        if (tmdbResult.results && tmdbResult.results.length > 0) {
+          cacheMoviesToDB(tmdbResult.results);
+        }
+
+        return {
+          ...tmdbResult,
+          fromCache: false
+        };
       },
       staleTime: 60 * 60 * 1000, // 1 час
     });
   };
 
-  // Получение фильмов по жанрам
+  // Получение фильмов по жанрам с умным кэшированием
   const getMoviesByGenre = (genreId: number, page = 1) => {
     return useQuery({
       queryKey: ['movies', 'by-genre', genreId, page],
       queryFn: async () => {
-        // Проверяем кэш в базе данных
-        const { data: cachedMovies } = await supabase
+        console.log(`🎬 Searching movies for genre ${genreId}, page ${page}`);
+        
+        // Проверяем сколько всего фильмов с этим жанром у нас в кэше
+        const { count } = await supabase
           .from('movies_tmdb')
-          .select('*')
-          .contains('genres', [{ id: genreId }])
-          .order('popularity', { ascending: false })
-          .range((page - 1) * 20, page * 20 - 1);
+          .select('*', { count: 'exact', head: true })
+          .contains('genres', [{ id: genreId }]);
 
-        if (cachedMovies && cachedMovies.length > 10) {
-          console.log(`Found ${cachedMovies.length} cached movies for genre ${genreId}`);
+        console.log(`📊 Found ${count || 0} cached movies for genre ${genreId}`);
+
+        // Если у нас достаточно фильмов жанра (больше 20), используем кэш
+        if (count && count >= 20) {
+          const { data: cachedMovies } = await supabase
+            .from('movies_tmdb')
+            .select('*')
+            .contains('genres', [{ id: genreId }])
+            .order('popularity', { ascending: false })
+            .range((page - 1) * 20, page * 20 - 1);
+
+          console.log(`✅ Using cached data: ${cachedMovies?.length || 0} movies`);
           return {
-            results: cachedMovies,
-            total_pages: Math.ceil(cachedMovies.length / 20),
-            total_results: cachedMovies.length,
-            page
+            results: cachedMovies || [],
+            total_pages: Math.ceil(count / 20),
+            total_results: count,
+            page,
+            fromCache: true
           };
         }
 
-        // Если недостаточно в кэше, запрашиваем у TMDB
-        console.log(`Fetching movies for genre ${genreId} from TMDB, page ${page}`);
-        return await tmdbClient.discoverMovies({
+        // Если недостаточно в кэше - обращаемся к TMDB
+        console.log(`🌐 Insufficient cached data. Fetching from TMDB...`);
+        const tmdbResult = await tmdbClient.discoverMovies({
           with_genres: genreId.toString(),
           sort_by: 'popularity.desc',
           page
         });
+
+        // Кэшируем результаты
+        if (tmdbResult.results && tmdbResult.results.length > 0) {
+          cacheMoviesToDB(tmdbResult.results);
+        }
+
+        return {
+          ...tmdbResult,
+          fromCache: false
+        };
       },
       staleTime: 60 * 60 * 1000, // 1 час
     });
   };
 
-  // Универсальный фильтр фильмов
+  // Функция для кэширования фильмов из TMDB в базу
+  const cacheMoviesToDB = async (movies: any[]) => {
+    if (!movies.length) return;
+    
+    console.log(`Caching ${movies.length} movies to database`);
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 дней
+
+    const moviesToCache = movies.map(movie => ({
+      id: movie.id,
+      title: movie.title,
+      original_title: movie.original_title,
+      overview: movie.overview,
+      poster_path: movie.poster_path,
+      backdrop_path: movie.backdrop_path,
+      release_date: movie.release_date,
+      vote_average: movie.vote_average,
+      vote_count: movie.vote_count,
+      popularity: movie.popularity,
+      adult: movie.adult,
+      video: movie.video,
+      genres: movie.genre_ids ? movie.genre_ids.map((id: number) => ({ id })) : [],
+      cached_at: now.toISOString(),
+      expires_at: expiresAt.toISOString(),
+      updated_at: now.toISOString(),
+    }));
+
+    try {
+      const { error } = await supabase
+        .from('movies_tmdb')
+        .upsert(moviesToCache);
+
+      if (error) {
+        console.error('Error caching movies:', error);
+      } else {
+        console.log(`Successfully cached ${moviesToCache.length} movies`);
+      }
+    } catch (error) {
+      console.error('Error in cacheMoviesToDB:', error);
+    }
+  };
+
+  // Универсальный фильтр фильмов с умным кэшированием
   const getFilteredMovies = (filters: MovieFilter) => {
     return useQuery({
       queryKey: ['movies', 'filtered', filters],
       queryFn: async () => {
+        console.log('🎬 Starting filtered movies search with filters:', filters);
+        
+        // Сначала проверяем кэш в базе данных
         let query = supabase
           .from('movies_tmdb')
           .select('*');
@@ -133,29 +221,34 @@ export const useCategoryFilters = () => {
 
         query = query.order(orderField, { ascending });
 
-        // Пагинация
-        const page = filters.page || 1;
-        query = query.range((page - 1) * 20, page * 20 - 1);
-
-        const { data: cachedMovies, error } = await query;
+        // Получаем данные без пагинации для подсчета
+        const { data: allCachedMovies, error } = await query;
 
         if (error) {
           console.error('Error fetching filtered movies:', error);
-          throw error;
         }
 
-        if (cachedMovies && cachedMovies.length > 0) {
-          console.log(`Found ${cachedMovies.length} cached movies with filters:`, filters);
+        const cachedCount = allCachedMovies?.length || 0;
+        console.log(`📊 Found ${cachedCount} cached movies matching filters`);
+
+        // Если у нас достаточно фильмов в кэше (больше 20), используем их
+        if (cachedCount >= 20) {
+          const page = filters.page || 1;
+          const paginatedMovies = allCachedMovies!.slice((page - 1) * 20, page * 20);
+          
+          console.log(`✅ Using cached data: ${paginatedMovies.length} movies for page ${page}`);
           return {
-            results: cachedMovies,
-            total_pages: Math.ceil(cachedMovies.length / 20),
-            total_results: cachedMovies.length,
-            page
+            results: paginatedMovies,
+            total_pages: Math.ceil(cachedCount / 20),
+            total_results: cachedCount,
+            page,
+            fromCache: true
           };
         }
 
-        // Если нет в кэше, используем TMDB discover
-        console.log('Fetching filtered movies from TMDB with filters:', filters);
+        // Если недостаточно в кэше - обращаемся к TMDB API
+        console.log(`🌐 Insufficient cached data (${cachedCount} < 20). Fetching from TMDB...`);
+        
         const discoverParams: any = {
           page: filters.page || 1,
           sort_by: filters.sortBy || 'popularity.desc'
@@ -173,7 +266,19 @@ export const useCategoryFilters = () => {
           discoverParams['vote_average.gte'] = filters.minRating;
         }
 
-        return await tmdbClient.discoverMovies(discoverParams);
+        const tmdbResult = await tmdbClient.discoverMovies(discoverParams);
+        
+        // Кэшируем новые результаты в фоновом режиме
+        if (tmdbResult.results && tmdbResult.results.length > 0) {
+          cacheMoviesToDB(tmdbResult.results);
+        }
+
+        console.log(`🎯 TMDB returned ${tmdbResult.results?.length || 0} movies`);
+        
+        return {
+          ...tmdbResult,
+          fromCache: false
+        };
       },
       staleTime: 30 * 60 * 1000, // 30 минут
     });

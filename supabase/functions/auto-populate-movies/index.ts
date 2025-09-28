@@ -94,14 +94,15 @@ async function cacheMovieInDB(movie: TMDbMovieDetails) {
 }
 
 async function populateMovies(pages: number = 5) {
-  console.log(`Starting to populate movies (${pages} pages)`);
+  console.log(`🚀 Starting enhanced movie population (${pages} pages)`);
   let totalProcessed = 0;
   let totalCached = 0;
 
   try {
     // Популярные фильмы
+    console.log(`📈 Fetching popular movies...`);
     for (let page = 1; page <= pages; page++) {
-      console.log(`Fetching popular movies page ${page}`);
+      console.log(`📄 Fetching popular movies page ${page}/${pages}`);
       const popularData = await fetchFromTMDB(`/movie/popular?page=${page}`);
       
       for (const movie of popularData.results) {
@@ -113,7 +114,7 @@ async function populateMovies(pages: number = 5) {
           .maybeSingle();
 
         if (existing && new Date(existing.expires_at) > new Date()) {
-          console.log(`Movie ${movie.id} already cached and fresh`);
+          console.log(`✅ Movie ${movie.id} already cached and fresh`);
           continue;
         }
 
@@ -123,24 +124,25 @@ async function populateMovies(pages: number = 5) {
           const success = await cacheMovieInDB(movieDetails);
           if (success) {
             totalCached++;
-            console.log(`Cached movie: ${movieDetails.title} (${movie.id})`);
+            console.log(`💾 Cached movie: ${movieDetails.title} (${movie.id})`);
           }
           totalProcessed++;
           
           // Пауза между запросами для соблюдения лимитов API
-          await new Promise(resolve => setTimeout(resolve, 300));
+          await new Promise(resolve => setTimeout(resolve, 250));
         } catch (error) {
-          console.error(`Failed to cache movie ${movie.id}:`, error);
+          console.error(`❌ Failed to cache movie ${movie.id}:`, error);
         }
       }
       
       // Пауза между страницами
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
 
     // Топ рейтинговые фильмы
+    console.log(`🏆 Fetching top rated movies...`);
     for (let page = 1; page <= Math.min(pages, 3); page++) {
-      console.log(`Fetching top rated movies page ${page}`);
+      console.log(`📄 Fetching top rated movies page ${page}/${Math.min(pages, 3)}`);
       const topRatedData = await fetchFromTMDB(`/movie/top_rated?page=${page}`);
       
       for (const movie of topRatedData.results) {
@@ -159,30 +161,74 @@ async function populateMovies(pages: number = 5) {
           const success = await cacheMovieInDB(movieDetails);
           if (success) {
             totalCached++;
-            console.log(`Cached top rated movie: ${movieDetails.title} (${movie.id})`);
+            console.log(`💾 Cached top rated movie: ${movieDetails.title} (${movie.id})`);
           }
           totalProcessed++;
           
-          await new Promise(resolve => setTimeout(resolve, 300));
+          await new Promise(resolve => setTimeout(resolve, 250));
         } catch (error) {
-          console.error(`Failed to cache top rated movie ${movie.id}:`, error);
+          console.error(`❌ Failed to cache top rated movie ${movie.id}:`, error);
         }
       }
       
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
 
-    console.log(`Population complete: ${totalCached} movies cached out of ${totalProcessed} processed`);
+    // Новые фильмы (2024-2025)
+    console.log(`🆕 Fetching recent movies (2024-2025)...`);
+    const currentYear = new Date().getFullYear();
+    for (const year of [currentYear, currentYear - 1]) {
+      for (let page = 1; page <= 3; page++) {
+        console.log(`📄 Fetching ${year} movies page ${page}/3`);
+        const yearMovies = await fetchFromTMDB(`/discover/movie?primary_release_year=${year}&sort_by=popularity.desc&page=${page}`);
+        
+        for (const movie of yearMovies.results) {
+          const { data: existing } = await supabase
+            .from('movies_tmdb')
+            .select('id, expires_at')
+            .eq('id', movie.id)
+            .maybeSingle();
+
+          if (existing && new Date(existing.expires_at) > new Date()) {
+            continue;
+          }
+
+          try {
+            const movieDetails = await fetchFromTMDB(`/movie/${movie.id}`);
+            const success = await cacheMovieInDB(movieDetails);
+            if (success) {
+              totalCached++;
+              console.log(`💾 Cached ${year} movie: ${movieDetails.title} (${movie.id})`);
+            }
+            totalProcessed++;
+            
+            await new Promise(resolve => setTimeout(resolve, 250));
+          } catch (error) {
+            console.error(`❌ Failed to cache ${year} movie ${movie.id}:`, error);
+          }
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+
+    console.log(`🎉 Population complete: ${totalCached} movies cached out of ${totalProcessed} processed`);
     
+    // Получаем финальную статистику
+    const { count: finalCount } = await supabase
+      .from('movies_tmdb')
+      .select('*', { count: 'exact', head: true });
+
     return {
       success: true,
       totalProcessed,
       totalCached,
-      message: `Successfully processed ${totalProcessed} movies, cached ${totalCached} new/updated movies`
+      finalDatabaseCount: finalCount || 0,
+      message: `Successfully processed ${totalProcessed} movies, cached ${totalCached} new/updated movies. Database now has ${finalCount || 0} total movies.`
     };
 
   } catch (error) {
-    console.error('Error in populateMovies:', error);
+    console.error('❌ Error in populateMovies:', error);
     throw error;
   }
 }
@@ -194,16 +240,42 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Auto-populate movies function called');
+    console.log('🎬 Auto-populate movies function called');
     
     if (!TMDB_API_KEY) {
       throw new Error('TMDB_API_KEY not configured');
     }
 
-    const result = await populateMovies(5); // 5 страниц популярных + 3 страницы топ рейтинговых
+    // Получаем параметры из запроса
+    let requestBody: any = {};
+    try {
+      if (req.body) {
+        requestBody = await req.json();
+      }
+    } catch (e) {
+      console.log('No request body or invalid JSON, using defaults');
+    }
+
+    const pages = requestBody.pages || 8; // Увеличиваем по умолчанию до 8 страниц
+    const trigger = requestBody.trigger || 'manual';
+    
+    console.log(`📊 Starting population with ${pages} pages (trigger: ${trigger})`);
+
+    // Проверяем текущее состояние базы
+    const { count: currentCount } = await supabase
+      .from('movies_tmdb')
+      .select('*', { count: 'exact', head: true });
+
+    console.log(`📈 Current database has ${currentCount || 0} movies`);
+
+    const result = await populateMovies(pages);
     
     return new Response(
-      JSON.stringify(result),
+      JSON.stringify({
+        ...result,
+        trigger,
+        previousCount: currentCount || 0
+      }),
       { 
         headers: { 
           'Content-Type': 'application/json',
@@ -213,7 +285,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error in auto-populate-movies:', error);
+    console.error('❌ Error in auto-populate-movies:', error);
     
     return new Response(
       JSON.stringify({ 

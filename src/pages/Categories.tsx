@@ -27,6 +27,7 @@ import {
 import { useCategoryFilters, type MovieFilter } from '@/hooks/useCategoryFilters';
 import { useMovieGenres } from '@/hooks/useTMDbApi';
 import { getTMDbClient } from '@/lib/tmdb';
+import { useMoviePopulation } from '@/hooks/useMoviePopulation';
 
 export const Categories = () => {
   const navigate = useNavigate();
@@ -47,6 +48,7 @@ export const Categories = () => {
   const { data: genres } = useMovieGenres();
   const { data: availableYears } = getAvailableYears();
   const { data: categoryStats } = getCategoryStats();
+  const { triggerAutoPopulation, checkDatabaseStatus } = useMoviePopulation();
 
   // Создаем фильтр на основе выбранных параметров
   console.log('Categories Debug:', { availableYears, genres: genres?.genres, selectedYear, selectedGenre });
@@ -58,6 +60,19 @@ export const Categories = () => {
   };
 
   const { data: filteredMovies, isLoading, error } = getFilteredMovies(filters);
+
+  // Автоматически проверяем состояние базы и запускаем пополнение при необходимости
+  React.useEffect(() => {
+    const autoPopulateIfNeeded = async () => {
+      const status = await checkDatabaseStatus();
+      if (status.needsPopulation) {
+        console.log('🔄 Database needs population, triggering auto-population...');
+        await triggerAutoPopulation();
+      }
+    };
+
+    autoPopulateIfNeeded();
+  }, [checkDatabaseStatus, triggerAutoPopulation]);
 
   const handleSearch = (query: string) => {
     if (query.trim()) {
@@ -136,6 +151,9 @@ export const Categories = () => {
                 <Badge variant="outline" className="text-sm">
                   <Film className="h-4 w-4 mr-1" />
                   {categoryStats.totalMovies.toLocaleString()} фильмов
+                  {categoryStats.totalMovies < 1000 && (
+                    <span className="ml-1 text-amber-600">• пополняется</span>
+                  )}
                 </Badge>
                 <Badge variant="outline" className="text-sm">
                   <Calendar className="h-4 w-4 mr-1" />
@@ -304,14 +322,23 @@ export const Categories = () => {
 
             {/* Сетка фильмов */}
             {isLoading ? (
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {Array.from({ length: 20 }).map((_, index) => (
-                  <div key={index} className="space-y-2">
-                    <Skeleton className="aspect-[2/3] w-full rounded-lg" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-3 w-2/3" />
-                  </div>
-                ))}
+              <div>
+                <div className="text-center py-4">
+                  <p className="text-muted-foreground">
+                    {(categoryStats?.totalMovies || 0) < 100 
+                      ? "Ищем фильмы в TMDB и сохраняем в базу..." 
+                      : "Загружаем фильмы..."}
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {Array.from({ length: 20 }).map((_, index) => (
+                    <div key={index} className="space-y-2">
+                      <Skeleton className="aspect-[2/3] w-full rounded-lg" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-3 w-2/3" />
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : error ? (
               <div className="text-center py-12">
