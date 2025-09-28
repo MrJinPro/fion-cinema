@@ -187,9 +187,9 @@ export const Categories = () => {
                 <div>
                   <label className="text-sm font-medium mb-2 block">Год</label>
                   <Select 
-                    value={selectedYear?.toString() || ''} 
+                    value={selectedYear?.toString() || 'all'} 
                     onValueChange={(value) => {
-                      setSelectedYear(value ? parseInt(value) : undefined);
+                      setSelectedYear(value && value !== 'all' ? parseInt(value) : undefined);
                       setCurrentPage(1);
                     }}
                   >
@@ -197,7 +197,7 @@ export const Categories = () => {
                       <SelectValue placeholder="Все года" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Все года</SelectItem>
+                      <SelectItem value="all">Все года</SelectItem>
                       {availableYears?.slice(0, 20).map(year => (
                         <SelectItem key={year} value={year.toString()}>
                           {year}
@@ -216,9 +216,9 @@ export const Categories = () => {
                 <div>
                   <label className="text-sm font-medium mb-2 block">Жанр</label>
                   <Select 
-                    value={selectedGenre?.toString() || ''} 
+                    value={selectedGenre?.toString() || 'all'} 
                     onValueChange={(value) => {
-                      setSelectedGenre(value ? parseInt(value) : undefined);
+                      setSelectedGenre(value && value !== 'all' ? parseInt(value) : undefined);
                       setCurrentPage(1);
                     }}
                   >
@@ -226,7 +226,7 @@ export const Categories = () => {
                       <SelectValue placeholder="Все жанры" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Все жанры</SelectItem>
+                      <SelectItem value="all">Все жанры</SelectItem>
                       {genres?.genres.map(genre => (
                         <SelectItem key={genre.id} value={genre.id.toString()}>
                           {genre.name}
