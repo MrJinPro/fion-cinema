@@ -98,79 +98,61 @@ export const useTVGenres = () => {
 
 // Hook для обнаружения фильмов
 export const useDiscoverMovies = (filters: {
-  page?: number;
   with_genres?: string;
-  primary_release_year?: number;
-  vote_average_gte?: number;
   sort_by?: string;
+  primary_release_year?: number;
+  'vote_average.gte'?: number;
+  page?: number;
+  region?: string;
 } = {}) => {
   return useQuery({
     queryKey: ['discover', 'movies', filters],
     queryFn: () => tmdbClient.discoverMovies(filters),
-    staleTime: 15 * 60 * 1000, // 15 минут
+    staleTime: 30 * 60 * 1000, // 30 минут
   });
 };
 
 // Hook для обнаружения сериалов
 export const useDiscoverTVShows = (filters: {
-  page?: number;
   with_genres?: string;
-  first_air_date_year?: number;
-  vote_average_gte?: number;
   sort_by?: string;
+  first_air_date_year?: number;
+  'vote_average.gte'?: number;
+  page?: number;
+  region?: string;
 } = {}) => {
   return useQuery({
     queryKey: ['discover', 'tv', filters],
     queryFn: () => tmdbClient.discoverTVShows(filters),
-    staleTime: 15 * 60 * 1000, // 15 минут
+    staleTime: 30 * 60 * 1000, // 30 минут
   });
 };
 
-// Hook для получения деталей фильма
+// Hook для детальной информации о фильме с умным кэшированием
 export const useMovieDetails = (id: number) => {
-  const { cacheMovie } = useMovieCache();
+  const { smartFetchMovie } = useSmartCache();
   
   return useQuery({
     queryKey: ['movie', id],
-    queryFn: async () => {
-      try {
-        const movieData = await tmdbClient.getMovieDetails(id);
-        // Автоматически кэшируем фильм при получении
-        cacheMovie(movieData);
-        return movieData;
-      } catch (error) {
-        console.error('Error fetching movie details:', error);
-        throw error;
-      }
-    },
+    queryFn: () => smartFetchMovie(id),
     enabled: !!id,
     staleTime: 60 * 60 * 1000, // 1 час
   });
 };
 
-// Hook для получения деталей сериала
+// Hook для детальной информации о сериале с умным кэшированием  
 export const useTVDetails = (id: number) => {
-  const { cacheTVShow } = useMovieCache();
+  const { smartFetchTVShow } = useSmartCache();
   
   return useQuery({
     queryKey: ['tv', id],
-    queryFn: async () => {
-      try {
-        const tvData = await tmdbClient.getTVDetails(id);
-        // Автоматически кэшируем сериал при получении
-        cacheTVShow(tvData);
-        return tvData;
-      } catch (error) {
-        console.error('Error fetching TV details:', error);
-        throw error;
-      }
-    },
+    queryFn: () => smartFetchTVShow(id),
     enabled: !!id,
     staleTime: 60 * 60 * 1000, // 1 час
   });
 };
 
-// Credits hooks
+// Hook для актерского состава фильма
 export const useMovieCredits = (id: number) => {
   return useQuery({
     queryKey: ['movie', id, 'credits'],
@@ -180,6 +162,7 @@ export const useMovieCredits = (id: number) => {
   });
 };
 
+// Hook для актерского состава сериала
 export const useTVCredits = (id: number) => {
   return useQuery({
     queryKey: ['tv', id, 'credits'],
@@ -189,7 +172,7 @@ export const useTVCredits = (id: number) => {
   });
 };
 
-// Videos hooks
+// Hook для видео фильма
 export const useMovieVideos = (id: number) => {
   return useQuery({
     queryKey: ['movie', id, 'videos'],
@@ -199,6 +182,7 @@ export const useMovieVideos = (id: number) => {
   });
 };
 
+// Hook для видео сериала
 export const useTVVideos = (id: number) => {
   return useQuery({
     queryKey: ['tv', id, 'videos'],
@@ -208,7 +192,7 @@ export const useTVVideos = (id: number) => {
   });
 };
 
-// Images hooks
+// Hook для изображений фильма
 export const useMovieImages = (id: number) => {
   return useQuery({
     queryKey: ['movie', id, 'images'],
@@ -218,6 +202,7 @@ export const useMovieImages = (id: number) => {
   });
 };
 
+// Hook для изображений сериала
 export const useTVImages = (id: number) => {
   return useQuery({
     queryKey: ['tv', id, 'images'],
@@ -227,124 +212,132 @@ export const useTVImages = (id: number) => {
   });
 };
 
-// Similar content hooks
-export const useSimilarMovies = (id: number, page = 1) => {
+// Hook для похожих фильмов
+export const useSimilarMovies = (id: number) => {
   return useQuery({
-    queryKey: ['movie', id, 'similar', page],
-    queryFn: () => tmdbClient.getSimilarMovies(id, page),
+    queryKey: ['movie', id, 'similar'],
+    queryFn: () => tmdbClient.getSimilarMovies(id),
     enabled: !!id,
-    staleTime: 30 * 60 * 1000, // 30 минут
+    staleTime: 60 * 60 * 1000, // 1 час
   });
 };
 
-export const useSimilarTVShows = (id: number, page = 1) => {
+// Hook для похожих сериалов
+export const useSimilarTVShows = (id: number) => {
   return useQuery({
-    queryKey: ['tv', id, 'similar', page],
-    queryFn: () => tmdbClient.getSimilarTVShows(id, page),
+    queryKey: ['tv', id, 'similar'],
+    queryFn: () => tmdbClient.getSimilarTVShows(id),
     enabled: !!id,
-    staleTime: 30 * 60 * 1000, // 30 минут
+    staleTime: 60 * 60 * 1000, // 1 час
   });
 };
 
-// Recommendations hooks
-export const useMovieRecommendations = (id: number, page = 1) => {
+// Hook для рекомендаций фильмов
+export const useMovieRecommendations = (id: number) => {
   return useQuery({
-    queryKey: ['movie', id, 'recommendations', page],
-    queryFn: () => tmdbClient.getMovieRecommendations(id, page),
+    queryKey: ['movie', id, 'recommendations'],
+    queryFn: () => tmdbClient.getMovieRecommendations(id),
     enabled: !!id,
-    staleTime: 30 * 60 * 1000, // 30 минут
+    staleTime: 60 * 60 * 1000, // 1 час
   });
 };
 
-export const useTVRecommendations = (id: number, page = 1) => {
+// Hook для рекомендаций сериалов
+export const useTVRecommendations = (id: number) => {
   return useQuery({
-    queryKey: ['tv', id, 'recommendations', page],
-    queryFn: () => tmdbClient.getTVRecommendations(id, page),
+    queryKey: ['tv', id, 'recommendations'],
+    queryFn: () => tmdbClient.getTVRecommendations(id),
     enabled: !!id,
-    staleTime: 30 * 60 * 1000, // 30 минут
+    staleTime: 60 * 60 * 1000, // 1 час
   });
 };
 
-// Reviews hooks
-export const useMovieReviews = (id: number, page = 1) => {
+// Hook для отзывов о фильме
+export const useMovieReviews = (id: number) => {
   return useQuery({
-    queryKey: ['movie', id, 'reviews', page],
-    queryFn: () => tmdbClient.getMovieReviews(id, page),
+    queryKey: ['movie', id, 'reviews'],
+    queryFn: () => tmdbClient.getMovieReviews(id),
     enabled: !!id,
-    staleTime: 30 * 60 * 1000, // 30 минут
+    staleTime: 60 * 60 * 1000, // 1 час
   });
 };
 
-export const useTVReviews = (id: number, page = 1) => {
+// Hook для отзывов о сериале
+export const useTVReviews = (id: number) => {
   return useQuery({
-    queryKey: ['tv', id, 'reviews', page],
-    queryFn: () => tmdbClient.getTVReviews(id, page),
+    queryKey: ['tv', id, 'reviews'],
+    queryFn: () => tmdbClient.getTVReviews(id),
     enabled: !!id,
-    staleTime: 30 * 60 * 1000, // 30 минут
+    staleTime: 60 * 60 * 1000, // 1 час
   });
 };
 
-// Watch Providers hooks
+// Hook для провайдеров просмотра фильма
 export const useMovieWatchProviders = (id: number) => {
   return useQuery({
-    queryKey: ['movie-watch-providers', id],
+    queryKey: ['movie', id, 'watch_providers'],
     queryFn: () => tmdbClient.getMovieWatchProviders(id),
     enabled: !!id,
-    staleTime: 30 * 60 * 1000, // 30 минут
+    staleTime: 60 * 60 * 1000, // 1 час
   });
 };
 
+// Hook для провайдеров просмотра сериала
 export const useTVWatchProviders = (id: number) => {
   return useQuery({
-    queryKey: ['tv-watch-providers', id],
+    queryKey: ['tv', id, 'watch_providers'],
     queryFn: () => tmdbClient.getTVWatchProviders(id),
     enabled: !!id,
-    staleTime: 30 * 60 * 1000, // 30 минут
+    staleTime: 60 * 60 * 1000, // 1 час
   });
 };
 
-// Person hooks
+// Hook для детальной информации о персоне
 export const usePersonDetails = (id: number) => {
   return useQuery({
     queryKey: ['person', id],
     queryFn: () => tmdbClient.getPersonDetails(id),
     enabled: !!id,
-    staleTime: 120 * 60 * 1000, // 2 часа - персональная информация меняется редко
+    staleTime: 60 * 60 * 1000, // 1 час
   });
 };
 
+// Hook для фильмографии персоны (фильмы)
 export const usePersonMovieCredits = (id: number) => {
   return useQuery({
-    queryKey: ['person', id, 'movie-credits'],
+    queryKey: ['person', id, 'movie_credits'],
     queryFn: () => tmdbClient.getPersonMovieCredits(id),
     enabled: !!id,
-    staleTime: 120 * 60 * 1000, // 2 часа
+    staleTime: 60 * 60 * 1000, // 1 час
   });
 };
 
+// Hook для фильмографии персоны (сериалы)
 export const usePersonTVCredits = (id: number) => {
   return useQuery({
-    queryKey: ['person', id, 'tv-credits'],
+    queryKey: ['person', id, 'tv_credits'],
     queryFn: () => tmdbClient.getPersonTVCredits(id),
     enabled: !!id,
-    staleTime: 120 * 60 * 1000, // 2 часа
+    staleTime: 60 * 60 * 1000, // 1 час
   });
 };
 
+// Hook для изображений персоны
 export const usePersonImages = (id: number) => {
   return useQuery({
     queryKey: ['person', id, 'images'],
     queryFn: () => tmdbClient.getPersonImages(id),
     enabled: !!id,
-    staleTime: 120 * 60 * 1000, // 2 часа
+    staleTime: 60 * 60 * 1000, // 1 час
   });
 };
 
+// Hook для внешних ID персоны
 export const usePersonExternalIds = (id: number) => {
   return useQuery({
-    queryKey: ['person', id, 'external-ids'],
+    queryKey: ['person', id, 'external_ids'],
     queryFn: () => tmdbClient.getPersonExternalIds(id),
     enabled: !!id,
-    staleTime: 240 * 60 * 1000, // 4 часа - внешние ссылки меняются очень редко
+    staleTime: 60 * 60 * 1000, // 1 час
   });
 };

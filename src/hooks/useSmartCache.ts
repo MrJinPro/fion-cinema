@@ -58,7 +58,8 @@ export const useSmartCache = () => {
       // Сначала проверяем кэш
       const cachedMovie = await checkCacheFirst(movieId, 'movie');
       if (cachedMovie) {
-        return cachedMovie as TMDbMovieDetails;
+        console.log(`Cache HIT for movie ${movieId}`);
+        return cachedMovie as any; // Приводим к нужному типу
       }
 
       // Если нет в кэше, запрашиваем у TMDB
@@ -85,7 +86,7 @@ export const useSmartCache = () => {
       // Сначала проверяем кэш
       const cachedTVShow = await checkCacheFirst(tvId, 'tv');
       if (cachedTVShow) {
-        return cachedTVShow as TMDbTVDetails;
+        return cachedTVShow as any; // Приводим к нужному типу
       }
 
       // Если нет в кэше, запрашиваем у TMDB

@@ -319,12 +319,8 @@ export const Categories = () => {
                   {filteredMovies.results.map((movie) => (
                     <div key={movie.id} onClick={() => handleMovieClick(movie.id)}>
                       <MovieCard
-                        id={movie.id}
-                        title={movie.title}
-                        posterPath={movie.poster_path}
-                        releaseDate={movie.release_date}
-                        voteAverage={movie.vote_average}
-                        mediaType="movie"
+                        item={movie}
+                        type="movie"
                       />
                     </div>
                   ))}
