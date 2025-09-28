@@ -61,6 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
   const navLinks = [
     { href: '/', label: t('nav.home') },
     { href: '/search', label: t('nav.search') },
+    { href: '/categories', label: 'Категории' },
     { href: '/russian-cinema', label: 'Российское кино' },
     ...(user ? [
       { href: '/favorites', label: t('nav.favorites'), icon: Heart },

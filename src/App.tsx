@@ -13,8 +13,9 @@ import { ListDetails } from "./pages/ListDetails";
 import { MovieDetails } from "./pages/MovieDetails";
 import TVDetails from "./pages/TVDetails";
 import PersonDetails from "./pages/PersonDetails";
-import Auth from "./pages/Auth";
-import Admin from "./pages/Admin";
+import { Categories } from "./pages/Categories";
+import { Auth } from "./pages/Auth";
+import { Admin } from "./pages/Admin";
 import RussianCinema from "./pages/RussianCinema";
 import Collection from "./pages/Collection";
 import NotFound from "./pages/NotFound";
@@ -34,6 +35,7 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/search" element={<Search />} />
+              <Route path="/categories" element={<Categories />} />
               <Route path="/favorites" element={<Favorites />} />
               <Route path="/lists" element={<Lists />} />
               <Route path="/lists/:id" element={<ListDetails />} />

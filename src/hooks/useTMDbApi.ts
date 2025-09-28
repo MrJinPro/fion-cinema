@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getTMDbClient } from '@/lib/tmdb';
-import { useMovieCache } from './useMovieCache';
+import { useSmartCache } from './useSmartCache';
 import type { 
   TMDbMovie, 
   TMDbTVShow, 
