@@ -24,7 +24,8 @@ function SimilarMovieCard({ item, type }: { item: TMDbMovie | TMDbTVShow; type: 
   const year = releaseDate ? new Date(releaseDate).getFullYear() : null;
 
   const handleClick = () => {
-    navigate(`/${type}/${item.id}`);
+    window.scrollTo(0, 0);
+    navigate(`/movie/${item.id}`);
   };
 
   return (
