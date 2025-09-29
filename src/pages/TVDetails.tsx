@@ -24,6 +24,7 @@ import { SimilarSection } from '@/components/ui/similar-section';
 import { ArrowLeft, Star, Calendar, Tv, Users, PlayCircle, Play } from 'lucide-react';
 import { getTMDbClient } from '@/lib/tmdb';
 import { SEOHead } from '@/components/seo/SEOHead';
+import { SearchEngineButtons } from '@/components/ui/search-engine-buttons';
 
 const TVDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -265,6 +266,14 @@ const TVDetails = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Search Engine Buttons */}
+            <SearchEngineButtons 
+              title={tvShow.name}
+              year={firstAirYear}
+              type="tv"
+              seasons={tvShow.number_of_seasons}
+            />
 
             {/* Additional Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

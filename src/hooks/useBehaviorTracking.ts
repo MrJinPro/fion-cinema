@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from './useAuth';
 
 export interface UserAction {
-  action_type: 'view_movie' | 'watch_trailer' | 'add_favorite' | 'create_list' | 'rate_movie' | 'exit_page';
+  action_type: 'view_movie' | 'watch_trailer' | 'add_favorite' | 'create_list' | 'rate_movie' | 'exit_page' | 'search_external';
   content_id?: number;
   content_type?: 'movie' | 'tv' | 'person';
   metadata?: Record<string, any>;

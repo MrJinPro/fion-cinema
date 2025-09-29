@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SEOHead } from '@/components/seo/SEOHead';
+import { SearchEngineButtons } from '@/components/ui/search-engine-buttons';
 import { RatingStars } from '@/components/ui/rating-stars';
 import { 
   ArrowLeft, 
@@ -372,6 +373,13 @@ export const MovieDetails = () => {
                   </>
                 )}
               </div>
+
+              {/* Search Engine Buttons */}
+              <SearchEngineButtons 
+                title={movie.title}
+                year={releaseYear}
+                type="movie"
+              />
 
               {/* Featured Trailer Section */}
               {featuredTrailer && (
