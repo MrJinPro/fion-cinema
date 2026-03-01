@@ -343,6 +343,13 @@ export const MovieDetails = () => {
 
               {/* Action Buttons */}
               <div className={`flex ${isMobile ? 'flex-col' : 'flex-wrap'} gap-3`}>
+                <EmbeddedPlayer
+                  movieId={movieId}
+                  title={movie.title}
+                  year={releaseYear || undefined}
+                  watchProviders={watchProviders?.results?.RU || watchProviders?.results?.US}
+                  className={isMobile ? '' : 'flex-1'}
+                />
                 {featuredTrailer && (
                   <Button 
                     onClick={handleTrailerPlay}

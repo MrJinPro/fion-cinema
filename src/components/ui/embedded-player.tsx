@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Play, ExternalLink, Film } from 'lucide-react';
+import { Play, ExternalLink, Film, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { StreamingAvailability } from './streaming-availability';
+import { useKinoApiPlayer } from '@/hooks/useKinoApiPlayer';
 
 interface EmbeddedPlayerProps {
   movieId: number;
@@ -22,7 +22,8 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
   className 
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { t } = useTranslation();
+  const { data, isLoading, error } = useKinoApiPlayer(title, year, isOpen);
+  const streamUrl = data?.player?.streamUrl ?? null;
 
   return (
     <>
@@ -34,7 +35,7 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
           onClick={() => setIsOpen(true)}
         >
           <Play className="mr-2 h-5 w-5" />
-          {t('player.watchOnline')}
+          Смотреть фильм
         </Button>
       
         <DialogContent className="max-w-4xl w-full max-h-[80vh] overflow-y-auto">
@@ -46,19 +47,48 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
           </DialogHeader>
 
           <div className="space-y-6 p-6">
-            {/* Main Message */}
-            <div className="text-center py-8">
-              <div className="animate-pulse rounded-full h-20 w-20 bg-primary/20 mx-auto mb-6 flex items-center justify-center">
-                <Play className="h-10 w-10 text-primary" />
+            {isLoading && (
+              <div className="text-center py-8">
+                <div className="rounded-full h-20 w-20 bg-primary/20 mx-auto mb-6 flex items-center justify-center">
+                  <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4">Подбираем источник для просмотра...</h3>
+                <p className="text-muted-foreground">Ищем фильм в KinoAPI по названию и году.</p>
               </div>
-              <h3 className="text-2xl font-bold mb-4">{t('player.message')}</h3>
-              <p className="text-muted-foreground mb-4">
-                {t('player.subtitle')}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {t('player.useOfficialSources')}
-              </p>
-            </div>
+            )}
+
+            {!isLoading && error && (
+              <Alert variant="destructive">
+                <AlertDescription>
+                  Не удалось получить поток из KinoAPI: {error.message}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {!isLoading && !error && streamUrl && (
+              <div className="space-y-3">
+                <div className="aspect-video rounded-lg overflow-hidden bg-black">
+                  <video
+                    src={streamUrl}
+                    controls
+                    autoPlay
+                    playsInline
+                    className="w-full h-full"
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Источник найден через KinoAPI. Если воспроизведение не начинается, откройте фильм в официальных сервисах ниже.
+                </p>
+              </div>
+            )}
+
+            {!isLoading && !error && !streamUrl && (
+              <Alert>
+                <AlertDescription>
+                  Поток для этого фильма не найден в KinoAPI по запросу «{title}{year ? ` (${year})` : ''}».
+                </AlertDescription>
+              </Alert>
+            )}
 
             {/* Streaming Availability */}
             <StreamingAvailability 
@@ -72,7 +102,7 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
               <ExternalLink className="h-4 w-4" />
               <AlertDescription>
                 <div className="space-y-3">
-                  <p className="font-medium">{t('player.officialSources')}</p>
+                  <p className="font-medium">Официальные источники</p>
                   <div className="flex flex-wrap gap-2">
                     <Button
                       variant="outline"
