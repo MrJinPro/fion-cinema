@@ -22,11 +22,14 @@ export interface KinoApiPlaybackResponse {
   };
 }
 
-async function fetchKinoApiPlayback(title: string, year?: number): Promise<KinoApiPlaybackResponse> {
+export type KinoApiMediaType = 'movie' | 'tv';
+
+async function fetchKinoApiPlayback(title: string, year?: number, mediaType: KinoApiMediaType = 'movie'): Promise<KinoApiPlaybackResponse> {
   const { data, error } = await supabase.functions.invoke('kinoapi-proxy', {
     body: {
       title: title.trim(),
       year,
+      mediaType,
     },
     headers: {
       'Content-Type': 'application/json',
@@ -40,10 +43,15 @@ async function fetchKinoApiPlayback(title: string, year?: number): Promise<KinoA
   return data as KinoApiPlaybackResponse;
 }
 
-export function useKinoApiPlayer(title: string, year?: number, enabled = true) {
+export function useKinoApiPlayer(
+  title: string,
+  year?: number,
+  enabled = true,
+  mediaType: KinoApiMediaType = 'movie',
+) {
   return useQuery({
-    queryKey: ['kinoapi-player', title, year],
-    queryFn: () => fetchKinoApiPlayback(title, year),
+    queryKey: ['kinoapi-player', mediaType, title, year],
+    queryFn: () => fetchKinoApiPlayback(title, year, mediaType),
     enabled: enabled && title.trim().length > 1,
     staleTime: 1000 * 60 * 15,
     retry: 1,

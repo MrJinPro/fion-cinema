@@ -219,7 +219,7 @@ serve(async (req) => {
   }
 
   try {
-    const { title, year } = await req.json();
+    const { title, year, mediaType } = await req.json();
 
     if (!title || typeof title !== "string") {
       return new Response(
@@ -230,15 +230,30 @@ serve(async (req) => {
 
     const cleanTitle = title.trim();
     const safeYear = typeof year === "number" ? year : undefined;
+    const normalizedMediaType = mediaType === "tv" ? "tv" : "movie";
+    const searchType = normalizedMediaType === "tv" ? "serial" : "movie";
 
     const searchResponse = await requestKinoApi("/v1/items/search", {
       q: cleanTitle,
-      type: "movie",
+      type: searchType,
       perpage: 20,
       sectioned: 0,
     });
 
-    const items = Array.isArray(searchResponse?.items) ? searchResponse.items as KinoApiItem[] : [];
+    let items = Array.isArray(searchResponse?.items) ? searchResponse.items as KinoApiItem[] : [];
+
+    if (!items.length) {
+      const fallbackSearchResponse = await requestKinoApi("/v1/items/search", {
+        q: cleanTitle,
+        perpage: 20,
+        sectioned: 0,
+      });
+
+      items = Array.isArray(fallbackSearchResponse?.items)
+        ? fallbackSearchResponse.items as KinoApiItem[]
+        : [];
+    }
+
     const match = findBestMatch(items, cleanTitle, safeYear);
 
     if (!match) {

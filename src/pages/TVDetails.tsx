@@ -7,7 +7,8 @@ import {
   useTVImages, 
   useTVReviews,
   useSimilarTVShows,
-  useTVRecommendations
+  useTVRecommendations,
+  useTVWatchProviders
 } from '@/hooks/useTMDbApi';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
@@ -25,6 +26,7 @@ import { ArrowLeft, Star, Calendar, Tv, Users, PlayCircle, Play } from 'lucide-r
 import { getTMDbClient } from '@/lib/tmdb';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { SearchEngineButtons } from '@/components/ui/search-engine-buttons';
+import EmbeddedPlayer from '@/components/ui/embedded-player';
 
 const TVDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -39,6 +41,7 @@ const TVDetails = () => {
   const { data: reviews } = useTVReviews(tvId);
   const { data: similar } = useSimilarTVShows(tvId);
   const { data: recommendations } = useTVRecommendations(tvId);
+  const { data: watchProviders } = useTVWatchProviders(tvId);
   const tmdbClient = getTMDbClient();
 
   const handleSearch = (query: string) => {
@@ -273,6 +276,14 @@ const TVDetails = () => {
               year={firstAirYear}
               type="tv"
               seasons={tvShow.number_of_seasons}
+            />
+
+            <EmbeddedPlayer
+              movieId={tvId}
+              title={tvShow.name}
+              year={firstAirYear || undefined}
+              watchProviders={watchProviders?.results?.RU || watchProviders?.results?.US}
+              mediaType="tv"
             />
 
             {/* Additional Info */}

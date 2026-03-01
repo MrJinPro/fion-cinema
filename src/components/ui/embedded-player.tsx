@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Play, ExternalLink, Film, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { StreamingAvailability } from './streaming-availability';
-import { useKinoApiPlayer } from '@/hooks/useKinoApiPlayer';
+import { KinoApiMediaType, useKinoApiPlayer } from '@/hooks/useKinoApiPlayer';
 
 interface EmbeddedPlayerProps {
   movieId: number;
@@ -12,6 +12,7 @@ interface EmbeddedPlayerProps {
   year?: number;
   watchProviders?: any;
   className?: string;
+  mediaType?: KinoApiMediaType;
 }
 
 const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({ 
@@ -19,10 +20,11 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
   title, 
   year, 
   watchProviders,
-  className 
+  className,
+  mediaType = 'movie',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { data, isLoading, error } = useKinoApiPlayer(title, year, isOpen);
+  const { data, isLoading, error } = useKinoApiPlayer(title, year, isOpen, mediaType);
   const streamUrl = data?.player?.streamUrl ?? null;
 
   return (
@@ -53,7 +55,9 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
                   <Loader2 className="h-10 w-10 text-primary animate-spin" />
                 </div>
                 <h3 className="text-2xl font-bold mb-4">Подбираем источник для просмотра...</h3>
-                <p className="text-muted-foreground">Ищем фильм в KinoAPI по названию и году.</p>
+                <p className="text-muted-foreground">
+                  Ищем {mediaType === 'tv' ? 'сериал' : 'фильм'} в KinoAPI по названию и году.
+                </p>
               </div>
             )}
 
