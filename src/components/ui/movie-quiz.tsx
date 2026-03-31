@@ -3,12 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Film, Heart, Users, Clock, Calendar } from 'lucide-react';
+import { Film, Heart, Users, Clock, Calendar, Star } from 'lucide-react';
 
 export interface QuizAnswers {
   mood?: string;
   company?: string;
   genres?: string[];
+  priority?: string;
+  avoidGenres?: string[];
   duration?: string;
   movieAge?: string;
 }
@@ -59,6 +61,32 @@ const QUIZ_QUESTIONS = [
     ]
   },
   {
+    id: 'priority',
+    title: 'Что важнее при выборе сегодня?',
+    icon: Star,
+    options: [
+      { value: 'popular', label: 'Хочу популярное 🔥' },
+      { value: 'rating', label: 'Хочу высокий рейтинг ⭐' },
+      { value: 'blockbuster', label: 'Хочу блокбастер 💥' },
+    ]
+  },
+  {
+    id: 'avoidGenres',
+    title: 'Чего точно НЕ хочется? (можно выбрать)',
+    icon: Film,
+    multiple: true,
+    options: [
+      { value: 'horror', label: 'Без ужасов' },
+      { value: 'thriller', label: 'Без триллеров' },
+      { value: 'drama', label: 'Без драмы' },
+      { value: 'romance', label: 'Без романтики' },
+      { value: 'action', label: 'Без экшена' },
+      { value: 'animation', label: 'Без анимации' },
+      { value: 'comedy', label: 'Без комедии' },
+      { value: 'scifi', label: 'Без фантастики' },
+    ]
+  },
+  {
     id: 'duration',
     title: 'Сколько времени есть?',
     icon: Clock,
@@ -92,11 +120,11 @@ export const MovieQuiz: React.FC<MovieQuizProps> = ({ onComplete, onCancel }) =>
     const updatedAnswers = { ...answers };
     
     if (question.multiple) {
-      const currentGenres = updatedAnswers.genres || [];
-      if (currentGenres.includes(value)) {
-        updatedAnswers.genres = currentGenres.filter(g => g !== value);
+      const currentValues = ((updatedAnswers as any)[question.id] as string[] | undefined) || [];
+      if (currentValues.includes(value)) {
+        (updatedAnswers as any)[question.id] = currentValues.filter(v => v !== value);
       } else {
-        updatedAnswers.genres = [...currentGenres, value];
+        (updatedAnswers as any)[question.id] = [...currentValues, value];
       }
     } else {
       (updatedAnswers as any)[question.id] = value;
@@ -121,8 +149,8 @@ export const MovieQuiz: React.FC<MovieQuizProps> = ({ onComplete, onCancel }) =>
     }
   };
 
-  const isAnswered = question.multiple 
-    ? (answers.genres && answers.genres.length > 0)
+  const isAnswered = question.multiple
+    ? ((((answers as any)[question.id] as string[] | undefined) || []).length > 0)
     : answers[question.id as keyof QuizAnswers];
 
   return (
@@ -145,7 +173,7 @@ export const MovieQuiz: React.FC<MovieQuizProps> = ({ onComplete, onCancel }) =>
           <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
             {question.options.map((option) => {
               const isSelected = question.multiple
-                ? answers.genres?.includes(option.value)
+                ? ((((answers as any)[question.id] as string[] | undefined) || []).includes(option.value))
                 : answers[question.id as keyof QuizAnswers] === option.value;
                 
               return (
@@ -161,14 +189,14 @@ export const MovieQuiz: React.FC<MovieQuizProps> = ({ onComplete, onCancel }) =>
             })}
           </div>
           
-          {question.multiple && answers.genres && answers.genres.length > 0 && (
+          {question.multiple && ((((answers as any)[question.id] as string[] | undefined) || []).length > 0) && (
             <div className="mt-4">
               <p className="text-sm text-muted-foreground mb-2">Выбрано:</p>
               <div className="flex flex-wrap gap-2 justify-center">
-                {answers.genres.map((genre) => {
-                  const option = question.options.find(opt => opt.value === genre);
+                {((((answers as any)[question.id] as string[] | undefined) || [])).map((value) => {
+                  const option = question.options.find(opt => opt.value === value);
                   return (
-                    <Badge key={genre} variant="secondary">
+                    <Badge key={value} variant="secondary">
                       {option?.label}
                     </Badge>
                   );

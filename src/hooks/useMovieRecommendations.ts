@@ -68,6 +68,18 @@ const MOVIE_AGE_LABEL: Record<string, string> = {
   classic: 'Классика',
 };
 
+const PRIORITY_LABEL: Record<string, string> = {
+  popular: 'Популярность',
+  rating: 'Высокий рейтинг',
+  blockbuster: 'Блокбастер',
+};
+
+const PRIORITY_SORT: Record<string, SortBy> = {
+  popular: 'popularity.desc',
+  rating: 'vote_average.desc',
+  blockbuster: 'revenue.desc',
+};
+
 const SORT_BY_ALLOWED: SortBy[] = ['popularity.desc', 'vote_average.desc', 'revenue.desc'];
 
 const toYmd = (date: Date) => date.toISOString().split('T')[0];
@@ -131,6 +143,8 @@ const computeReleaseRange = (movieAge?: string) => {
   return { gte: '2020-01-01', lte: toYmd(today) };
 };
 
+const uniqueNumbers = (values: number[]) => Array.from(new Set(values));
+
 export const useMovieRecommendations = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -153,6 +167,14 @@ export const useMovieRecommendations = () => {
       parts.push(`Выбранные жанры: ${answers.genres.join(', ')}`);
     }
 
+    if (answers.priority) {
+      parts.push(`Приоритет: ${PRIORITY_LABEL[answers.priority] ?? answers.priority}`);
+    }
+
+    if (answers.avoidGenres && answers.avoidGenres.length > 0) {
+      parts.push(`Исключить жанры: ${answers.avoidGenres.join(', ')}`);
+    }
+
     if (answers.duration) {
       parts.push(`Время: ${DURATION_LABEL[answers.duration] ?? answers.duration}`);
     }
@@ -171,7 +193,7 @@ export const useMovieRecommendations = () => {
     try {
       const formattedAnswers = formatAnswersForAI(answers);
 
-      const totalQuestions = 5;
+      const totalQuestions = 7;
       const answeredQuestions = Object.keys(answers).filter((key) => {
         const value = answers[key as keyof QuizAnswers];
         return value && (Array.isArray(value) ? value.length > 0 : true);
@@ -180,6 +202,12 @@ export const useMovieRecommendations = () => {
 
       const runtimeRange = computeRuntimeRange(answers.duration);
       const releaseRange = computeReleaseRange(answers.movieAge);
+
+      const excludedGenreIds = uniqueNumbers(
+        (Array.isArray(answers.avoidGenres) ? answers.avoidGenres : [])
+          .map((k) => GENRE_MAP[k])
+          .filter((v): v is number => typeof v === 'number'),
+      );
 
       const systemPrompt = `Ты — рекомендательный ассистент кино.
 Верни ТОЛЬКО валидный JSON (без markdown и без текста до/после JSON).
@@ -200,6 +228,9 @@ export const useMovieRecommendations = () => {
 Контекст фильтрации (фиксированный):
 - Длительность (мин): ${runtimeRange.min}–${runtimeRange.max}
 - Даты релиза: ${releaseRange.gte}..${releaseRange.lte}
+
+Ограничения:
+- Если пользователь указал исключаемые жанры, не предлагай их.
 
 Предпочтения пользователя: ${formattedAnswers}`;
 
@@ -237,18 +268,30 @@ export const useMovieRecommendations = () => {
       const explicitGenreKeys = Array.isArray(answers.genres) ? answers.genres : [];
       const aiGenreKeys = normalizeGenreKeys(aiRecommendation.genre_keys);
 
+      const excludedGenreKeySet = new Set(Array.isArray(answers.avoidGenres) ? answers.avoidGenres : []);
+
       const finalGenreKeys = (explicitGenreKeys.length > 0 ? explicitGenreKeys : aiGenreKeys)
         .filter((k) => Object.prototype.hasOwnProperty.call(GENRE_MAP, k))
+        .filter((k) => !excludedGenreKeySet.has(k))
         .slice(0, 3);
 
-      const finalGenreIds = (finalGenreKeys.length > 0
-        ? finalGenreKeys.map((k) => GENRE_MAP[k]).filter(Boolean)
-        : [35, 18]
-      ).slice(0, 3);
+      const genreIdsFromKeys = finalGenreKeys
+        .map((k) => GENRE_MAP[k])
+        .filter((v): v is number => typeof v === 'number');
+
+      const filteredGenreIds = genreIdsFromKeys.filter((id) => !excludedGenreIds.includes(id));
+
+      const fallbackGenreIds = [35, 18, 28, 10751, 12, 53, 14, 16]
+        .filter((id) => !excludedGenreIds.includes(id))
+        .slice(0, 3);
+
+      const finalGenreIds = (filteredGenreIds.length > 0 ? filteredGenreIds : fallbackGenreIds).slice(0, 3);
 
       const finalRuntimeMin = clampInt(runtimeRange.min, 0, 240, 80);
       const finalRuntimeMax = clampInt(runtimeRange.max, 30, 300, 180);
-      const finalSortBy = sanitizeSortBy(aiRecommendation.sort_by);
+      const finalSortBy = answers.priority && PRIORITY_SORT[answers.priority]
+        ? PRIORITY_SORT[answers.priority]
+        : sanitizeSortBy(aiRecommendation.sort_by);
       const finalExplanation =
         typeof aiRecommendation.explanation === 'string' && aiRecommendation.explanation.trim()
           ? aiRecommendation.explanation.trim()
@@ -256,6 +299,7 @@ export const useMovieRecommendations = () => {
 
       const queryKey = JSON.stringify({
         with_genres: finalGenreIds.join(','),
+        without_genres: excludedGenreIds.join(','),
         release_date_gte: releaseRange.gte,
         release_date_lte: releaseRange.lte,
         with_runtime_gte: finalRuntimeMin,
@@ -272,11 +316,13 @@ export const useMovieRecommendations = () => {
 
       const baseFilters = {
         with_genres: finalGenreIds.join(','),
+        ...(excludedGenreIds.length > 0 ? { without_genres: excludedGenreIds.join(',') } : {}),
         'release_date.gte': releaseRange.gte,
         'release_date.lte': releaseRange.lte,
         with_runtime_gte: String(finalRuntimeMin),
         with_runtime_lte: String(finalRuntimeMax),
         sort_by: finalSortBy,
+        ...(finalSortBy === 'vote_average.desc' ? { 'vote_count.gte': '200' } : {}),
         language: 'ru-RU',
       };
 
