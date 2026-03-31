@@ -80,6 +80,21 @@ const PRIORITY_SORT: Record<string, SortBy> = {
   blockbuster: 'revenue.desc',
 };
 
+const MOOD_GENRE_BOOST: Record<string, string[]> = {
+  happy: ['comedy', 'adventure', 'family'],
+  romantic: ['romance', 'drama', 'comedy'],
+  tense: ['thriller', 'mystery', 'action'],
+  sad: ['drama', 'romance', 'history'],
+  relaxed: ['comedy', 'family', 'animation', 'documentary'],
+};
+
+const COMPANY_GENRE_BOOST: Record<string, string[]> = {
+  alone: ['drama', 'mystery', 'documentary'],
+  couple: ['romance', 'comedy', 'drama'],
+  friends: ['comedy', 'action', 'adventure', 'thriller'],
+  family: ['family', 'animation', 'adventure', 'comedy'],
+};
+
 const SORT_BY_ALLOWED: SortBy[] = ['popularity.desc', 'vote_average.desc', 'revenue.desc'];
 
 const toYmd = (date: Date) => date.toISOString().split('T')[0];
@@ -144,6 +159,53 @@ const computeReleaseRange = (movieAge?: string) => {
 };
 
 const uniqueNumbers = (values: number[]) => Array.from(new Set(values));
+
+const uniqueStrings = (values: string[]) => Array.from(new Set(values));
+
+const safeYearFromYmd = (date: unknown): number | null => {
+  if (typeof date !== 'string') return null;
+  const year = Number.parseInt(date.slice(0, 4), 10);
+  return Number.isFinite(year) ? year : null;
+};
+
+const pickDiverseMovies = (movies: TMDbMovie[], limit: number) => {
+  const picked: TMDbMovie[] = [];
+  const usedGenre = new Set<number>();
+  const usedDecade = new Set<number>();
+
+  const tryPick = (movie: TMDbMovie) => {
+    if (picked.length >= limit) return;
+
+    const primaryGenre = Array.isArray(movie.genre_ids) ? movie.genre_ids[0] : undefined;
+    const year = safeYearFromYmd(movie.release_date);
+    const decade = year ? Math.floor(year / 10) : null;
+
+    const genreOk = typeof primaryGenre === 'number' ? !usedGenre.has(primaryGenre) : true;
+    const decadeOk = typeof decade === 'number' ? !usedDecade.has(decade) : true;
+
+    if (genreOk && decadeOk) {
+      picked.push(movie);
+      if (typeof primaryGenre === 'number') usedGenre.add(primaryGenre);
+      if (typeof decade === 'number') usedDecade.add(decade);
+    }
+  };
+
+  // Pass 1: максимально разнообразно
+  for (const movie of movies) tryPick(movie);
+
+  // Pass 2: добиваем остаток без строгих ограничений
+  if (picked.length < limit) {
+    const pickedId = new Set(picked.map((m) => m.id));
+    for (const movie of movies) {
+      if (picked.length >= limit) break;
+      if (pickedId.has(movie.id)) continue;
+      picked.push(movie);
+      pickedId.add(movie.id);
+    }
+  }
+
+  return picked.slice(0, limit);
+};
 
 export const useMovieRecommendations = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -268,9 +330,18 @@ export const useMovieRecommendations = () => {
       const explicitGenreKeys = Array.isArray(answers.genres) ? answers.genres : [];
       const aiGenreKeys = normalizeGenreKeys(aiRecommendation.genre_keys);
 
+      const moodBoost = answers.mood && MOOD_GENRE_BOOST[answers.mood] ? MOOD_GENRE_BOOST[answers.mood] : [];
+      const companyBoost = answers.company && COMPANY_GENRE_BOOST[answers.company] ? COMPANY_GENRE_BOOST[answers.company] : [];
+      const boostKeys = uniqueStrings([...moodBoost, ...companyBoost]);
+
       const excludedGenreKeySet = new Set(Array.isArray(answers.avoidGenres) ? answers.avoidGenres : []);
 
-      const finalGenreKeys = (explicitGenreKeys.length > 0 ? explicitGenreKeys : aiGenreKeys)
+      const primaryKeys = explicitGenreKeys.length > 0 ? explicitGenreKeys : aiGenreKeys;
+      const finalGenreKeys = uniqueStrings([
+        ...primaryKeys,
+        ...(explicitGenreKeys.length > 0 && explicitGenreKeys.length >= 3 ? [] : boostKeys),
+      ])
+        .map((k) => String(k).trim().toLowerCase())
         .filter((k) => Object.prototype.hasOwnProperty.call(GENRE_MAP, k))
         .filter((k) => !excludedGenreKeySet.has(k))
         .slice(0, 3);
@@ -368,8 +439,19 @@ export const useMovieRecommendations = () => {
       let movies: TMDbMovie[] = [];
       for (const page of pagesToTry) {
         const tmdbData = await fetchDiscoverPage(page);
-        const candidate = tmdbData?.results?.slice(0, 5) || [];
-        const candidateIds = (candidate as TMDbMovie[]).map((m) => m.id).join(',');
+        const rawResults = (tmdbData?.results as TMDbMovie[] | undefined) ?? [];
+
+        // Берём пул побольше и формируем подборку «как куратор»
+        const pool = rawResults
+          .filter((m) => m && typeof m.id === 'number')
+          .filter((m) => !m.adult)
+          .slice(0, 20);
+
+        const withPoster = pool.filter((m) => !!m.poster_path);
+        const poolForPick = withPoster.length >= 8 ? withPoster : pool;
+
+        const candidate = pickDiverseMovies(poolForPick, 5);
+        const candidateIds = candidate.map((m) => m.id).join(',');
 
         // If we're repeating the same query, avoid returning identical results.
         if (attemptRef.current > 0 && candidateIds && candidateIds === lastResultIdsRef.current) {
