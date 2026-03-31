@@ -76,7 +76,7 @@ serve(async (req: Request) => {
     }
 
     const users = listed?.users ?? [];
-    const userIds = users.map((u) => u.id);
+    const userIds = users.map((u: { id: string }) => u.id);
 
     const { data: profiles, error: profilesError } = await supabaseAdmin
       .from("profiles")
@@ -96,7 +96,7 @@ serve(async (req: Request) => {
       return jsonResponse({ error: rolesError.message }, { status: 500 });
     }
 
-    const profileById = new Map((profiles ?? []).map((p) => [p.id, p]));
+    const profileById = new Map((profiles ?? []).map((p: { id: string }) => [p.id, p]));
 
     const rolesByUserId = new Map<string, string>();
     for (const row of roles ?? []) {
@@ -108,7 +108,7 @@ serve(async (req: Request) => {
       if (weight > currentWeight) rolesByUserId.set(row.user_id, role);
     }
 
-    const result = users.map((u) => {
+    const result = users.map((u: { id: string; email?: string | null; created_at?: string | null }) => {
       const profile = profileById.get(u.id);
       return {
         id: u.id,

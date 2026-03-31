@@ -1,6 +1,7 @@
 {
   "include": ["debug_kinogo.py", "parser/**/*.py", "src/**/*.py"],
   "exclude": [
+    "**/.*",
     "node_modules",
     "dist",
     "supabase",
