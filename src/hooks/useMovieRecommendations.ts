@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { getSupabaseAnonKey, getSupabaseUrl } from '@/lib/public-env';
 import type { QuizAnswers } from '@/components/ui/movie-quiz';
@@ -134,6 +134,9 @@ const computeReleaseRange = (movieAge?: string) => {
 export const useMovieRecommendations = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const lastQueryKeyRef = useRef<string>('');
+  const attemptRef = useRef<number>(0);
+  const lastResultIdsRef = useRef<string>('');
 
   const formatAnswersForAI = (answers: QuizAnswers): string => {
     const parts: string[] = [];
@@ -251,23 +254,31 @@ export const useMovieRecommendations = () => {
           ? aiRecommendation.explanation.trim()
           : 'Подобрали популярные фильмы на основе ваших предпочтений.';
 
-      const filters = {
+      const queryKey = JSON.stringify({
+        with_genres: finalGenreIds.join(','),
+        release_date_gte: releaseRange.gte,
+        release_date_lte: releaseRange.lte,
+        with_runtime_gte: finalRuntimeMin,
+        with_runtime_lte: finalRuntimeMax,
+        sort_by: finalSortBy,
+      });
+
+      if (lastQueryKeyRef.current === queryKey) {
+        attemptRef.current += 1;
+      } else {
+        attemptRef.current = 0;
+        lastQueryKeyRef.current = queryKey;
+      }
+
+      const baseFilters = {
         with_genres: finalGenreIds.join(','),
         'release_date.gte': releaseRange.gte,
         'release_date.lte': releaseRange.lte,
         with_runtime_gte: String(finalRuntimeMin),
         with_runtime_lte: String(finalRuntimeMax),
         sort_by: finalSortBy,
-        page: '1',
         language: 'ru-RU',
       };
-
-      console.log('Fetching movies with filters:', filters);
-
-      const searchParams = new URLSearchParams({
-        endpoint: '/discover/movie',
-        ...filters,
-      });
 
       const supabaseUrl = getSupabaseUrl();
       const supabaseAnonKey = getSupabaseAnonKey();
@@ -275,22 +286,55 @@ export const useMovieRecommendations = () => {
         throw new Error('Supabase env is not configured. Cannot call tmdb-proxy.');
       }
 
-      const response = await fetch(`${supabaseUrl}/functions/v1/tmdb-proxy?${searchParams}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${supabaseAnonKey}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const fetchDiscoverPage = async (page: number) => {
+        const filters = {
+          ...baseFilters,
+          page: String(page),
+        };
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('TMDb proxy error:', response.status, errorText);
-        throw new Error(`TMDb proxy error: ${response.status}`);
+        console.log('Fetching movies with filters:', filters);
+
+        const searchParams = new URLSearchParams({
+          endpoint: '/discover/movie',
+          ...filters,
+        });
+
+        const response = await fetch(`${supabaseUrl}/functions/v1/tmdb-proxy?${searchParams}`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${supabaseAnonKey}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('TMDb proxy error:', response.status, errorText);
+          throw new Error(`TMDb proxy error: ${response.status}`);
+        }
+
+        return response.json();
+      };
+
+      const startingPage = 1 + (attemptRef.current % 5);
+      const pagesToTry = [startingPage, startingPage + 1, startingPage + 2].filter((p) => p >= 1 && p <= 10);
+
+      let movies: TMDbMovie[] = [];
+      for (const page of pagesToTry) {
+        const tmdbData = await fetchDiscoverPage(page);
+        const candidate = tmdbData?.results?.slice(0, 5) || [];
+        const candidateIds = (candidate as TMDbMovie[]).map((m) => m.id).join(',');
+
+        // If we're repeating the same query, avoid returning identical results.
+        if (attemptRef.current > 0 && candidateIds && candidateIds === lastResultIdsRef.current) {
+          continue;
+        }
+
+        movies = candidate;
+        if (candidateIds) lastResultIdsRef.current = candidateIds;
+        break;
       }
 
-      const tmdbData = await response.json();
-      const movies = tmdbData?.results?.slice(0, 5) || [];
       console.log('Found movies:', movies.length);
 
       return {
