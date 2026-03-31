@@ -9,7 +9,10 @@ export const useMoviePopulation = () => {
     try {
       const { data, error } = await supabase.functions.invoke('auto-populate-movies', {
         body: { 
-          pages: 10, // Больше страниц для лучшего покрытия
+          pages: 3,
+          maxMovies: 80,
+          timeBudgetMs: 25000,
+          sleepMs: 100,
           trigger: 'user_request' 
         }
       });

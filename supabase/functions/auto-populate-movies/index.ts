@@ -33,16 +33,57 @@ interface TMDbMovieDetails {
 }
 
 const TMDB_API_KEY = Deno.env.get('TMDB_API_KEY');
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+function getSupabaseClient() {
+  if (!SUPABASE_URL) throw new Error('SUPABASE_URL not configured');
+  if (!SUPABASE_SERVICE_ROLE_KEY) throw new Error('SUPABASE_SERVICE_ROLE_KEY not configured');
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+}
+
+function clampInt(value: unknown, fallback: number, min: number, max: number) {
+  const parsed = typeof value === 'string' ? Number.parseInt(value, 10) : Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(min, Math.min(max, Math.trunc(parsed)));
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function safeReadJson(req: Request): Promise<Record<string, unknown>> {
+  try {
+    const contentType = req.headers.get('content-type') ?? '';
+    if (!contentType.includes('application/json')) {
+      const text = (await req.text()).trim();
+      if (!text) return {};
+      try {
+        return JSON.parse(text);
+      } catch {
+        return {};
+      }
+    }
+    return await req.json();
+  } catch {
+    return {};
+  }
+}
 
 async function fetchFromTMDB(endpoint: string) {
-  const url = `https://api.themoviedb.org/3${endpoint}?api_key=${TMDB_API_KEY}&language=ru-RU&region=RU`;
-  console.log(`Fetching from TMDB: ${url}`);
-  
-  const response = await fetch(url);
+  if (!TMDB_API_KEY) throw new Error('TMDB_API_KEY not configured');
+
+  const url = new URL(`https://api.themoviedb.org/3${endpoint}`);
+  url.searchParams.set('api_key', TMDB_API_KEY);
+  url.searchParams.set('language', 'ru-RU');
+  url.searchParams.set('region', 'RU');
+
+  // Не логируем секреты
+  const safeUrl = new URL(url.toString());
+  safeUrl.searchParams.delete('api_key');
+  console.log(`Fetching from TMDb: ${safeUrl.pathname}${safeUrl.search}`);
+
+  const response = await fetch(url.toString());
   if (!response.ok) {
     throw new Error(`TMDB API error: ${response.status} ${response.statusText}`);
   }
@@ -50,7 +91,7 @@ async function fetchFromTMDB(endpoint: string) {
   return await response.json();
 }
 
-async function cacheMovieInDB(movie: TMDbMovieDetails) {
+async function cacheMovieInDB(supabase: ReturnType<typeof createClient>, movie: TMDbMovieDetails) {
   const now = new Date();
   const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 дней
   
@@ -93,19 +134,34 @@ async function cacheMovieInDB(movie: TMDbMovieDetails) {
   return true;
 }
 
-async function populateMovies(pages: number = 5) {
-  console.log(`🚀 Starting enhanced movie population (${pages} pages)`);
+async function populateMovies(options: {
+  pages: number;
+  maxMovies: number;
+  timeBudgetMs: number;
+  sleepMs: number;
+}) {
+  const supabase = getSupabaseClient();
+
+  const { pages, maxMovies, timeBudgetMs, sleepMs } = options;
   let totalProcessed = 0;
   let totalCached = 0;
+
+  const startedAt = Date.now();
+  const shouldStop = () => (Date.now() - startedAt) >= timeBudgetMs || totalProcessed >= maxMovies;
+
+  console.log(`🚀 Starting enhanced movie population (pages=${pages}, maxMovies=${maxMovies}, timeBudgetMs=${timeBudgetMs})`);
 
   try {
     // Популярные фильмы
     console.log(`📈 Fetching popular movies...`);
+    popularLoop:
     for (let page = 1; page <= pages; page++) {
       console.log(`📄 Fetching popular movies page ${page}/${pages}`);
       const popularData = await fetchFromTMDB(`/movie/popular?page=${page}`);
       
       for (const movie of popularData.results) {
+        if (shouldStop()) break popularLoop;
+
         // Проверяем, есть ли уже в кэше
         const { data: existing } = await supabase
           .from('movies_tmdb')
@@ -121,7 +177,7 @@ async function populateMovies(pages: number = 5) {
         // Получаем детали фильма
         try {
           const movieDetails = await fetchFromTMDB(`/movie/${movie.id}`);
-          const success = await cacheMovieInDB(movieDetails);
+          const success = await cacheMovieInDB(supabase, movieDetails);
           if (success) {
             totalCached++;
             console.log(`💾 Cached movie: ${movieDetails.title} (${movie.id})`);
@@ -129,23 +185,27 @@ async function populateMovies(pages: number = 5) {
           totalProcessed++;
           
           // Пауза между запросами для соблюдения лимитов API
-          await new Promise(resolve => setTimeout(resolve, 250));
+          if (sleepMs > 0) await sleep(sleepMs);
         } catch (error) {
           console.error(`❌ Failed to cache movie ${movie.id}:`, error);
         }
       }
       
       // Пауза между страницами
-      await new Promise(resolve => setTimeout(resolve, 500));
+      if (shouldStop()) break popularLoop;
+      if (sleepMs > 0) await sleep(Math.min(250, sleepMs * 2));
     }
 
     // Топ рейтинговые фильмы
     console.log(`🏆 Fetching top rated movies...`);
+    topRatedLoop:
     for (let page = 1; page <= Math.min(pages, 3); page++) {
       console.log(`📄 Fetching top rated movies page ${page}/${Math.min(pages, 3)}`);
       const topRatedData = await fetchFromTMDB(`/movie/top_rated?page=${page}`);
       
       for (const movie of topRatedData.results) {
+        if (shouldStop()) break topRatedLoop;
+
         const { data: existing } = await supabase
           .from('movies_tmdb')
           .select('id, expires_at')
@@ -158,31 +218,37 @@ async function populateMovies(pages: number = 5) {
 
         try {
           const movieDetails = await fetchFromTMDB(`/movie/${movie.id}`);
-          const success = await cacheMovieInDB(movieDetails);
+          const success = await cacheMovieInDB(supabase, movieDetails);
           if (success) {
             totalCached++;
             console.log(`💾 Cached top rated movie: ${movieDetails.title} (${movie.id})`);
           }
           totalProcessed++;
           
-          await new Promise(resolve => setTimeout(resolve, 250));
+          if (sleepMs > 0) await sleep(sleepMs);
         } catch (error) {
           console.error(`❌ Failed to cache top rated movie ${movie.id}:`, error);
         }
       }
       
-      await new Promise(resolve => setTimeout(resolve, 500));
+      if (shouldStop()) break topRatedLoop;
+      if (sleepMs > 0) await sleep(Math.min(250, sleepMs * 2));
     }
 
     // Новые фильмы (2024-2025)
     console.log(`🆕 Fetching recent movies (2024-2025)...`);
     const currentYear = new Date().getFullYear();
+    recentLoop:
     for (const year of [currentYear, currentYear - 1]) {
       for (let page = 1; page <= 3; page++) {
+        if (shouldStop()) break recentLoop;
+
         console.log(`📄 Fetching ${year} movies page ${page}/3`);
         const yearMovies = await fetchFromTMDB(`/discover/movie?primary_release_year=${year}&sort_by=popularity.desc&page=${page}`);
         
         for (const movie of yearMovies.results) {
+          if (shouldStop()) break recentLoop;
+
           const { data: existing } = await supabase
             .from('movies_tmdb')
             .select('id, expires_at')
@@ -195,20 +261,21 @@ async function populateMovies(pages: number = 5) {
 
           try {
             const movieDetails = await fetchFromTMDB(`/movie/${movie.id}`);
-            const success = await cacheMovieInDB(movieDetails);
+            const success = await cacheMovieInDB(supabase, movieDetails);
             if (success) {
               totalCached++;
               console.log(`💾 Cached ${year} movie: ${movieDetails.title} (${movie.id})`);
             }
             totalProcessed++;
             
-            await new Promise(resolve => setTimeout(resolve, 250));
+            if (sleepMs > 0) await sleep(sleepMs);
           } catch (error) {
             console.error(`❌ Failed to cache ${year} movie ${movie.id}:`, error);
           }
         }
         
-        await new Promise(resolve => setTimeout(resolve, 500));
+        if (shouldStop()) break recentLoop;
+        if (sleepMs > 0) await sleep(Math.min(250, sleepMs * 2));
       }
     }
 
@@ -242,38 +309,59 @@ serve(async (req) => {
   try {
     console.log('🎬 Auto-populate movies function called');
     
-    if (!TMDB_API_KEY) {
-      throw new Error('TMDB_API_KEY not configured');
-    }
+    if (!TMDB_API_KEY) throw new Error('TMDB_API_KEY not configured');
+    // Валидируем Supabase env на старте вызова (чтобы ошибки были понятными)
+    getSupabaseClient();
 
-    // Получаем параметры из запроса
-    let requestBody: any = {};
-    try {
-      if (req.body) {
-        requestBody = await req.json();
-      }
-    } catch (e) {
-      console.log('No request body or invalid JSON, using defaults');
-    }
+    const url = new URL(req.url);
+    const requestBody = await safeReadJson(req);
 
-    const pages = requestBody.pages || 8; // Увеличиваем по умолчанию до 8 страниц
-    const trigger = requestBody.trigger || 'manual';
+    const pages = clampInt(
+      (requestBody as any).pages ?? url.searchParams.get('pages'),
+      2,
+      1,
+      25,
+    );
+    const maxMovies = clampInt(
+      (requestBody as any).maxMovies ?? url.searchParams.get('maxMovies'),
+      80,
+      10,
+      300,
+    );
+    const timeBudgetMs = clampInt(
+      (requestBody as any).timeBudgetMs ?? url.searchParams.get('timeBudgetMs'),
+      25_000,
+      5_000,
+      55_000,
+    );
+    const sleepMs = clampInt(
+      (requestBody as any).sleepMs ?? url.searchParams.get('sleepMs'),
+      100,
+      0,
+      1000,
+    );
+    const trigger = (requestBody as any).trigger || url.searchParams.get('trigger') || 'manual';
     
     console.log(`📊 Starting population with ${pages} pages (trigger: ${trigger})`);
 
     // Проверяем текущее состояние базы
+    const supabase = getSupabaseClient();
     const { count: currentCount } = await supabase
       .from('movies_tmdb')
       .select('*', { count: 'exact', head: true });
 
     console.log(`📈 Current database has ${currentCount || 0} movies`);
 
-    const result = await populateMovies(pages);
+    const result = await populateMovies({ pages, maxMovies, timeBudgetMs, sleepMs });
     
     return new Response(
       JSON.stringify({
         ...result,
         trigger,
+        pages,
+        maxMovies,
+        timeBudgetMs,
+        sleepMs,
         previousCount: currentCount || 0
       }),
       { 

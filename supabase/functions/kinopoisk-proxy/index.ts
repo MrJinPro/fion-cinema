@@ -47,7 +47,7 @@ serve(async (req) => {
     
     // Handle empty body or non-JSON requests
     if (!contentType || !contentType.includes('application/json')) {
-      console.error('Invalid content type or missing body');
+      console.warn('Invalid content type or missing body');
       return new Response(
         JSON.stringify({ 
           docs: [], 
@@ -64,7 +64,7 @@ serve(async (req) => {
     try {
       const body = await req.text();
       if (!body.trim()) {
-        console.error('Empty request body');
+        console.warn('Empty request body');
         return new Response(
           JSON.stringify({ 
             docs: [], 

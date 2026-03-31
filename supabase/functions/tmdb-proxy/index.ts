@@ -52,7 +52,10 @@ serve(async (req) => {
       }
     }
 
-    console.log('Proxying request to TMDb:', tmdbUrl.toString());
+    // Не логируем секреты
+    const safeLogUrl = new URL(tmdbUrl.toString());
+    safeLogUrl.searchParams.delete('api_key');
+    console.log('Proxying request to TMDb:', safeLogUrl.toString());
 
     // Make request to TMDb API
     const response = await fetch(tmdbUrl.toString(), {
