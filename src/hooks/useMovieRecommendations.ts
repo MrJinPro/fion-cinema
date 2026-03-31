@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getSupabaseAnonKey, getSupabaseUrl } from '@/lib/public-env';
 import { useDiscoverMovies } from '@/hooks/useTMDbApi';
 import type { QuizAnswers } from '@/components/ui/movie-quiz';
 import type { TMDbMovie } from '@/lib/tmdb';
@@ -164,11 +165,17 @@ TMDb жанры: Action=28, Adventure=12, Animation=16, Comedy=35, Crime=80, Doc
         endpoint: '/discover/movie',
         ...filters
       });
+
+      const supabaseUrl = getSupabaseUrl();
+      const supabaseAnonKey = getSupabaseAnonKey();
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error('Supabase env is not configured. Cannot call tmdb-proxy.');
+      }
       
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tmdb-proxy?${searchParams}`, {
+      const response = await fetch(`${supabaseUrl}/functions/v1/tmdb-proxy?${searchParams}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Authorization': `Bearer ${supabaseAnonKey}`,
           'Content-Type': 'application/json',
         },
       });

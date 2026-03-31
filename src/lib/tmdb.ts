@@ -300,6 +300,8 @@ class RateLimiter {
 }
 
 // TMDb API Client
+import { getSupabaseUrl } from './public-env';
+
 export class TMDbClient {
   private baseURL: string;
   private imageBaseURL = 'https://image.tmdb.org/t/p';
@@ -308,9 +310,12 @@ export class TMDbClient {
 
   constructor() {
     // Use Supabase Edge Function for API requests instead of direct TMDb API calls
-    const supabaseUrl = (import.meta as any)?.env?.VITE_SUPABASE_URL as string | undefined;
+    // Read via helper to support runtime config on static hosting.
+    const supabaseUrl = getSupabaseUrl();
     if (!supabaseUrl) {
-      throw new Error('VITE_SUPABASE_URL is not configured. Cannot call tmdb-proxy Edge Function.');
+      console.error('VITE_SUPABASE_URL is not configured. TMDb Edge Function calls will fail.');
+      this.baseURL = '';
+      return;
     }
 
     this.baseURL = `${supabaseUrl.replace(/\/$/, '')}/functions/v1/tmdb-proxy`;
@@ -318,6 +323,10 @@ export class TMDbClient {
 
   private async makeRequest<T>(endpoint: string, params: Record<string, any> = {}): Promise<T> {
     console.log('Making TMDb request to:', endpoint, 'with params:', params);
+
+    if (!this.baseURL) {
+      throw new Error('VITE_SUPABASE_URL is not configured. Cannot call tmdb-proxy Edge Function.');
+    }
 
     await this.rateLimiter.wait();
 
