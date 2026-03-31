@@ -1,0 +1,812 @@
+{% extends "base.html" %}
+
+{% block title %}Смотреть {{ movie.title }} - FionCinema{% endblock %}
+
+{% block head %}
+<style>
+/* Кастомные стили для видеоплеера */
+.video-player-container {
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+}
+
+.custom-video-player {
+    width: 100%;
+    height: 500px;
+    background: #000;
+    position: relative;
+}
+
+.video-element {
+    width: 100%;
+    height: 100%;
+    outline: none;
+}
+
+.video-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    padding: 20px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.video-player-container:hover .video-controls {
+    transform: translateY(0);
+}
+
+.controls-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.play-pause-btn {
+    background: var(--primary-color);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.play-pause-btn:hover {
+    background: var(--primary-color-dark);
+}
+
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.volume-slider {
+    width: 80px;
+}
+
+.progress-container {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+    position: relative;
+    cursor: pointer;
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--primary-color);
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.1s;
+}
+
+.time-display {
+    color: white;
+    font-size: 14px;
+    min-width: 80px;
+    text-align: center;
+}
+
+.fullscreen-btn, .settings-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.fullscreen-btn:hover, .settings-btn:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.quality-selector {
+    margin-bottom: 20px;
+}
+
+.quality-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.quality-btn {
+    padding: 8px 16px;
+    border: 2px solid var(--primary-color);
+    background: transparent;
+    color: var(--primary-color);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.quality-btn:hover, .quality-btn.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.no-video-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 500px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .custom-video-player {
+        height: 250px;
+    }
+    
+    .controls-row {
+        gap: 10px;
+    }
+    
+    .volume-slider {
+        width: 60px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ url_for('index') }}">
+                        <i class="bi bi-house"></i> Главная
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ url_for('movie_detail', movie_id=movie.id) }}">
+                        {{ movie.title }}
+                    </a>
+                </li>
+                <li class="breadcrumb-item active">Смотреть онлайн</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 mb-3">
+            <i class="bi bi-play-circle"></i> {{ movie.title }}
+            {% if movie.year %}
+                <span class="text-muted">({{ movie.year }})</span>
+            {% endif %}
+        </h1>
+    </div>
+</div>
+
+<!-- Видеоплеер -->
+<div class="row mb-4">
+    <div class="col-12">
+        {% if video_urls %}
+            <!-- Селектор качества -->
+            <div class="quality-selector">
+                <label class="form-label">Выберите источник:</label>
+                <div class="quality-buttons">
+                    {% for video in video_urls %}
+                        <button class="quality-btn" 
+                                data-url="{{ video.url }}" 
+                                data-type="{{ video.type }}"
+                                onclick="loadVideo('{{ video.url }}', '{{ video.type }}')">
+                            {{ video.source }} - {{ video.quality }}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Видеоплеер -->
+            <div class="video-player-container">
+                <div class="custom-video-player" id="videoPlayer">
+                    <!-- Контент будет загружен динамически -->
+                    <div class="no-video-message" id="noVideoMessage">
+                        <i class="bi bi-play-circle display-1 mb-3"></i>
+                        <h4>Выберите источник для просмотра</h4>
+                        <p>Нажмите на одну из кнопок выше</p>
+                    </div>
+                </div>
+        {% else %}
+            <!-- Динамическая загрузка видео -->
+            <div class="quality-selector">
+                <div class="alert alert-info" id="searchingAlert">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Поиск видео-ссылок...</strong>
+                    <p>Ищем доступные источники для просмотра этого фильма</p>
+                </div>
+                <div class="quality-buttons" id="dynamicQualityButtons" style="display: none;">
+                    <!-- Кнопки будут добавлены динамически -->
+                </div>
+            </div>
+
+            <!-- Видеоплеер -->
+            <div class="video-player-container">
+                <div class="custom-video-player" id="videoPlayer">
+                    <!-- Загрузка -->
+                    <div class="no-video-message" id="searchingMessage">
+                        <div class="loading-spinner mb-3"></div>
+                        <h4>Поиск видео...</h4>
+                        <p>Анализируем источники для фильма "{{ movie.title }}"</p>
+                    </div>
+                </div>
+
+                <!-- Загрузка -->
+                <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+                    <div class="loading-spinner"></div>
+                </div>
+
+                <!-- Кастомные контролы -->
+                <div class="video-controls" id="videoControls" style="display: none;">
+                    <div class="controls-row">
+                        <button class="play-pause-btn" id="playPauseBtn">
+                            <i class="bi bi-play-fill"></i>
+                        </button>
+
+                        <div class="volume-control">
+                            <i class="bi bi-volume-up text-white"></i>
+                            <input type="range" class="volume-slider" min="0" max="100" value="100" id="volumeSlider">
+                        </div>
+
+                        <div class="progress-container" id="progressContainer">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+
+                        <div class="time-display" id="timeDisplay">00:00 / 00:00</div>
+
+                        <button class="settings-btn">
+                            <i class="bi bi-gear"></i>
+                        </button>
+
+                        <button class="fullscreen-btn" id="fullscreenBtn">
+                            <i class="bi bi-fullscreen"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сообщение об отсутствии видео (если динамический поиск не дал результатов) -->
+            <div class="video-player-container" id="noResultsContainer" style="display: none;">
+                <div class="no-video-message">
+                    <i class="bi bi-exclamation-triangle display-1 mb-3"></i>
+                    <h4>Видео не найдено</h4>
+                    <p>К сожалению, для этого фильма не удалось найти ссылки на видео</p>
+                    <a href="{{ movie.movie_url }}" target="_blank" class="btn btn-primary mt-3">
+                        <i class="bi bi-external-link"></i> Смотреть на оригинальном сайте
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Информация о фильме -->
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">О фильме</h5>
+                
+                {% if movie.description %}
+                    <p class="card-text">{{ movie.description }}</p>
+                {% endif %}
+                
+                <div class="row">
+                    {% if movie.year %}
+                        <div class="col-sm-6 mb-2">
+                            <strong><i class="bi bi-calendar3"></i> Год:</strong> {{ movie.year }}
+                        </div>
+                    {% endif %}
+                    
+                    {% if movie.genre %}
+                        <div class="col-sm-6 mb-2">
+                            <strong><i class="bi bi-tags"></i> Жанр:</strong> {{ movie.genre }}
+                        </div>
+                    {% endif %}
+                    
+                    {% if movie.director %}
+                        <div class="col-sm-6 mb-2">
+                            <strong><i class="bi bi-camera-video"></i> Режиссер:</strong> {{ movie.director }}
+                        </div>
+                    {% endif %}
+                    
+                    {% if movie.rating_kp or movie.rating_imdb %}
+                        <div class="col-sm-6 mb-2">
+                            <strong><i class="bi bi-star"></i> Рейтинг:</strong>
+                            {% if movie.rating_kp %}
+                                KP: {{ "%.1f"|format(movie.rating_kp) }}
+                            {% endif %}
+                            {% if movie.rating_imdb %}
+                                IMDB: {{ "%.1f"|format(movie.rating_imdb) }}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Действия</h5>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('movie_detail', movie_id=movie.id) }}" class="btn btn-outline-primary">
+                        <i class="bi bi-info-circle"></i> Подробнее о фильме
+                    </a>
+                    <a href="{{ movie.movie_url }}" target="_blank" class="btn btn-outline-secondary">
+                        <i class="bi bi-external-link"></i> Открыть оригинал
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentVideo = null;
+let isPlaying = false;
+let currentTime = 0;
+let duration = 0;
+
+function loadVideo(url, type) {
+    console.log('Loading video:', url, type);
+    
+    const videoPlayer = document.getElementById('videoPlayer');
+    const noVideoMessage = document.getElementById('noVideoMessage');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const videoControls = document.getElementById('videoControls');
+    
+    // Показываем загрузку
+    noVideoMessage.style.display = 'none';
+    loadingOverlay.style.display = 'flex';
+    
+    // Активируем кнопку качества
+    document.querySelectorAll('.quality-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    // Очищаем предыдущее видео
+    if (currentVideo) {
+        currentVideo.pause();
+        currentVideo.remove();
+    }
+    
+    setTimeout(() => {
+        if (type === 'iframe' || type === 'direct') {
+            // Для iframe плееров (включая FiOn Player)
+            const iframe = document.createElement('iframe');
+            iframe.className = 'video-element';
+            iframe.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture';
+            iframe.allowFullscreen = true;
+            iframe.frameBorder = '0';
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            
+            // Устанавливаем src
+            iframe.src = url;
+            
+            // Добавляем обертку с кастомными контролами для iframe
+            const wrapper = document.createElement('div');
+            wrapper.className = 'iframe-wrapper';
+            wrapper.style.position = 'relative';
+            wrapper.style.width = '100%';
+            wrapper.style.height = '100%';
+            
+            wrapper.appendChild(iframe);
+            
+            // Добавляем кастомную панель управления поверх iframe
+            const customControls = document.createElement('div');
+            customControls.className = 'iframe-custom-controls';
+            customControls.innerHTML = `
+                <div class="iframe-controls-overlay">
+                    <div class="iframe-controls-bar">
+                        <button class="iframe-btn" onclick="toggleIframeFullscreen()" title="Полноэкранный режим">
+                            <i class="bi bi-fullscreen"></i>
+                        </button>
+                        <button class="iframe-btn" onclick="openInNewWindow('${url}')" title="Открыть в новом окне">
+                            <i class="bi bi-box-arrow-up-right"></i>
+                        </button>
+                        <span class="iframe-title">FiOn Player</span>
+                    </div>
+                </div>
+            `;
+            
+            // Стили для кастомных контролов
+            const style = document.createElement('style');
+            style.textContent = `
+                .iframe-wrapper {
+                    position: relative;
+                }
+                .iframe-custom-controls {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    z-index: 10;
+                    pointer-events: none;
+                }
+                .iframe-controls-overlay {
+                    background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+                    padding: 10px 15px;
+                    border-radius: 0 0 0 15px;
+                    backdrop-filter: blur(10px);
+                }
+                .iframe-controls-bar {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    pointer-events: all;
+                }
+                .iframe-btn {
+                    background: rgba(255,255,255,0.1);
+                    border: 1px solid rgba(255,255,255,0.2);
+                    color: white;
+                    padding: 8px 12px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                    font-size: 14px;
+                }
+                .iframe-btn:hover {
+                    background: rgba(255,255,255,0.2);
+                    border-color: rgba(255,255,255,0.3);
+                    transform: translateY(-2px);
+                }
+                .iframe-title {
+                    color: white;
+                    font-size: 12px;
+                    font-weight: 500;
+                    opacity: 0.8;
+                }
+            `;
+            document.head.appendChild(style);
+            
+            wrapper.appendChild(customControls);
+            
+            videoPlayer.innerHTML = '';
+            videoPlayer.appendChild(wrapper);
+            
+            // Скрываем индикатор загрузки через небольшую задержку
+            setTimeout(() => {
+                loadingOverlay.style.display = 'none';
+            }, 2000);
+            
+            videoControls.style.display = 'none'; // Скрываем стандартные контролы для iframe
+            
+        } else if (type === 'direct_video') {
+            // Для прямых ссылок на видео
+            const video = document.createElement('video');
+            video.src = url;
+            video.className = 'video-element';
+            video.controls = false; // Убираем стандартные контролы
+            video.preload = 'metadata';
+            video.crossOrigin = 'anonymous';
+            
+            video.addEventListener('loadedmetadata', () => {
+                duration = video.duration;
+                updateTimeDisplay();
+                loadingOverlay.style.display = 'none';
+                videoControls.style.display = 'block';
+            });
+            
+            video.addEventListener('timeupdate', updateProgress);
+            video.addEventListener('ended', () => {
+                isPlaying = false;
+                updatePlayPauseBtn();
+            });
+            
+            video.addEventListener('error', (e) => {
+                console.error('Video error:', e);
+                showVideoError('Ошибка загрузки видео. Попробуйте другой источник.');
+            });
+            
+            videoPlayer.innerHTML = '';
+            videoPlayer.appendChild(video);
+            currentVideo = video;
+            
+        } else {
+            // Fallback для других типов
+            showVideoError('Неподдерживаемый тип видео');
+        }
+    }, 1000);
+}
+
+function togglePlayPause() {
+    if (!currentVideo) return;
+    
+    if (isPlaying) {
+        currentVideo.pause();
+    } else {
+        currentVideo.play();
+    }
+    
+    isPlaying = !isPlaying;
+    updatePlayPauseBtn();
+}
+
+function updatePlayPauseBtn() {
+    const btn = document.getElementById('playPauseBtn');
+    const icon = btn.querySelector('i');
+    
+    if (isPlaying) {
+        icon.className = 'bi bi-pause-fill';
+    } else {
+        icon.className = 'bi bi-play-fill';
+    }
+}
+
+function updateProgress() {
+    if (!currentVideo) return;
+    
+    currentTime = currentVideo.currentTime;
+    const progress = (currentTime / duration) * 100;
+    
+    document.getElementById('progressBar').style.width = progress + '%';
+    updateTimeDisplay();
+}
+
+function updateTimeDisplay() {
+    const current = formatTime(currentTime);
+    const total = formatTime(duration);
+    document.getElementById('timeDisplay').textContent = `${current} / ${total}`;
+}
+
+function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+function seekTo(e) {
+    if (!currentVideo) return;
+    
+    const progressContainer = document.getElementById('progressContainer');
+    const rect = progressContainer.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const percentage = clickX / rect.width;
+    
+    currentVideo.currentTime = percentage * duration;
+}
+
+function changeVolume(e) {
+    if (!currentVideo) return;
+    
+    const volume = e.target.value / 100;
+    currentVideo.volume = volume;
+}
+
+function toggleIframeFullscreen() {
+    const container = document.querySelector('.video-player-container');
+    
+    if (document.fullscreenElement) {
+        document.exitFullscreen();
+    } else {
+        container.requestFullscreen().catch(err => {
+            console.error('Fullscreen error:', err);
+        });
+    }
+}
+
+function openInNewWindow(url) {
+    const width = Math.min(1200, window.screen.width * 0.8);
+    const height = Math.min(800, window.screen.height * 0.8);
+    const left = (window.screen.width - width) / 2;
+    const top = (window.screen.height - height) / 2;
+    
+    window.open(url, 'VideoPlayer', `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`);
+}
+
+function showVideoError(message) {
+    const videoPlayer = document.getElementById('videoPlayer');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    
+    loadingOverlay.style.display = 'none';
+    
+    videoPlayer.innerHTML = `
+        <div class="no-video-message">
+            <i class="bi bi-exclamation-triangle display-1 mb-3 text-warning"></i>
+            <h4>Ошибка воспроизведения</h4>
+            <p>${message}</p>
+            <button class="btn btn-primary mt-3" onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise"></i> Попробовать снова
+            </button>
+        </div>
+    `;
+}
+
+// Инициализация событий
+document.addEventListener('DOMContentLoaded', function() {
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const progressContainer = document.getElementById('progressContainer');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    
+    if (playPauseBtn) playPauseBtn.addEventListener('click', togglePlayPause);
+    if (progressContainer) progressContainer.addEventListener('click', seekTo);
+    if (volumeSlider) volumeSlider.addEventListener('input', changeVolume);
+    if (fullscreenBtn) fullscreenBtn.addEventListener('click', toggleIframeFullscreen);
+    
+    // Динамическая загрузка видео для фильмов без предзагруженных ссылок
+    /* {% if not video_urls %} */
+        loadVideosDynamically(Number("{{ movie.id }}"));
+    /* {% endif %} */
+    
+    // Клавиатурные сокращения
+    document.addEventListener('keydown', function(e) {
+        if (e.target.tagName === 'INPUT') return;
+        
+        switch(e.code) {
+            case 'Space':
+                e.preventDefault();
+                togglePlayPause();
+                break;
+            case 'KeyF':
+                e.preventDefault();
+                toggleIframeFullscreen();
+                break;
+        }
+    });
+});
+
+function loadVideosDynamically(movieId) {
+    console.log('🔍 Загружаем видео динамически для фильма ID:', movieId);
+    
+    // Показываем индикатор загрузки
+    const searchingMessage = document.getElementById('searchingMessage');
+    const searchingAlert = document.getElementById('searchingAlert');
+    
+    if (searchingMessage) {
+        searchingMessage.innerHTML = `
+            <div class="loading-spinner mb-3"></div>
+            <h4>Поиск видео...</h4>
+            <p>Анализируем источники видео, это может занять несколько секунд...</p>
+        `;
+    }
+    
+    // Делаем AJAX запрос к API
+    fetch(`/api/get_video_urls/${movieId}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('📡 Получен ответ от API:', data);
+            
+            if (data.success && data.video_urls && data.video_urls.length > 0) {
+                // Скрываем сообщение о поиске
+                if (searchingAlert) searchingAlert.style.display = 'none';
+                
+                // Показываем найденные видео
+                displayDynamicVideos(data.video_urls);
+                
+                // Обновляем плеер
+                if (searchingMessage) {
+                    searchingMessage.innerHTML = `
+                        <i class="bi bi-play-circle display-1 mb-3"></i>
+                        <h4>Видео найдены!</h4>
+                        <p>Выберите источник для просмотра выше</p>
+                    `;
+                }
+                
+            } else {
+                // Видео не найдены
+                showNoVideoFound();
+            }
+        })
+        .catch(error => {
+            console.error('❌ Ошибка загрузки видео:', error);
+            showVideoError('Ошибка поиска видео. Попробуйте обновить страницу.');
+        });
+}
+
+function displayDynamicVideos(videos) {
+    const dynamicButtons = document.getElementById('dynamicQualityButtons');
+    const searchingAlert = document.getElementById('searchingAlert');
+    
+    if (!dynamicButtons) return;
+    
+    // Создаем кнопки для каждого видео
+    dynamicButtons.innerHTML = '';
+    
+    // Добавляем заголовок
+    const label = document.createElement('label');
+    label.className = 'form-label';
+    label.textContent = 'Выберите источник:';
+    dynamicButtons.parentElement.insertBefore(label, dynamicButtons);
+    
+    videos.forEach(video => {
+        const button = document.createElement('button');
+        button.className = 'quality-btn';
+        button.textContent = `${video.source} - ${video.quality}`;
+        button.setAttribute('data-url', video.url);
+        button.setAttribute('data-type', video.type);
+        button.onclick = () => loadVideo(video.url, video.type);
+        
+        dynamicButtons.appendChild(button);
+    });
+    
+    // Показываем кнопки
+    dynamicButtons.style.display = 'flex';
+    
+    // Скрываем сообщение о поиске
+    if (searchingAlert) {
+        searchingAlert.style.display = 'none';
+    }
+    
+    console.log(`✅ Отображено ${videos.length} видео источников`);
+}
+
+function showNoVideoFound() {
+    const searchingMessage = document.getElementById('searchingMessage');
+    const searchingAlert = document.getElementById('searchingAlert');
+    
+    if (searchingAlert) {
+        searchingAlert.className = 'alert alert-warning';
+        searchingAlert.innerHTML = `
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>Видео не найдено</strong>
+            <p>К сожалению, для этого фильма не удалось найти доступные источники</p>
+        `;
+    }
+    
+    if (searchingMessage) {
+        searchingMessage.innerHTML = `
+            <i class="bi bi-exclamation-triangle display-1 mb-3 text-warning"></i>
+            <h4>Видео не найдено</h4>
+            <p>Попробуйте посмотреть фильм на оригинальном сайте</p>
+            <a href="{{ movie.movie_url }}" target="_blank" class="btn btn-primary mt-3">
+                <i class="bi bi-external-link"></i> Открыть оригинал
+            </a>
+        `;
+    }
+}
+
+console.log('🎬 FionCinema Video Player loaded');
+</script>
+{% endblock %}

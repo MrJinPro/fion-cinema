@@ -48,6 +48,7 @@ import { useBehaviorTracking } from '@/hooks/useBehaviorTracking';
 import { useUserRatings } from '@/hooks/useUserRatings';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useFavorites } from '@/hooks/useFavorites';
+import { AdSlot } from '@/components/ui/ad-slot';
 
 export const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -267,6 +268,10 @@ export const MovieDetails = () => {
                     <span className="text-muted-foreground">Нет постера</span>
                   </div>
                 )}
+
+                <div className={isMobile ? 'mt-4 max-w-xl mx-auto' : 'mt-4'}>
+                  <AdSlot placement="movie_details" format="rectangle" />
+                </div>
               </div>
             </div>
 

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Статистика - FionCinema{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-4 text-center mb-5">
+            <i class="bi bi-graph-up"></i> Статистика каталога
+        </h1>
+    </div>
+</div>
+
+<!-- Overview Stats -->
+<div class="row mb-5">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white text-center">
+            <div class="card-body">
+                <i class="bi bi-film display-4 mb-3"></i>
+                <h3>{{ total_movies }}</h3>
+                <p class="mb-0">Всего фильмов</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white text-center">
+            <div class="card-body">
+                <i class="bi bi-tags display-4 mb-3"></i>
+                <h3>{{ top_genres|length }}</h3>
+                <p class="mb-0">Жанров</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white text-center">
+            <div class="card-body">
+                <i class="bi bi-calendar-range display-4 mb-3"></i>
+                <h3>{{ years_stats|length }}</h3>
+                <p class="mb-0">Разных лет</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark text-center">
+            <div class="card-body">
+                <i class="bi bi-star display-4 mb-3"></i>
+                <h3>{{ top_rated|length }}</h3>
+                <p class="mb-0">С рейтингом</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Top Genres -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Популярные жанры</h5>
+            </div>
+            <div class="card-body">
+                {% if top_genres %}
+                    {% for genre, count in top_genres %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>{{ genre }}</span>
+                            <div class="d-flex align-items-center">
+                                <div class="progress me-2" style="width: 100px; height: 8px;">
+                                    <div class="progress-bar" 
+                                         style="--bar-w: {{ (count / top_genres[0][1] * 100)|int }}%; width: var(--bar-w);"></div>
+                                </div>
+                                <span class="badge bg-secondary">{{ count }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">Нет данных о жанрах</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Years Distribution -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Распределение по годам</h5>
+            </div>
+            <div class="card-body">
+                {% if years_stats %}
+                    {% for year, count in years_stats %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>{{ year if year else 'Неизвестно' }}</span>
+                            <div class="d-flex align-items-center">
+                                <div class="progress me-2" style="width: 100px; height: 8px;">
+                                    <div class="progress-bar bg-info" 
+                                         style="--bar-w: {{ (count / years_stats[0][1] * 100)|int }}%; width: var(--bar-w);"></div>
+                                </div>
+                                <span class="badge bg-info">{{ count }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">Нет данных о годах</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Top Rated Movies -->
+{% if top_rated %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-award"></i> Лучшие по рейтингу</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for movie in top_rated %}
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <div class="card border-0 bg-light">
+                                    <div class="row g-0">
+                                        <div class="col-4">
+                                            {% if movie.poster_url %}
+                                                <img src="{{ movie.poster_url }}" 
+                                                     class="img-fluid rounded-start h-100 object-cover" 
+                                                     alt="{{ movie.title }}"
+                                                     style="max-height: 120px;"
+                                                     onerror="this.src='https://via.placeholder.com/80x120/343a40/ffffff?text=?'">
+                                            {% else %}
+                                                <div class="d-flex align-items-center justify-content-center h-100 rounded-start bg-secondary">
+                                                    <i class="bi bi-film text-white"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-8">
+                                            <div class="card-body p-2">
+                                                <h6 class="card-title mb-1">
+                                                    <a href="{{ url_for('movie_detail', movie_id=movie.id) }}" 
+                                                       class="text-decoration-none">
+                                                        {{ movie.title[:30] }}{% if movie.title|length > 30 %}...{% endif %}
+                                                    </a>
+                                                </h6>
+                                                {% if movie.year %}
+                                                    <p class="card-text mb-1">
+                                                        <small class="text-muted">{{ movie.year }}</small>
+                                                    </p>
+                                                {% endif %}
+                                                <div class="d-flex gap-1">
+                                                    <span class="badge bg-warning text-dark">
+                                                        <i class="bi bi-star-fill"></i>
+                                                        {{ "%.1f"|format(movie.rating_kp) }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}

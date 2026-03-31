@@ -28,6 +28,7 @@ import { useCategoryFilters, type MovieFilter } from '@/hooks/useCategoryFilters
 import { useMovieGenres } from '@/hooks/useTMDbApi';
 import { getTMDbClient } from '@/lib/tmdb';
 import { useMoviePopulation } from '@/hooks/useMoviePopulation';
+import { AdSlot } from '@/components/ui/ad-slot';
 
 export const Categories = () => {
   const navigate = useNavigate();
@@ -213,6 +214,10 @@ export const Categories = () => {
                 </Card>
               );
             })}
+          </div>
+
+          <div className="mb-8">
+            <AdSlot placement="categories" format="banner" />
           </div>
 
           {/* Фильтры */}

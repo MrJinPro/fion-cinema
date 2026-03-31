@@ -4,6 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useAdsEnabled } from "@/hooks/useAdsEnabled";
+import { MobileStickyAd } from "@/components/ui/mobile-sticky-ad";
 import Index from "./pages/Index";
 import Search from "./pages/Search";
 import About from "./pages/About";
@@ -24,6 +26,7 @@ const queryClient = new QueryClient();
 
 const App = () => {
   console.log("FiOn Cinema App загружается...");
+  const { adsEnabled } = useAdsEnabled();
   
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ backgroundColor: '#0B0F17', color: '#F8FAFC' }}>
@@ -32,24 +35,27 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/search" element={<Search />} />
-              <Route path="/categories" element={<Categories />} />
-              <Route path="/favorites" element={<Favorites />} />
-              <Route path="/lists" element={<Lists />} />
-              <Route path="/lists/:id" element={<ListDetails />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/russian-cinema" element={<RussianCinema />} />
-              <Route path="/collections/:slug" element={<Collection />} />
-              <Route path="/movie/:id" element={<MovieDetails />} />
-              <Route path="/tv/:id" element={<TVDetails />} />
-              <Route path="/person/:id" element={<PersonDetails />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/admin" element={<Admin />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <div className={adsEnabled ? 'pb-20 sm:pb-0' : undefined}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/search" element={<Search />} />
+                <Route path="/categories" element={<Categories />} />
+                <Route path="/favorites" element={<Favorites />} />
+                <Route path="/lists" element={<Lists />} />
+                <Route path="/lists/:id" element={<ListDetails />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/russian-cinema" element={<RussianCinema />} />
+                <Route path="/collections/:slug" element={<Collection />} />
+                <Route path="/movie/:id" element={<MovieDetails />} />
+                <Route path="/tv/:id" element={<TVDetails />} />
+                <Route path="/person/:id" element={<PersonDetails />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/admin" element={<Admin />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </div>
+            <MobileStickyAd />
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>

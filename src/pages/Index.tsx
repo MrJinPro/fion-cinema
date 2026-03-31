@@ -21,6 +21,7 @@ import { useMixedHeroContent } from '@/hooks/useMixedHeroContent';
 import { PWAInstallPrompt } from '@/components/ui/pwa-install-prompt';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { CuratedCollectionsSection } from '@/components/ui/curated-collections-section';
+import { AdSlot } from '@/components/ui/ad-slot';
 const Index = () => {
   const {
     t
@@ -83,6 +84,9 @@ const Index = () => {
       <Header searchValue={searchValue} onSearchChange={setSearchValue} onSearch={handleSearch} />
       
       <main className="space-y-12">
+        <div className="container mx-auto px-2 sm:px-4 pt-4">
+          <AdSlot placement="home_top" format="banner" />
+        </div>
         {/* Hero Banner */}
         {mixedHeroContent && mixedHeroContent.length > 0 && <div className="container mx-auto px-2 sm:px-4 pt-4 sm:pt-8">
             <HeroBanner items={mixedHeroContent} onItemClick={handleMovieClick} />

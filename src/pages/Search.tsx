@@ -15,6 +15,7 @@ import { TMDbMovie, TMDbTVShow, TMDbGenre } from '@/lib/tmdb';
 import { useSearchMulti, useMovieGenres, useTVGenres, useDiscoverMovies, useDiscoverTVShows } from '@/hooks/useTMDbApi';
 import { SearchTabs } from '@/components/ui/search-tabs';
 import { SEOHead } from '@/components/seo/SEOHead';
+import { AdSlot } from '@/components/ui/ad-slot';
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -229,6 +230,9 @@ const Search = () => {
       />
 
       <main className="container px-4 py-8">
+        <div className="mb-6">
+          <AdSlot placement="search" format="banner" />
+        </div>
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Фильтры */}
           <aside className="lg:w-80">
