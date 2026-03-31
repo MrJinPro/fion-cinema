@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Play, ExternalLink, Film, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { StreamingAvailability } from './streaming-availability';
 import { KinoApiMediaType, useKinoApiPlayer } from '@/hooks/useKinoApiPlayer';
+import { useAuth } from '@/hooks/useAuth';
 
 interface EmbeddedPlayerProps {
   movieId: number;
@@ -23,9 +25,30 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
   className,
   mediaType = 'movie',
 }) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const { data, isLoading, error } = useKinoApiPlayer(title, year, isOpen, mediaType);
   const streamUrl = data?.player?.streamUrl ?? null;
+
+  if (!user) {
+    return (
+      <div className={className}>
+        <Button
+          variant="default"
+          size="lg"
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+          onClick={() => navigate('/auth')}
+        >
+          <Play className="mr-2 h-5 w-5" />
+          Смотреть {mediaType === 'tv' ? 'сериал' : 'фильм'}
+        </Button>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Войдите в аккаунт, чтобы открыть плеер.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -37,7 +60,7 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
           onClick={() => setIsOpen(true)}
         >
           <Play className="mr-2 h-5 w-5" />
-          Смотреть фильм
+          Смотреть {mediaType === 'tv' ? 'сериал' : 'фильм'}
         </Button>
       
         <DialogContent className="max-w-4xl w-full max-h-[80vh] overflow-y-auto">

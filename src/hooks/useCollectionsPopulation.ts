@@ -8,19 +8,29 @@ export const useCollectionsPopulation = () => {
         .select('*', { count: 'exact', head: true })
         .eq('is_active', true);
 
+      const { count: nonEmptyCollectionsCount } = await supabase
+        .from('curated_collections')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', true)
+        .gt('total_items', 0);
+
       const { count: itemsCount } = await supabase
         .from('collection_items')
         .select('*', { count: 'exact', head: true });
 
       return {
         collectionsCount: collectionsCount || 0,
+        nonEmptyCollectionsCount: nonEmptyCollectionsCount || 0,
         itemsCount: itemsCount || 0,
-        needsPopulation: (collectionsCount || 0) > 0 && (itemsCount || 0) === 0,
+        needsPopulation:
+          (collectionsCount || 0) > 0 &&
+          (nonEmptyCollectionsCount || 0) < (collectionsCount || 0),
       };
     } catch (error) {
       console.error('Error checking collections status:', error);
       return {
         collectionsCount: 0,
+        nonEmptyCollectionsCount: 0,
         itemsCount: 0,
         needsPopulation: false,
       };

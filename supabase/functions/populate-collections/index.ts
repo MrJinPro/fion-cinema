@@ -12,9 +12,17 @@ serve(async (req) => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error('SUPABASE_URL / SUPABASE_ANON_KEY not configured');
+    }
+
+    const authHeader = req.headers.get('Authorization');
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      supabaseUrl,
+      supabaseAnonKey,
+      authHeader ? { global: { headers: { Authorization: authHeader } } } : undefined
     );
 
     const TMDB_API_KEY = Deno.env.get('TMDB_API_KEY');
@@ -52,42 +60,32 @@ serve(async (req) => {
       throw new Error('No collections found');
     }
 
-    const weeklyCollection = collections.find(c => c.slug === 'weekly-top-50');
-    const monthlyCollection = collections.find(c => c.slug === 'monthly-top-250');
+    const weeklyCollection = collections.find((c) => c.slug === 'weekly-top-50');
+    const monthlyCollection = collections.find((c) => c.slug === 'monthly-top-250');
+    const russianCollection = collections.find((c) => c.slug === 'russian-masterpieces');
 
     // Populate weekly top 50 with trending movies
     if (weeklyCollection && trendingData.results) {
       console.log('Populating weekly top 50...');
-      
-      // Clear existing items
-      await supabaseClient
-        .from('collection_items')
-        .delete()
-        .eq('collection_id', weeklyCollection.id);
 
       // Add new items
       const weeklyItems = trendingData.results.slice(0, 50).map((movie: any, index: number) => ({
-        collection_id: weeklyCollection.id,
         tmdb_id: movie.id,
         media_type: 'movie',
         position: index + 1,
-        curator_note: index < 10 ? `Один из самых популярных фильмов этой недели!` : undefined
+        curator_note: index < 10 ? `Один из самых популярных фильмов этой недели!` : undefined,
       }));
 
-      await supabaseClient
-        .from('collection_items')
-        .insert(weeklyItems);
+      const { error: weeklyRpcError } = await supabaseClient.rpc('replace_collection_items_by_slug', {
+        collection_slug: weeklyCollection.slug,
+        items: weeklyItems,
+      });
+      if (weeklyRpcError) throw weeklyRpcError;
     }
 
     // Populate monthly top 250 with mix of popular and top rated
     if (monthlyCollection && popularData.results && topRatedData.results) {
       console.log('Populating monthly top 250...');
-      
-      // Clear existing items
-      await supabaseClient
-        .from('collection_items')
-        .delete()
-        .eq('collection_id', monthlyCollection.id);
 
       // Mix popular and top rated movies
       const allMovies = [
@@ -101,20 +99,21 @@ serve(async (req) => {
       ).slice(0, 250);
 
       const monthlyItems = uniqueMovies.map((movie: any, index: number) => ({
-        collection_id: monthlyCollection.id,
         tmdb_id: movie.id,
         media_type: 'movie',
         position: index + 1,
-        curator_note: index < 20 ? `Топ ${index + 1} по версии FiOn Cinema!` : undefined
+        curator_note: index < 20 ? `Топ ${index + 1} по версии FiOn Cinema!` : undefined,
       }));
 
-      await supabaseClient
-        .from('collection_items')
-        .insert(monthlyItems);
+      const { error: monthlyRpcError } = await supabaseClient.rpc('replace_collection_items_by_slug', {
+        collection_slug: monthlyCollection.slug,
+        items: monthlyItems,
+      });
+      if (monthlyRpcError) throw monthlyRpcError;
     }
 
     // Populate genre collections
-    const genreCollections = collections.filter(c => c.slug.includes('drama') || c.slug.includes('scifi'));
+    const genreCollections = collections.filter((c) => c.slug.includes('drama') || c.slug.includes('scifi'));
     
     for (const collection of genreCollections) {
       let genreId = 18; // Drama by default
@@ -132,23 +131,43 @@ serve(async (req) => {
       const genreData = await genreResponse.json();
 
       if (genreData.results) {
-        // Clear existing items
-        await supabaseClient
-          .from('collection_items')
-          .delete()
-          .eq('collection_id', collection.id);
-
         const genreItems = genreData.results.slice(0, 50).map((movie: any, index: number) => ({
-          collection_id: collection.id,
           tmdb_id: movie.id,
           media_type: 'movie',
           position: index + 1,
-          curator_note: index < 5 ? `Шедевр жанра!` : undefined
+          curator_note: index < 5 ? `Шедевр жанра!` : undefined,
         }));
 
-        await supabaseClient
-          .from('collection_items')
-          .insert(genreItems);
+        const { error: genreRpcError } = await supabaseClient.rpc('replace_collection_items_by_slug', {
+          collection_slug: collection.slug,
+          items: genreItems,
+        });
+        if (genreRpcError) throw genreRpcError;
+      }
+    }
+
+    // Populate Russian masterpieces (previously never filled)
+    if (russianCollection) {
+      console.log('Populating russian-masterpieces...');
+
+      const russianResponse = await fetch(
+        `https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_API_KEY}&language=ru-RU&sort_by=vote_average.desc&vote_count.gte=500&with_original_language=ru&page=1`
+      );
+      const russianData = await russianResponse.json();
+
+      if (russianData.results) {
+        const russianItems = russianData.results.slice(0, 50).map((movie: any, index: number) => ({
+          tmdb_id: movie.id,
+          media_type: 'movie',
+          position: index + 1,
+          curator_note: index < 5 ? `Классика российского кино!` : undefined,
+        }));
+
+        const { error: russianRpcError } = await supabaseClient.rpc('replace_collection_items_by_slug', {
+          collection_slug: russianCollection.slug,
+          items: russianItems,
+        });
+        if (russianRpcError) throw russianRpcError;
       }
     }
 
