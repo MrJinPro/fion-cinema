@@ -7,10 +7,15 @@ type UserRole = 'admin' | 'moderator' | 'user' | null;
 export const useUserRole = () => {
   const [role, setRole] = useState<UserRole>(null);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    console.log('useUserRole: user changed:', { userId: user?.id, hasUser: !!user });
+    console.log('useUserRole: user/auth changed:', { authLoading, userId: user?.id, hasUser: !!user });
+
+    if (authLoading) {
+      setLoading(true);
+      return;
+    }
     
     if (!user) {
       console.log('useUserRole: No user, setting role to null');
@@ -21,6 +26,7 @@ export const useUserRole = () => {
 
     const fetchUserRole = async () => {
       try {
+        setLoading(true);
         console.log('useUserRole: Fetching role for user:', user.id);
         const { data, error } = await supabase
           .from('user_roles')
@@ -46,7 +52,7 @@ export const useUserRole = () => {
     };
 
     fetchUserRole();
-  }, [user]);
+  }, [user, authLoading]);
 
   const isAdmin = role === 'admin';
   const isModerator = role === 'moderator' || role === 'admin';

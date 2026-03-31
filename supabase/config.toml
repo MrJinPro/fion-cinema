@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.populate-collections]
 verify_jwt = false
+
+[functions.auto-populate-movies]
+verify_jwt = true

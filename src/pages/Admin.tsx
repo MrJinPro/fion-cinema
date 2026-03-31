@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -27,11 +27,12 @@ interface UserWithRole {
 }
 
 const Admin = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { isAdmin, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { toast } = useToast();
+  const didInitRef = useRef(false);
   
   const [stats, setStats] = useState<AdminStats>({
     totalUsers: 0,
@@ -45,32 +46,34 @@ const Admin = () => {
 
   useEffect(() => {
     console.log('Admin: Auth state:', { 
+      authLoading,
       roleLoading, 
       hasUser: !!user, 
       userId: user?.id, 
       isAdmin, 
       loading
     });
-    
-    if (!roleLoading) {
-      if (!user) {
-        console.log('Admin: No authenticated user, redirecting to auth');
-        navigate('/auth');
-        return;
-      }
-      
-      if (!isAdmin) {
-        console.log('Admin: User is not admin, redirecting to home');
-        navigate('/');
-        return;
-      }
 
-      if (isAdmin) {
-        fetchStats();
-        fetchUsers();
-      }
+    if (authLoading || roleLoading) return;
+
+    if (!user) {
+      console.log('Admin: No authenticated user, redirecting to auth');
+      navigate('/auth');
+      return;
     }
-  }, [isAdmin, roleLoading, navigate, user, loading]);
+
+    if (!isAdmin) {
+      console.log('Admin: User is not admin, redirecting to home');
+      navigate('/');
+      return;
+    }
+
+    if (!didInitRef.current) {
+      didInitRef.current = true;
+      fetchStats();
+      fetchUsers();
+    }
+  }, [authLoading, isAdmin, roleLoading, navigate, user]);
 
   const fetchStats = async () => {
     try {
@@ -183,7 +186,7 @@ const Admin = () => {
     }
   };
 
-  if (roleLoading || loading) {
+  if (authLoading || roleLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
