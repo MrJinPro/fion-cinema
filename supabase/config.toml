@@ -12,6 +12,9 @@ verify_jwt = false
 [functions.ai]
 verify_jwt = false
 
+[functions.kinoapi-proxy]
+verify_jwt = false
+
 [functions.kinogo-parser]
 verify_jwt = false
 
