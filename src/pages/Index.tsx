@@ -74,7 +74,7 @@ const Index = () => {
     },
     "sameAs": ["https://www.tiktok.com/@fion_cinema", "https://t.me/fion_cinema"]
   };
-  return <div className="min-h-screen bg-background">
+  return <div className="min-h-screen">
       <SEOHead title="FiOn - Русский Кино-каталог | Фильмы и Сериалы Онлайн" description="Откройте мир кино с FiOn! Популярные фильмы, новые сериалы, персональные рекомендации и подробная информация о фильмах на русском языке. Смотрите трейлеры, читайте рецензии." keywords="фильмы онлайн, сериалы, кинопоиск, русские фильмы, трейлеры, рецензии фильмов, новинки кино, популярные фильмы, рейтинг фильмов" canonicalUrl="https://vion.app" structuredData={homeStructuredData} />
       <div className="block sm:hidden px-4 py-2 bg-card/50 backdrop-blur-sm border-b border-accent/20">
         <p className="text-xs text-center text-muted-foreground">
@@ -83,36 +83,48 @@ const Index = () => {
       </div>
       <Header searchValue={searchValue} onSearchChange={setSearchValue} onSearch={handleSearch} />
       
-      <main className="space-y-12">
-        <div className="container mx-auto px-2 sm:px-4 pt-4">
+      <main className="space-y-10 sm:space-y-12">
+        <div className="container mx-auto px-2 sm:px-4 pt-4 sm:pt-6 space-y-4">
           <AdSlot placement="home_top" format="banner" />
+
+          {/* Hero Banner (Screen) */}
+          {mixedHeroContent && mixedHeroContent.length > 0 && <div className="cinema-screen">
+              <HeroBanner items={mixedHeroContent} onItemClick={handleMovieClick} />
+            </div>}
         </div>
-        {/* Hero Banner */}
-        {mixedHeroContent && mixedHeroContent.length > 0 && <div className="container mx-auto px-2 sm:px-4 pt-4 sm:pt-8">
-            <HeroBanner items={mixedHeroContent} onItemClick={handleMovieClick} />
-          </div>}
 
         <div className="container mx-auto px-2 sm:px-4 space-y-8 sm:space-y-12">
           {/* Featured Movie */}
-          {trending?.results && trending.results[0] && <FeaturedMovie item={trending.results[0]} onItemClick={handleMovieClick} />}
+          {trending?.results && trending.results[0] && <div className="cinema-surface rounded-lg">
+              <FeaturedMovie item={trending.results[0]} onItemClick={handleMovieClick} />
+            </div>}
 
 
           {/* Персонализированная секция */}
-          <PersonalizedSection onItemClick={handleMovieClick} onNavigate={navigate} />
+          <div className="cinema-surface rounded-lg">
+            <PersonalizedSection onItemClick={handleMovieClick} onNavigate={navigate} />
+          </div>
 
 
           {/* Российский контент */}
           <section className="space-y-6 animate-stagger-1">
-            
-            <RussianContentSection />
+            <div className="cinema-surface rounded-lg">
+              <RussianContentSection />
+            </div>
           </section>
 
           {/* Kinopoisk.dev секции */}
-          <KinopoiskPremieres />
-          <KinopoiskNewReleases />
+          <div className="cinema-surface rounded-lg">
+            <KinopoiskPremieres />
+          </div>
+          <div className="cinema-surface rounded-lg">
+            <KinopoiskNewReleases />
+          </div>
 
           {/* В кинотеатрах сейчас */}
-          {nowPlaying?.results && <AutoCarousel title={t('sections.nowPlaying')} items={nowPlaying.results} type="movie" isLoading={nowPlayingLoading} onItemClick={handleMovieClick} autoPlayInterval={4000} />}
+          {nowPlaying?.results && <div className="cinema-surface rounded-lg">
+              <AutoCarousel title={t('sections.nowPlaying')} items={nowPlaying.results} type="movie" isLoading={nowPlayingLoading} onItemClick={handleMovieClick} autoPlayInterval={4000} />
+            </div>}
 
           {/* В тренде сегодня */}
           <section className="space-y-6 animate-stagger-1">
@@ -129,7 +141,9 @@ const Index = () => {
           </section>
 
           {/* Curated Collections */}
-          <CuratedCollectionsSection />
+          <div className="cinema-surface rounded-lg">
+            <CuratedCollectionsSection />
+          </div>
 
           {/* Популярные фильмы */}
           <section className="space-y-6 animate-stagger-2">

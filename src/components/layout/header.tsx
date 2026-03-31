@@ -70,7 +70,7 @@ export const Header: React.FC<HeaderProps> = ({
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-card/30 backdrop-blur-xl supports-[backdrop-filter]:bg-card/20">
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Логотип */}
         <Link to="/" className="flex items-center space-x-2 hover-neon-primary transition-neon">
@@ -179,7 +179,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Мобильный поиск */}
-      <div className="border-t border-border/40 p-4 sm:hidden">
+      <div className="border-t border-border/50 p-4 sm:hidden bg-background/10">
         <SearchInput
           value={searchValue}
           onChange={onSearchChange}

@@ -7,7 +7,7 @@ export const Footer: React.FC = () => {
   const {
     t
   } = useTranslation();
-  return <footer className="border-t border-border/40 bg-card/30 backdrop-blur">
+  return <footer className="border-t border-border/50 bg-card/20 backdrop-blur-xl">
       <div className="container px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Логотип и описание */}

@@ -164,6 +164,18 @@ export const Categories = () => {
       
       <main className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90">
         <div className="container mx-auto px-4 py-8">
+          <div className="cinema-surface rounded-lg p-4 sm:p-6 mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+              <div>
+                <h1 className="text-3xl sm:text-4xl font-bold text-gradient-primary mb-2">Каталог</h1>
+                <p className="text-sm text-muted-foreground">Подберите фильм по году, жанру и популярности — как в афише кинотеатра</p>
+              </div>
+              <div className="max-w-md w-full">
+                <AdSlot placement="categories" format="banner" />
+              </div>
+            </div>
+          </div>
+
           {/* Заголовок и статистика */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-4">Каталог фильмов</h1>
@@ -214,10 +226,6 @@ export const Categories = () => {
                 </Card>
               );
             })}
-          </div>
-
-          <div className="mb-8">
-            <AdSlot placement="categories" format="banner" />
           </div>
 
           {/* Фильтры */}

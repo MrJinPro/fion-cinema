@@ -194,4 +194,29 @@
   .transition-neon {
     @apply transition-all duration-300 ease-out;
   }
+
+  /* Cinema-like backdrop and surfaces (use theme HSL vars only) */
+  .cinema-backdrop {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, hsl(var(--primary) / 0.18), transparent 60%),
+      radial-gradient(900px 480px at 15% 20%, hsl(var(--accent) / 0.10), transparent 55%),
+      radial-gradient(900px 520px at 85% 25%, hsl(var(--info) / 0.08), transparent 55%),
+      radial-gradient(1200px 700px at 50% 120%, hsl(var(--background) / 0.0), hsl(var(--background) / 1) 70%);
+  }
+
+  .cinema-vignette {
+    background:
+      radial-gradient(1400px 800px at 50% 40%, transparent 50%, hsl(var(--background) / 0.95) 100%);
+  }
+
+  .cinema-surface {
+    @apply bg-card/40 border border-border/50 backdrop-blur-sm;
+  }
+
+  .cinema-screen {
+    @apply cinema-surface overflow-hidden shadow-neon-primary;
+  }
 }

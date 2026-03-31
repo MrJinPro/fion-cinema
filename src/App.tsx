@@ -29,36 +29,41 @@ const App = () => {
   const { adsEnabled } = useAdsEnabled();
   
   return (
-    <div className="min-h-screen bg-background text-foreground" style={{ backgroundColor: '#0B0F17', color: '#F8FAFC' }}>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <div className={adsEnabled ? 'pb-20 sm:pb-0' : undefined}>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/search" element={<Search />} />
-                <Route path="/categories" element={<Categories />} />
-                <Route path="/favorites" element={<Favorites />} />
-                <Route path="/lists" element={<Lists />} />
-                <Route path="/lists/:id" element={<ListDetails />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/russian-cinema" element={<RussianCinema />} />
-                <Route path="/collections/:slug" element={<Collection />} />
-                <Route path="/movie/:id" element={<MovieDetails />} />
-                <Route path="/tv/:id" element={<TVDetails />} />
-                <Route path="/person/:id" element={<PersonDetails />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/admin" element={<Admin />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </div>
-            <MobileStickyAd />
-          </BrowserRouter>
-        </TooltipProvider>
-      </QueryClientProvider>
+    <div className="min-h-screen bg-background text-foreground relative" style={{ backgroundColor: '#0B0F17', color: '#F8FAFC' }}>
+      <div aria-hidden className="cinema-backdrop" />
+      <div aria-hidden className="cinema-vignette fixed inset-0 pointer-events-none" />
+
+      <div className="relative z-10">
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <div className={adsEnabled ? 'pb-20 sm:pb-0' : undefined}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/search" element={<Search />} />
+                  <Route path="/categories" element={<Categories />} />
+                  <Route path="/favorites" element={<Favorites />} />
+                  <Route path="/lists" element={<Lists />} />
+                  <Route path="/lists/:id" element={<ListDetails />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/russian-cinema" element={<RussianCinema />} />
+                  <Route path="/collections/:slug" element={<Collection />} />
+                  <Route path="/movie/:id" element={<MovieDetails />} />
+                  <Route path="/tv/:id" element={<TVDetails />} />
+                  <Route path="/person/:id" element={<PersonDetails />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/admin" element={<Admin />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </div>
+              <MobileStickyAd />
+            </BrowserRouter>
+          </TooltipProvider>
+        </QueryClientProvider>
+      </div>
     </div>
   );
 };

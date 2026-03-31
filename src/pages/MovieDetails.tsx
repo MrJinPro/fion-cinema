@@ -224,8 +224,9 @@ export const MovieDetails = () => {
       <main className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90">
         {/* Hero Section with backdrop */}
         {backdropUrl && (
-          <div className="relative h-96 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${backdropUrl})` }}>
+          <div className="relative h-[50vh] min-h-80 bg-cover bg-center bg-no-repeat cinema-screen" style={{ backgroundImage: `url(${backdropUrl})` }}>
             <div className="absolute inset-0 bg-black/60" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/55 to-background" />
             <div className="absolute bottom-4 left-4">
               <Button
                 variant="outline"
@@ -253,7 +254,8 @@ export const MovieDetails = () => {
             </Button>
           )}
 
-          <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3'} gap-8`}>
+          <div className="cinema-surface rounded-lg p-4 sm:p-6">
+            <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3'} gap-8`}>
             {/* Poster */}
             <div className={isMobile ? '' : 'lg:col-span-1'}>
               <div className={isMobile ? 'mb-6' : 'sticky top-4'}>
@@ -466,6 +468,7 @@ export const MovieDetails = () => {
                   </Card>
                 )}
               </div>
+            </div>
             </div>
           </div>
 

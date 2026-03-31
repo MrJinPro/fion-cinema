@@ -214,7 +214,7 @@ const Search = () => {
     : 'Поиск и каталог фильмов и сериалов. Найдите любой фильм или сериал с помощью удобных фильтров по жанрам, году, рейтингу.';
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <SEOHead
         title={seoTitle}
         description={seoDescription}
@@ -229,14 +229,24 @@ const Search = () => {
         onSearch={handleSearch}
       />
 
-      <main className="container px-4 py-8">
-        <div className="mb-6">
-          <AdSlot placement="search" format="banner" />
+      <main className="container px-4 py-8 space-y-6">
+        <div className="cinema-surface rounded-lg p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gradient-primary">Поиск</h1>
+              <p className="text-sm text-muted-foreground">
+                {searchValue ? `Результаты по запросу «${searchValue}»` : 'Подбор по фильтрам: жанры, год, рейтинг'}
+              </p>
+            </div>
+            <div className="max-w-md w-full">
+              <AdSlot placement="search" format="banner" />
+            </div>
+          </div>
         </div>
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Фильтры */}
           <aside className="lg:w-80">
-            <Card className="sticky top-24 bg-card/50 border-border/50">
+            <Card className="sticky top-24 bg-card/40 border-border/50 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between text-foreground">
                   <span className="flex items-center gap-2">
