@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Python (legacy local artifacts)
+__pycache__/
+*.pyc
+.venv/
+
+# Local legacy SQLite cache (not used by Supabase version)
+data/

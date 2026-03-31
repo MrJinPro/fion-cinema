@@ -36,6 +36,7 @@ export const Categories = () => {
   const [selectedGenre, setSelectedGenre] = useState<number | undefined>();
   const [sortBy, setSortBy] = useState<string>('popularity.desc');
   const [currentPage, setCurrentPage] = useState(1);
+  const [accumulatedMovies, setAccumulatedMovies] = useState<any[]>([]);
 
   const { 
     getMoviesByYear, 
@@ -60,6 +61,28 @@ export const Categories = () => {
   };
 
   const { data: filteredMovies, isLoading, error } = getFilteredMovies(filters);
+
+  // Накапливаем результаты при пагинации ("Загрузить ещё"), чтобы не показывать всегда только 20 карточек
+  React.useEffect(() => {
+    if (!filteredMovies?.results) return;
+
+    setAccumulatedMovies((prev) => {
+      const nextBatch = filteredMovies.results;
+
+      if ((filteredMovies.page || 1) <= 1) {
+        return nextBatch;
+      }
+
+      const seen = new Set(prev.map((m) => m?.id));
+      const deduped = nextBatch.filter((m: any) => !seen.has(m?.id));
+      return [...prev, ...deduped];
+    });
+  }, [filteredMovies?.results, filteredMovies?.page]);
+
+  // При смене фильтров сбрасываем накопленный список
+  React.useEffect(() => {
+    setAccumulatedMovies([]);
+  }, [selectedYear, selectedGenre, sortBy]);
 
   // Автоматически проверяем состояние базы и запускаем пополнение при необходимости
   React.useEffect(() => {
@@ -353,10 +376,10 @@ export const Categories = () => {
                   Попробовать снова
                 </Button>
               </div>
-            ) : filteredMovies && filteredMovies.results.length > 0 ? (
+            ) : filteredMovies && accumulatedMovies.length > 0 ? (
               <>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {filteredMovies.results.map((movie) => (
+                  {accumulatedMovies.map((movie) => (
                     <div key={movie.id} onClick={() => handleMovieClick(movie.id)}>
                       <MovieCard
                         item={movie}

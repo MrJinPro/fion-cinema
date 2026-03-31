@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from './card';
 import { Badge } from './badge';
 import { Button } from './button';
 import { useCuratedCollections } from '@/hooks/useCuratedCollections';
+import { useCollectionsPopulation } from '@/hooks/useCollectionsPopulation';
+import { useQueryClient } from '@tanstack/react-query';
 import { Crown, TrendingUp, Star, Film, Calendar } from 'lucide-react';
 
 const getCollectionIcon = (type: string) => {
@@ -59,6 +61,29 @@ const getTypeLabel = (type: string) => {
 
 export function CuratedCollectionsSection() {
   const { data: collections, isLoading, error } = useCuratedCollections();
+  const { checkCollectionsStatus, triggerCollectionsPopulation } = useCollectionsPopulation();
+  const queryClient = useQueryClient();
+  const [populationAttempted, setPopulationAttempted] = React.useState(false);
+
+  // Если коллекции есть, но items ещё не заполнены — один раз триггерим пополнение
+  React.useEffect(() => {
+    const run = async () => {
+      if (populationAttempted) return;
+      if (!collections) return;
+
+      const status = await checkCollectionsStatus();
+      if (!status.needsPopulation) return;
+
+      setPopulationAttempted(true);
+      await triggerCollectionsPopulation();
+
+      // Обновляем данные подборок/элементов
+      await queryClient.invalidateQueries({ queryKey: ['curated_collections'] });
+      await queryClient.invalidateQueries({ queryKey: ['collection_items'] });
+    };
+
+    run();
+  }, [collections, populationAttempted, checkCollectionsStatus, triggerCollectionsPopulation, queryClient]);
 
   if (isLoading) {
     return (

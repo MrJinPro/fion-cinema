@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useCollectionBySlug, useCollectionItems } from '@/hooks/useCuratedCollections';
 import { useMovieDetails } from '@/hooks/useTMDbApi';
 import { MobileNavigationFix } from '@/components/ui/mobile-navigation-fix';
+import { useCollectionsPopulation } from '@/hooks/useCollectionsPopulation';
 import { Crown, ArrowLeft, Calendar, TrendingUp, Star, Film } from 'lucide-react';
 
 const getCollectionIcon = (type: string) => {
@@ -49,9 +50,29 @@ export default function Collection() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState('');
+  const { checkCollectionsStatus, triggerCollectionsPopulation } = useCollectionsPopulation();
+  const [populationAttempted, setPopulationAttempted] = useState(false);
 
   const { data: collection, isLoading: collectionLoading } = useCollectionBySlug(slug || '');
-  const { data: items, isLoading: itemsLoading } = useCollectionItems(slug || '');
+  const { data: items, isLoading: itemsLoading, refetch: refetchItems } = useCollectionItems(slug || '');
+
+  // Если подборка пуста, а items в базе ещё не заполнены — пробуем один раз пополнить
+  React.useEffect(() => {
+    const run = async () => {
+      if (populationAttempted) return;
+      if (itemsLoading) return;
+      if (!items || items.length > 0) return;
+
+      const status = await checkCollectionsStatus();
+      if (!status.needsPopulation) return;
+
+      setPopulationAttempted(true);
+      await triggerCollectionsPopulation();
+      await refetchItems();
+    };
+
+    run();
+  }, [items, itemsLoading, populationAttempted, checkCollectionsStatus, triggerCollectionsPopulation, refetchItems]);
 
   const handleSearch = (value: string) => {
     setSearchValue(value);

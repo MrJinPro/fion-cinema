@@ -307,8 +307,13 @@ export class TMDbClient {
   private rateLimiter = new RateLimiter();
 
   constructor() {
-    // Use Edge Function for API requests instead of direct TMDb API calls
-    this.baseURL = `https://qvavaxqdsbwjcimsbqmx.supabase.co/functions/v1/tmdb-proxy`;
+    // Use Supabase Edge Function for API requests instead of direct TMDb API calls
+    const supabaseUrl = (import.meta as any)?.env?.VITE_SUPABASE_URL as string | undefined;
+    if (!supabaseUrl) {
+      throw new Error('VITE_SUPABASE_URL is not configured. Cannot call tmdb-proxy Edge Function.');
+    }
+
+    this.baseURL = `${supabaseUrl.replace(/\/$/, '')}/functions/v1/tmdb-proxy`;
   }
 
   private async makeRequest<T>(endpoint: string, params: Record<string, any> = {}): Promise<T> {

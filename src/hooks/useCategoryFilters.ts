@@ -187,60 +187,84 @@ export const useCategoryFilters = () => {
       queryKey: ['movies', 'filtered', filters],
       queryFn: async () => {
         console.log('🎬 Starting filtered movies search with filters:', filters);
-        
-        // Сначала проверяем кэш в базе данных
-        let query = supabase
-          .from('movies_tmdb')
-          .select('*');
 
-        // Применяем фильтры
+        // Сначала проверяем кэш в базе данных (count + range, чтобы не тянуть тысячи записей)
+        const page = filters.page || 1;
+
+        let countQuery = supabase
+          .from('movies_tmdb')
+          .select('*', { count: 'exact', head: true });
+
+        // Применяем фильтры (для count)
         if (filters.year) {
-          query = query
+          countQuery = countQuery
             .gte('release_date', `${filters.year}-01-01`)
             .lt('release_date', `${filters.year + 1}-01-01`);
         }
 
         if (filters.minRating) {
-          query = query.gte('vote_average', filters.minRating);
+          countQuery = countQuery.gte('vote_average', filters.minRating);
         }
 
         if (filters.genre) {
-          query = query.contains('genres', [{ id: filters.genre }]);
+          countQuery = countQuery.contains('genres', [{ id: filters.genre }]);
         }
 
-        // Сортировка
-        const sortBy = filters.sortBy || 'popularity.desc';
-        const [field, direction] = sortBy.split('.');
-        const ascending = direction === 'asc';
-        
-        let orderField = field;
-        if (field === 'popularity') orderField = 'popularity';
-        else if (field === 'vote_average') orderField = 'vote_average';
-        else if (field === 'release_date') orderField = 'release_date';
-        else if (field === 'title') orderField = 'title';
-
-        query = query.order(orderField, { ascending });
-
-        // Получаем данные без пагинации для подсчета
-        const { data: allCachedMovies, error } = await query;
-
-        if (error) {
-          console.error('Error fetching filtered movies:', error);
+        const { count: cachedCount, error: countError } = await countQuery;
+        if (countError) {
+          console.error('Error counting filtered movies:', countError);
         }
 
-        const cachedCount = allCachedMovies?.length || 0;
-        console.log(`📊 Found ${cachedCount} cached movies matching filters`);
+        const totalCached = cachedCount || 0;
+        console.log(`📊 Found ${totalCached} cached movies matching filters`);
 
-        // Если у нас достаточно фильмов в кэше (больше 20), используем их
-        if (cachedCount >= 20) {
-          const page = filters.page || 1;
-          const paginatedMovies = allCachedMovies!.slice((page - 1) * 20, page * 20);
-          
-          console.log(`✅ Using cached data: ${paginatedMovies.length} movies for page ${page}`);
+        // Если у нас достаточно фильмов в кэше (>= 20), используем кэш с серверной пагинацией
+        if (totalCached >= 20) {
+          // Сортировка
+          const sortBy = filters.sortBy || 'popularity.desc';
+          const [field, direction] = sortBy.split('.');
+          const ascending = direction === 'asc';
+
+          let orderField = field;
+          if (field === 'popularity') orderField = 'popularity';
+          else if (field === 'vote_average') orderField = 'vote_average';
+          else if (field === 'release_date') orderField = 'release_date';
+          else if (field === 'title') orderField = 'title';
+
+          let pageQuery = supabase
+            .from('movies_tmdb')
+            .select('*');
+
+          // Применяем фильтры (для выборки страницы)
+          if (filters.year) {
+            pageQuery = pageQuery
+              .gte('release_date', `${filters.year}-01-01`)
+              .lt('release_date', `${filters.year + 1}-01-01`);
+          }
+
+          if (filters.minRating) {
+            pageQuery = pageQuery.gte('vote_average', filters.minRating);
+          }
+
+          if (filters.genre) {
+            pageQuery = pageQuery.contains('genres', [{ id: filters.genre }]);
+          }
+
+          const { data: paginatedMovies, error: pageError } = await pageQuery
+            .order(orderField, { ascending })
+            .range((page - 1) * 20, page * 20 - 1);
+
+          if (pageError) {
+            console.error('Error fetching paginated cached movies:', pageError);
+          }
+
+          const results = paginatedMovies || [];
+          console.log(`✅ Using cached data: ${results.length} movies for page ${page}`);
+
           return {
-            results: paginatedMovies,
-            total_pages: Math.ceil(cachedCount / 20),
-            total_results: cachedCount,
+            results,
+            total_pages: Math.ceil(totalCached / 20),
+            total_results: totalCached,
             page,
             fromCache: true
           };
@@ -250,7 +274,7 @@ export const useCategoryFilters = () => {
         console.log(`🌐 Insufficient cached data (${cachedCount} < 20). Fetching from TMDB...`);
         
         const discoverParams: any = {
-          page: filters.page || 1,
+          page,
           sort_by: filters.sortBy || 'popularity.desc'
         };
 
