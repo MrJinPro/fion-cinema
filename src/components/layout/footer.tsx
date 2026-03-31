@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Logo } from '@/components/ui/logo';
+import { APP_VERSION } from '@/lib/version';
 export const Footer: React.FC = () => {
   const {
     t
@@ -75,9 +76,11 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="border-t border-border/40 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center text-xs text-muted-foreground">
-          <p>{t('footer.copyright')}</p>
-          <p className="mt-2 sm:mt-0">
+        <div className="border-t border-border/40 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-muted-foreground">
+          <p>
+            {t('footer.copyright')} • {APP_VERSION}
+          </p>
+          <p className="sm:mt-0">
             {t('footer.disclaimer')}
           </p>
         </div>
