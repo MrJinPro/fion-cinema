@@ -91,6 +91,40 @@ const Index = () => {
           {mixedHeroContent && mixedHeroContent.length > 0 && <div className="cinema-screen">
               <HeroBanner items={mixedHeroContent} onItemClick={handleMovieClick} />
             </div>}
+
+          <section className="cinema-surface rounded-lg">
+            <div className="p-4 sm:p-6 space-y-4">
+              <div className="space-y-2">
+                <h2 className="text-xl sm:text-2xl font-bold">
+                  FiOn — кино‑каталог, который хочется листать
+                </h2>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                  Открывай подборки, сохраняй избранное, читай отзывы и находи, что посмотреть сегодня — без лишнего шума.
+                  Чем активнее ты пользуешься каталогом, тем быстрее сервис растёт и становится лучше.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm sm:text-base leading-relaxed">
+                  Наш следующий большой шаг — встроенный плеер прямо в FiOn.
+                  Когда мы стабильно достигнем <span className="font-semibold">1000 активных зрителей в день</span>,
+                  добавим просмотр фильмов внутри сервиса.
+                </p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Пока что — пользуйся каталогом: добавляй в избранное, оценивай и делись находками.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button className="w-full sm:w-auto" onClick={() => navigate('/search')}>
+                  Найти фильм
+                </Button>
+                <Button variant="secondary" className="w-full sm:w-auto" onClick={() => navigate('/categories')}>
+                  Открыть каталог
+                </Button>
+              </div>
+            </div>
+          </section>
         </div>
 
         <div className="container mx-auto px-2 sm:px-4 space-y-8 sm:space-y-12">
