@@ -62,13 +62,14 @@ export const MovieDetails = () => {
 
   // Fetch movie data
   const { data: movie, isLoading, error } = useMovieDetails(movieId);
-  const { data: credits } = useMovieCredits(movieId);
-  const { data: videos } = useMovieVideos(movieId);
-  const { data: images } = useMovieImages(movieId);
-  const { data: reviews } = useMovieReviews(movieId);
-  const { data: similarMovies } = useSimilarMovies(movieId);
-  const { data: recommendations } = useMovieRecommendations(movieId);
-  const { data: watchProviders } = useMovieWatchProviders(movieId);
+  const movieLoaded = !!movie && !error;
+  const { data: credits } = useMovieCredits(movieLoaded ? movieId : 0);
+  const { data: videos } = useMovieVideos(movieLoaded ? movieId : 0);
+  const { data: images } = useMovieImages(movieLoaded ? movieId : 0);
+  const { data: reviews } = useMovieReviews(movieLoaded ? movieId : 0);
+  const { data: similarMovies } = useSimilarMovies(movieLoaded ? movieId : 0);
+  const { data: recommendations } = useMovieRecommendations(movieLoaded ? movieId : 0);
+  const { data: watchProviders } = useMovieWatchProviders(movieLoaded ? movieId : 0);
 
   // Behavior tracking and ratings
   const { trackMovieView, trackTrailerWatch, trackPageExit } = useBehaviorTracking();
