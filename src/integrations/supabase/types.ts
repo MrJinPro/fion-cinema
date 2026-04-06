@@ -905,14 +905,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      cleanup_expired_cache: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      cleanup_expired_tmdb_cache: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      cleanup_expired_cache: { Args: never; Returns: undefined }
+      cleanup_expired_tmdb_cache: { Args: never; Returns: undefined }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -923,6 +917,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      replace_collection_items_by_slug: {
+        Args: { collection_slug: string; items: Json }
+        Returns: undefined
       }
     }
     Enums: {
