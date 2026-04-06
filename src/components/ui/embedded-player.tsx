@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Play, ExternalLink, Film, Loader2 } from 'lucide-react';
+import { Play, ExternalLink, Film, Loader2, Search } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { StreamingAvailability } from './streaming-availability';
+import { SearchEngineButtons } from './search-engine-buttons';
 import { KinoApiMediaType, useKinoApiPlayer } from '@/hooks/useKinoApiPlayer';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -28,8 +29,10 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const { data, isLoading, error } = useKinoApiPlayer(title, year, isOpen, mediaType);
+  const { data, isLoading } = useKinoApiPlayer(title, year, isOpen, mediaType);
   const streamUrl = data?.player?.streamUrl ?? null;
+  const kinoApiUnavailable = data?.error === 'unavailable';
+  const noStream = !isLoading && (!data?.found || !streamUrl);
 
   if (!user) {
     return (
@@ -79,20 +82,12 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
                 </div>
                 <h3 className="text-2xl font-bold mb-4">Подбираем источник для просмотра...</h3>
                 <p className="text-muted-foreground">
-                  Ищем {mediaType === 'tv' ? 'сериал' : 'фильм'} в KinoAPI по названию и году.
+                  Ищем {mediaType === 'tv' ? 'сериал' : 'фильм'} по названию и году.
                 </p>
               </div>
             )}
 
-            {!isLoading && error && (
-              <Alert variant="destructive">
-                <AlertDescription>
-                  Не удалось получить поток из KinoAPI: {error.message}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {!isLoading && !error && streamUrl && (
+            {!isLoading && !kinoApiUnavailable && streamUrl && (
               <div className="space-y-3">
                 <div className="aspect-video rounded-lg overflow-hidden bg-black">
                   <video
@@ -104,17 +99,27 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
                   />
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Источник найден через KinoAPI. Если воспроизведение не начинается, откройте фильм в официальных сервисах ниже.
+                  Если воспроизведение не начинается, воспользуйтесь поиском ниже.
                 </p>
               </div>
             )}
 
-            {!isLoading && !error && !streamUrl && (
-              <Alert>
-                <AlertDescription>
-                  Поток для этого фильма не найден в KinoAPI по запросу «{title}{year ? ` (${year})` : ''}».
-                </AlertDescription>
-              </Alert>
+            {/* When no stream found or KinoAPI unavailable - show search buttons */}
+            {noStream && (
+              <div className="space-y-4">
+                <div className="text-center py-4">
+                  <Search className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                  <h3 className="text-lg font-semibold mb-2">Найдите где смотреть</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Воспользуйтесь поисковиками чтобы найти «{title}» для просмотра онлайн
+                  </p>
+                </div>
+                <SearchEngineButtons
+                  title={title}
+                  year={year}
+                  type={mediaType === 'tv' ? 'tv' : 'movie'}
+                />
+              </div>
             )}
 
             {/* Streaming Availability */}
