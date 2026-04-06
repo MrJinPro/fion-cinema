@@ -25,22 +25,28 @@ export interface KinoApiPlaybackResponse {
 export type KinoApiMediaType = 'movie' | 'tv';
 
 async function fetchKinoApiPlayback(title: string, year?: number, mediaType: KinoApiMediaType = 'movie'): Promise<KinoApiPlaybackResponse> {
-  const { data, error } = await supabase.functions.invoke('kinoapi-proxy', {
-    body: {
-      title: title.trim(),
-      year,
-      mediaType,
-    },
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  try {
+    const { data, error } = await supabase.functions.invoke('kinoapi-proxy', {
+      body: {
+        title: title.trim(),
+        year,
+        mediaType,
+      },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-  if (error) {
-    throw new Error(error.message);
+    if (error) {
+      console.warn('KinoAPI unavailable:', error.message);
+      return { found: false, error: 'unavailable' };
+    }
+
+    return data as KinoApiPlaybackResponse;
+  } catch (e) {
+    console.warn('KinoAPI fetch failed:', e);
+    return { found: false, error: 'unavailable' };
   }
-
-  return data as KinoApiPlaybackResponse;
 }
 
 export function useKinoApiPlayer(
