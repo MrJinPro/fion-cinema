@@ -117,7 +117,7 @@ const EmbeddedPlayer: React.FC<EmbeddedPlayerProps> = ({
                 <SearchEngineButtons
                   title={title}
                   year={year}
-                  mediaType={mediaType === 'tv' ? 'tv' : 'movie'}
+                  type={mediaType === 'tv' ? 'tv' : 'movie'}
                 />
               </div>
             )}
